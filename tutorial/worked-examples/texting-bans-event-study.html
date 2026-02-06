@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event Study: Texting Bans | Intro to Data Analysis for Economics</title>
+  <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/latin-modern-roman@1.0.1/dist/LMRoman10-Regular.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="tutorial-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" style="text-decoration: none; color: inherit;"><h1>Intro to Data Analysis</h1></a>
+      </div>
+      <div class="global-lang-toggle">
+        <span>Show code in:</span>
+        <div class="lang-toggle-btns">
+          <button data-lang="stata" class="active">Stata</button>
+          <button data-lang="r">R</button>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a href="../getting-started.html" class="nav-section-header">
+            <span class="section-title">Getting Started</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <a href="../data-fundamentals.html" class="nav-section-header">
+            <span class="section-title">Data Fundamentals</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <a href="../descriptive-analysis.html" class="nav-section-header">
+            <span class="section-title">Descriptive Analysis</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <a href="../applied-micro.html" class="nav-section-header">
+            <span class="section-title">Applied Micro</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <a href="../regression.html" class="nav-section-header">
+            <span class="section-title">Regression</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <a href="../advanced.html" class="nav-section-header">
+            <span class="section-title">Advanced</span>
+            <span class="chevron">&#9654;</span>
+          </a>
+        </div>
+        <div class="nav-section open">
+          <div class="nav-section-header active">
+            <span class="section-title">Worked Example</span>
+            <span class="chevron">&#9654;</span>
+          </div>
+          <div class="nav-section-content">
+            <ul>
+              <li><a href="#overview">Overview</a></li>
+              <li><a href="#download-data">Download Data</a></li>
+              <li><a href="#clean-aggregate">Clean & Aggregate</a></li>
+              <li><a href="#merge-policy">Merge Policy Dates</a></li>
+              <li><a href="#event-study">Event Study</a></li>
+              <li><a href="#visualization">Visualization</a></li>
+              <li><a href="#interpretation">Interpretation</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../index.html">&larr; Tutorial Home</a>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <main class="tutorial-content">
+      <h1>Event Study: Texting Bans and Traffic Fatalities</h1>
+      <p class="subtitle">A complete worked example using FARS data</p>
+
+      <section id="overview" class="tutorial-section">
+        <h2>Overview</h2>
+
+        <p>This worked example walks through a complete event study analysis examining whether state texting-while-driving bans reduced traffic fatalities. We'll use data from the Fatality Analysis Reporting System (FARS), which records all fatal motor vehicle crashes in the United States.</p>
+
+        <div class="key-principle">
+          <h4>Research Question</h4>
+          <p>Did state laws banning texting while driving reduce traffic fatalities? States adopted these bans at different times between 2007 and 2020, providing staggered variation for a difference-in-differences/event study design.</p>
+        </div>
+
+        <h3>What We'll Do</h3>
+        <ol>
+          <li><strong>Download FARS data</strong> programmatically from NHTSA</li>
+          <li><strong>Aggregate</strong> to state-year fatality counts</li>
+          <li><strong>Merge</strong> with texting ban effective dates</li>
+          <li><strong>Run event study</strong> regression with two-way fixed effects</li>
+          <li><strong>Visualize</strong> the event study coefficients</li>
+        </ol>
+
+        <h3>Project Setup</h3>
+        <p>Create a directory structure for this project:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Create project directories
+mkdir "texting-bans"
+cd "texting-bans"
+mkdir "data/raw"
+mkdir "data/clean"
+mkdir "output"</code></pre>
+          <pre class="code-content r"><code class="language-r"># Create project directories
+dir.create("texting-bans/data/raw", recursive = TRUE)
+dir.create("texting-bans/data/clean", recursive = TRUE)
+dir.create("texting-bans/output", recursive = TRUE)
+setwd("texting-bans")</code></pre>
+        </div>
+      </section>
+
+      <section id="download-data" class="tutorial-section">
+        <h2>Download Data</h2>
+
+        <p>NHTSA provides FARS data as downloadable CSV files for each year. We'll download data from 2007-2022 to have adequate pre- and post-periods for most states.</p>
+
+        <div class="key-principle">
+          <h4>Data Source</h4>
+          <p>The Fatality Analysis Reporting System (FARS) is a nationwide census of fatal motor vehicle crashes. Each row in the <code>accident.csv</code> file represents one fatal crash, with variables for state, date, number of fatalities, and crash characteristics.</p>
+        </div>
+
+        <h3>Download FARS Files</h3>
+        <p>Download the accident files for each year. These are large files (~20-30MB each), so this may take a few minutes.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Download FARS data for each year
+* Note: Stata doesn't have built-in URL downloading, so we use shell commands
+
+local years 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022
+
+foreach year of local years {
+    * Download ZIP file
+    shell curl -s -L -o "data/raw/FARS`year'.zip" ///
+        "https://static.nhtsa.gov/nhtsa/downloads/FARS/`year'/National/FARS`year'NationalCSV.zip"
+
+    * Extract just the accident.csv file
+    shell unzip -j -o "data/raw/FARS`year'.zip" "*/accident.csv" ///
+        -d "data/raw/" && mv "data/raw/accident.csv" "data/raw/accident_`year'.csv"
+
+    display "Downloaded `year'"
+}</code></pre>
+          <pre class="code-content r"><code class="language-r"># Download FARS data for each year
+pacman::p_load(tidyverse)
+
+years <- 2007:2022
+
+for (year in years) {
+  url <- paste0("https://static.nhtsa.gov/nhtsa/downloads/FARS/",
+                year, "/National/FARS", year, "NationalCSV.zip")
+  zip_file <- paste0("data/raw/FARS", year, ".zip")
+
+  # Download ZIP file
+  download.file(url, zip_file, mode = "wb", quiet = TRUE)
+
+  # Extract accident.csv
+  unzip(zip_file, exdir = "data/raw/temp")
+
+  # Find and rename the accident file
+  accident_file <- list.files("data/raw/temp", pattern = "accident.csv",
+                              recursive = TRUE, full.names = TRUE)
+  file.rename(accident_file, paste0("data/raw/accident_", year, ".csv"))
+
+  # Clean up
+  unlink("data/raw/temp", recursive = TRUE)
+
+  message("Downloaded ", year)
+}</code></pre>
+        </div>
+
+        <h3>Load and Combine Years</h3>
+        <p>Now load and append all years into a single dataset:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Load and append all years
+clear
+tempfile combined
+save `combined', emptyok
+
+forvalues year = 2007/2022 {
+    import delimited "data/raw/accident_`year'.csv", clear
+
+    * Keep only variables we need
+    keep state statename year month fatals
+
+    append using `combined'
+    save `combined', replace
+}
+
+use `combined', clear
+save "data/clean/fars_all_years.dta", replace
+
+* Check the data
+tab year
+summarize fatals</code></pre>
+          <pre class="code-content r"><code class="language-r"># Load and combine all years
+pacman::p_load(tidyverse)
+
+fars_data <- map_dfr(2007:2022, function(year) {
+  read_csv(paste0("data/raw/accident_", year, ".csv"),
+           show_col_types = FALSE) |>
+    select(STATE, STATENAME, YEAR, MONTH, FATALS) |>
+    rename_all(tolower)
+})
+
+# Save combined data
+write_csv(fars_data, "data/clean/fars_all_years.csv")
+
+# Check the data
+fars_data |> count(year)
+fars_data |> summarize(mean_fatals = mean(fatals),
+                       total_fatals = sum(fatals))</code></pre>
+        </div>
+      </section>
+
+      <section id="clean-aggregate" class="tutorial-section">
+        <h2>Clean and Aggregate</h2>
+
+        <p>The raw FARS data has one row per crash. For our event study, we need state-year totals. We'll also need to calculate fatality rates (per capita or per VMT) to account for population differences across states.</p>
+
+        <h3>Aggregate to State-Year</h3>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">use "data/clean/fars_all_years.dta", clear
+
+* Collapse to state-year totals
+collapse (sum) fatalities = fatals (count) n_crashes = fatals, by(state statename year)
+
+* Label variables
+label variable fatalities "Total fatalities"
+label variable n_crashes "Number of fatal crashes"
+
+* Check for missing state-years (there shouldn't be any)
+egen state_id = group(state)
+tsset state_id year
+tsfill, full
+
+* Summary statistics
+summarize fatalities n_crashes
+
+save "data/clean/state_year_fatalities.dta", replace</code></pre>
+          <pre class="code-content r"><code class="language-r"># Aggregate to state-year totals
+state_year <- fars_data |>
+  group_by(state, statename, year) |>
+  summarize(
+    fatalities = sum(fatals),
+    n_crashes = n(),
+    .groups = "drop"
+  )
+
+# Check for missing state-years
+state_year |>
+  complete(state, year = 2007:2022) |>
+  filter(is.na(fatalities))
+
+# Summary statistics
+summary(state_year$fatalities)
+
+write_csv(state_year, "data/clean/state_year_fatalities.csv")</code></pre>
+        </div>
+
+        <h3>Add Population Data (Optional)</h3>
+        <p>For a more rigorous analysis, you'd want to calculate fatality <em>rates</em> per 100,000 population. You can get state population data from the Census Bureau's API or from FRED.</p>
+
+        <div class="common-mistakes">
+          <h4>Why Rates Matter</h4>
+          <p>Texas has more fatalities than Vermont simply because it's larger. If texting bans are correlated with state size, raw counts could give misleading results. Using per-capita rates addresses this concern.</p>
+        </div>
+      </section>
+
+      <section id="merge-policy" class="tutorial-section">
+        <h2>Merge Policy Dates</h2>
+
+        <p>Now we merge in the texting ban effective dates. The key variable is the year each state's ban went into effect.</p>
+
+        <h3>Policy Data</h3>
+        <p>First, download the policy dates file (compiled from GHSA and IIHS sources):</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Load policy dates
+* Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
+import delimited "data/raw/texting_ban_dates.csv", clear
+
+* Handle missing values for Montana (no ban)
+replace texting_ban_year = . if texting_ban_year == .
+
+save "data/clean/texting_ban_dates.dta", replace
+
+* Preview the data
+list state state_name texting_ban_year primary_enforcement in 1/10</code></pre>
+          <pre class="code-content r"><code class="language-r"># Load policy dates
+# Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
+policy <- read_csv("data/raw/texting_ban_dates.csv",
+                   na = c("", "NA", "."),
+                   show_col_types = FALSE)
+
+# Preview
+head(policy, 10)</code></pre>
+        </div>
+
+        <h3>Merge and Create Treatment Variables</h3>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Merge fatality data with policy dates
+use "data/clean/state_year_fatalities.dta", clear
+merge m:1 state using "data/clean/texting_ban_dates.dta"
+
+* Check merge
+tab _merge
+drop _merge
+
+* Create treatment indicator
+gen treated = (year >= texting_ban_year) & !missing(texting_ban_year)
+
+* Create event time variable (years since treatment)
+gen event_time = year - texting_ban_year
+
+* For never-treated states (Montana), set event_time to a placeholder
+replace event_time = -999 if missing(texting_ban_year)
+
+* Tabulate treatment timing
+tab texting_ban_year, missing
+tab event_time if event_time != -999
+
+save "data/clean/analysis_data.dta", replace</code></pre>
+          <pre class="code-content r"><code class="language-r"># Merge fatality data with policy dates
+analysis_data <- state_year |>
+  left_join(policy, by = "state") |>
+  mutate(
+    # Ever-treated indicator (1 if state ever adopts, 0 if never)
+    ever_treated = !is.na(texting_ban_year),
+
+    # Currently treated indicator
+    treated = ever_treated & year >= texting_ban_year,
+
+    # Event time (years since treatment)
+    # IMPORTANT: Never-treated states don't have a meaningful "event time"
+    # Set them to -1000 (a value outside the range of real event times)
+    # Then exclude with ref = c(-1, -1000) in fixest
+    event_time = if_else(
+      is.na(texting_ban_year),
+      -1000,                    # Never-treated: code as -1000
+      year - texting_ban_year   # Treated: actual event time
+    )
+  )
+
+# Check treatment timing
+analysis_data |> count(texting_ban_year)
+analysis_data |> filter(!is.na(event_time)) |> count(event_time)
+
+write_csv(analysis_data, "data/clean/analysis_data.csv")</code></pre>
+        </div>
+
+        <div class="key-principle">
+          <h4>Event Time</h4>
+          <p><code>event_time = year - texting_ban_year</code> measures years relative to treatment. Negative values are pre-treatment, zero is the treatment year, and positive values are post-treatment. This is the key variable for our event study.</p>
+        </div>
+      </section>
+
+      <section id="event-study" class="tutorial-section">
+        <h2>Event Study Regression</h2>
+
+        <p>An event study estimates separate effects for each time period relative to treatment. This lets us (1) test for pre-trends and (2) trace out the dynamic treatment effect.</p>
+
+        <h3>The Model</h3>
+        <p>We estimate:</p>
+        <div style="background: var(--bg-subtle); padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'Latin Modern Roman', serif; text-align: center;">
+          <p style="margin: 0;">Y<sub>st</sub> = &alpha;<sub>s</sub> + &gamma;<sub>t</sub> + &sum;<sub>k&ne;-1</sub> &beta;<sub>k</sub> &times; 1[K<sub>st</sub> = k] + &epsilon;<sub>st</sub></p>
+        </div>
+
+        <p>Where:</p>
+        <ul>
+          <li>&alpha;<sub>s</sub> = state fixed effects</li>
+          <li>&gamma;<sub>t</sub> = year fixed effects</li>
+          <li>K<sub>st</sub> = event time (years since treatment)</li>
+          <li>&beta;<sub>k</sub> = effect at event time k, relative to k = -1</li>
+        </ul>
+
+        <h3>Create Event Time Dummies</h3>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">use "data/clean/analysis_data.dta", clear
+
+* Bin endpoints (combine -6 and earlier, +6 and later)
+gen event_time_binned = event_time
+replace event_time_binned = -6 if event_time <= -6 & event_time != -999
+replace event_time_binned = 6 if event_time >= 6 & event_time != -999
+
+* Create dummies for each event time (excluding -1 as reference)
+* For never-treated states, all dummies are 0
+forvalues k = -6/6 {
+    if `k' != -1 {
+        local klab = cond(`k' < 0, "m" + string(abs(`k')), "p" + string(`k'))
+        gen et_`klab' = (event_time_binned == `k') & (event_time != -999)
+    }
+}
+
+* Verify: never-treated states should have all zeros
+summarize et_* if missing(texting_ban_year)</code></pre>
+          <pre class="code-content r"><code class="language-r"># Bin endpoints (but keep never-treated at -1000)
+analysis_data <- analysis_data |>
+  mutate(
+    event_time_binned = case_when(
+      event_time == -1000 ~ -1000,  # Never-treated: keep at -1000
+      event_time <= -6 ~ -6,        # Bin early periods
+      event_time >= 6 ~ 6,          # Bin late periods
+      TRUE ~ event_time
+    )
+  )
+
+# Why -1000 for never-treated?
+# Never-treated states don't have a treatment year, so "years since treatment"
+# is undefined. We can't just drop them (we need them as controls).
+# By coding them as -1000 and including -1000 in ref, fixest:
+#   1. Keeps them in the regression (they contribute to fixed effects)
+#   2. Doesn't create a dummy for them (no event_time = -1000 coefficient)</code></pre>
+        </div>
+
+        <h3>Run the Event Study</h3>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Install reghdfe if needed
+* ssc install reghdfe
+* ssc install ftools
+
+* Log transform outcome (fatalities are count data)
+gen ln_fatalities = ln(fatalities)
+
+* Event study with two-way fixed effects
+reghdfe ln_fatalities et_m6 et_m5 et_m4 et_m3 et_m2 ///
+    et_p0 et_p1 et_p2 et_p3 et_p4 et_p5 et_p6, ///
+    absorb(state year) cluster(state)
+
+* Store estimates for plotting
+estimates store event_study
+
+* Display results
+esttab event_study, se keep(et_*) ///
+    title("Event Study: Effect of Texting Bans on Log Fatalities")</code></pre>
+          <pre class="code-content r"><code class="language-r"># Install fixest if needed
+# install.packages("fixest")
+pacman::p_load(fixest)
+
+# Log transform outcome
+analysis_data <- analysis_data |>
+  mutate(ln_fatalities = log(fatalities))
+
+# Event study with two-way fixed effects
+# i(event_time_binned, ever_treated, ref = c(-1, -1000)) means:
+#   - event_time_binned: the relative time variable
+#   - ever_treated: interaction term (1 for treated states, 0 for never-treated)
+#   - ref = c(-1, -1000): exclude BOTH t=-1 (reference period) AND
+#                         t=-1000 (never-treated states)
+#
+# See: https://lrberge.github.io/fixest/articles/fixest_walkthrough.html
+event_study <- feols(
+  ln_fatalities ~ i(event_time_binned, ever_treated, ref = c(-1, -1000)) | state + year,
+  data = analysis_data,
+  cluster = ~state
+)
+
+# Display results
+summary(event_study)</code></pre>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>Standard Errors</h4>
+          <p>We cluster standard errors at the state level because (1) treatment varies at the state level, and (2) fatalities within a state are likely correlated over time. This is essential for correct inference in DiD designs.</p>
+        </div>
+      </section>
+
+      <section id="visualization" class="tutorial-section">
+        <h2>Visualization</h2>
+
+        <p>The classic event study plot shows coefficients and confidence intervals for each event time, with the reference period (t = -1) normalized to zero.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Install coefplot if needed
+* ssc install coefplot
+
+* Create event study plot
+coefplot event_study, ///
+    keep(et_*) ///
+    vertical ///
+    yline(0, lcolor(red) lpattern(dash)) ///
+    xline(6.5, lcolor(gray) lpattern(dash)) ///
+    xlabel(1 "-6" 2 "-5" 3 "-4" 4 "-3" 5 "-2" 6 "-1" ///
+           7 "0" 8 "1" 9 "2" 10 "3" 11 "4" 12 "5" 13 "6") ///
+    xtitle("Years Relative to Texting Ban") ///
+    ytitle("Effect on Log Fatalities") ///
+    title("Event Study: Texting Bans and Traffic Fatalities") ///
+    note("Notes: Coefficients relative to t=-1. 95% CIs shown." ///
+         "Clustered SEs at state level.") ///
+    ciopts(recast(rcap)) ///
+    msymbol(D) mcolor(navy) ///
+    graphregion(color(white)) bgcolor(white)
+
+graph export "output/event_study.png", replace width(1200)</code></pre>
+          <pre class="code-content r"><code class="language-r"># fixest has a built-in event study plot function
+iplot(event_study,
+      xlab = "Years Relative to Texting Ban",
+      ylab = "Effect on Log Fatalities",
+      main = "Event Study: Texting Bans and Traffic Fatalities")
+
+# Add reference line at zero
+abline(h = 0, lty = 2, col = "red")
+
+# For a publication-quality plot with ggplot2:
+pacman::p_load(broom, ggplot2)
+
+# Extract coefficients
+coef_df <- tidy(event_study, conf.int = TRUE) |>
+  filter(str_detect(term, "event_time")) |>
+  mutate(
+    event_time = as.numeric(str_extract(term, "-?\\d+"))
+  ) |>
+  # Add the reference period (t = -1)
+  bind_rows(tibble(event_time = -1, estimate = 0,
+                   conf.low = 0, conf.high = 0))
+
+# Create plot
+ggplot(coef_df, aes(x = event_time, y = estimate)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = -0.5, linetype = "dashed", color = "gray") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  labs(
+    x = "Years Relative to Texting Ban",
+    y = "Effect on Log Fatalities",
+    title = "Event Study: Texting Bans and Traffic Fatalities",
+    caption = "Notes: Coefficients relative to t=-1. 95% CIs shown.\nClustered SEs at state level."
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+ggsave("output/event_study.png", width = 10, height = 6, dpi = 300)</code></pre>
+        </div>
+      </section>
+
+      <section id="interpretation" class="tutorial-section">
+        <h2>Interpretation</h2>
+
+        <h3>Reading the Event Study Plot</h3>
+        <p>The event study plot tells us several things:</p>
+
+        <div style="display: grid; gap: 16px; margin: 20px 0;">
+          <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px;">
+            <h4 style="margin-top: 0; color: var(--primary);">Pre-Trends</h4>
+            <p style="margin-bottom: 0;">Look at coefficients for t < 0. If they're close to zero and not trending, the parallel trends assumption is more credible. Significant pre-trends suggest treated and control states were already diverging before the law.</p>
+          </div>
+          <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px;">
+            <h4 style="margin-top: 0; color: var(--primary);">Treatment Effect</h4>
+            <p style="margin-bottom: 0;">Look at t = 0 and beyond. Negative coefficients mean the texting ban reduced fatalities. The magnitude tells you the percent change (since our outcome is in logs).</p>
+          </div>
+          <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px;">
+            <h4 style="margin-top: 0; color: var(--primary);">Dynamics</h4>
+            <p style="margin-bottom: 0;">Does the effect appear immediately at t = 0? Does it grow over time? Fade out? These dynamics can be informative about the mechanism.</p>
+          </div>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>Null Results Are Results</h4>
+          <p>If you find no effect of texting bans on fatalities, that's a finding. It could mean bans are ineffective, or that enforcement is weak, or that texting wasn't a major cause of fatal crashes. Don't bury null results.</p>
+        </div>
+
+        <h3>Caveats and Extensions</h3>
+        <ul style="line-height: 2;">
+          <li><strong>Enforcement:</strong> Primary vs. secondary enforcement matters. You could interact treatment with enforcement type.</li>
+          <li><strong>Spillovers:</strong> Drivers cross state lines. Border counties might be affected by neighboring state laws.</li>
+          <li><strong>Other policies:</strong> Handheld bans, distracted driving laws, and other traffic safety policies may confound results.</li>
+        </ul>
+
+        <div class="callout-info">
+          <h4>A Note on Staggered Timing</h4>
+          <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+          <a href="../regression.html#event-studies" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #fff; color: var(--primary); border: 1px solid var(--primary); border-radius: 8px; text-decoration: none; font-weight: 500;">
+            &larr; Event Studies (Theory)
+          </a>
+          <a href="../index.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500;">
+            Tutorial Home &rarr;
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <button class="mobile-menu-btn" aria-label="Toggle menu">&#9776;</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
+  <script src="../../tutorial.js"></script>
+</body>
+</html>

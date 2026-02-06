@@ -1,0 +1,486 @@
+---
+layout: layouts/tutorial.html
+title: Project Organization | Intro to Data Analysis for Economics
+current_page: project-organization
+---
+<h1>Project Organization</h1>
+<p class="subtitle">Structure your project for reproducibility and collaboration</p>
+
+<section id="why-organize" class="tutorial-section">
+  <h2>Why Organization Matters</h2>
+
+  <p>A well-organized project:</p>
+  <ul>
+    <li><strong>Saves time</strong> — you can find files months later without searching</li>
+    <li><strong>Prevents errors</strong> — clear separation between raw and processed data</li>
+    <li><strong>Enables collaboration</strong> — others can understand and run your code</li>
+    <li><strong>Supports reproducibility</strong> — you (or a referee) can recreate all results</li>
+  </ul>
+
+  <div class="key-principle">
+    <h4>The Golden Rule</h4>
+    <p>Anyone should be able to run one script and reproduce all your results, starting from raw data. This includes future you, who will have forgotten everything.</p>
+  </div>
+</section>
+
+<section id="project-setup" class="tutorial-section">
+  <h2>Project Setup</h2>
+
+  <div class="key-principle">
+    <h4>Put Everything in Dropbox</h4>
+    <p>Before doing anything else, create your project folder in Dropbox. This gives you automatic backups and version history. When you accidentally delete code, you can right-click the file and restore it from any point in the last 30-180 days.</p>
+  </div>
+
+  <h3>One-Command Setup Script</h3>
+  <p>We provide a script that creates a well-organized project structure. Open your terminal and run:</p>
+
+  <p><strong>Mac/Linux:</strong></p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>cd ~/Dropbox
+curl -fsSL https://theodorecaputi.com/teaching/14.33/files/setup.sh | bash -s my_1433_project</code></pre>
+  </div>
+
+  <p><strong>Windows PowerShell:</strong></p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>cd ~\Dropbox
+irm https://theodorecaputi.com/teaching/14.33/files/setup.ps1 | iex; Setup-Project "my_1433_project"</code></pre>
+  </div>
+</section>
+
+<section id="folder-structure" class="tutorial-section">
+  <h2>Folder Structure</h2>
+
+  <h3>The Standard Economics Project</h3>
+
+  <pre style="background: var(--code-bg); padding: 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6;">
+my_project/
+├── master.do              # Runs everything (master.R or main.py)
+├── README.md              # Describe your project
+│
+├── build/                 # Data preparation
+│   ├── input/             # Raw data (NEVER modify these!)
+│   ├── code/              # Scripts to clean data
+│   └── output/            # Cleaned data
+│
+├── analysis/              # Your analysis
+│   ├── code/              # Regression scripts, etc.
+│   └── output/
+│       ├── tables/
+│       └── figures/
+│
+└── paper/                 # Your writeup
+    ├── draft.tex
+    └── figures/           # Symlinks to analysis/output/figures
+</pre>
+
+  <h3>What Goes Where</h3>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;">
+    <thead>
+      <tr style="background: #e9ecef;">
+        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Folder</th>
+        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Contains</th>
+        <th style="padding: 10px; border: 1px solid #dee2e6; text-align: left;">Rule</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>build/input/</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Raw data exactly as downloaded</td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>Never modify</strong> — treat as read-only</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>build/output/</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Cleaned datasets ready for analysis</td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Created by code, deletable</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>analysis/output/</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Tables, figures, estimates</td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Created by code, deletable</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout-danger">
+    <strong>Never Edit Raw Data</strong>
+    <p style="margin: 8px 0 0;">If you need to fix something in raw data, write code to do it. This creates a record of every change. Manually editing a CSV loses that history forever.</p>
+  </div>
+</section>
+
+<section id="master-script" class="tutorial-section">
+  <h2>The Master Script</h2>
+
+  <p>Your master script is the single entry point that runs your entire project. It should:</p>
+  <ol>
+    <li>Set paths relative to a project root</li>
+    <li>Run all build scripts in order</li>
+    <li>Run all analysis scripts in order</li>
+  </ol>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">/*==============================================================================
+    Master Do-File: My Research Project
+    Author: Your Name
+    Date: February 2026
+
+    Instructions: Change the path below, then run this entire file.
+==============================================================================*/
+
+clear all
+set more off
+
+* ============ CHANGE THIS PATH ============
+global root "/Users/yourname/Dropbox/my_project"
+* ==========================================
+
+* Define paths (don't change these)
+global build    "$root/build"
+global analysis "$root/analysis"
+
+* Run the build scripts (data preparation)
+do "$build/code/01_import_census.do"
+do "$build/code/02_import_policy.do"
+do "$build/code/03_clean.do"
+do "$build/code/04_merge.do"
+
+* Run the analysis
+do "$analysis/code/01_summary_stats.do"
+do "$analysis/code/02_main_regression.do"
+do "$analysis/code/03_robustness.do"
+do "$analysis/code/04_figures.do"
+
+di "Done! All results in $analysis/output/"</code></pre>
+    <pre class="code-content r"><code class="language-r">#==============================================================================
+#    Master Script: My Research Project
+#    Author: Your Name
+#    Date: February 2026
+#
+#    Instructions: Change the path below, then run this entire file.
+#==============================================================================
+
+rm(list = ls())
+
+# ============ CHANGE THIS PATH ============
+root <- "/Users/yourname/Dropbox/my_project"
+# ==========================================
+
+# Define paths (don't change these)
+build <- file.path(root, "build")
+analysis <- file.path(root, "analysis")
+
+# Run the build scripts (data preparation)
+source(file.path(build, "code", "01_import_census.R"))
+source(file.path(build, "code", "02_import_policy.R"))
+source(file.path(build, "code", "03_clean.R"))
+source(file.path(build, "code", "04_merge.R"))
+
+# Run the analysis
+source(file.path(analysis, "code", "01_summary_stats.R"))
+source(file.path(analysis, "code", "02_main_regression.R"))
+source(file.path(analysis, "code", "03_robustness.R"))
+source(file.path(analysis, "code", "04_figures.R"))
+
+cat("Done! All results in", file.path(analysis, "output"), "\n")</code></pre>
+    <pre class="code-content python"><code class="language-python">"""
+Master Script: My Research Project
+Author: Your Name
+Date: February 2026
+
+Instructions: Change the path below, then run this entire file.
+"""
+
+import os
+from pathlib import Path
+
+# ============ CHANGE THIS PATH ============
+ROOT = Path("/Users/yourname/Dropbox/my_project")
+# ==========================================
+
+# Define paths (don't change these)
+BUILD = ROOT / "build"
+ANALYSIS = ROOT / "analysis"
+
+# Run the build scripts (data preparation)
+exec(open(BUILD / "code" / "01_import_census.py").read())
+exec(open(BUILD / "code" / "02_import_policy.py").read())
+exec(open(BUILD / "code" / "03_clean.py").read())
+exec(open(BUILD / "code" / "04_merge.py").read())
+
+# Run the analysis
+exec(open(ANALYSIS / "code" / "01_summary_stats.py").read())
+exec(open(ANALYSIS / "code" / "02_main_regression.py").read())
+exec(open(ANALYSIS / "code" / "03_robustness.py").read())
+exec(open(ANALYSIS / "code" / "04_figures.py").read())
+
+print(f"Done! All results in {ANALYSIS / 'output'}")</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Number Your Scripts</h4>
+    <p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so the run order is obvious. This also keeps them sorted correctly in your file browser.</p>
+  </div>
+</section>
+
+<section id="paths" class="tutorial-section">
+  <h2>Working with Paths</h2>
+
+  <p>Hardcoded paths like <code>"/Users/john/Desktop/data.csv"</code> break when anyone else runs your code. Use relative paths from your project root instead.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* BAD: Hardcoded path (breaks on other computers)
+use "/Users/john/Desktop/project/data/census.dta", clear
+
+* GOOD: Use globals set in master.do
+use "$build/output/census_clean.dta", clear
+
+* Save output using globals
+save "$analysis/output/regression_results.dta", replace
+graph export "$analysis/output/figures/event_study.pdf", replace</code></pre>
+    <pre class="code-content r"><code class="language-r"># BAD: Hardcoded path (breaks on other computers)
+df <- read_csv("/Users/john/Desktop/project/data/census.csv")
+
+# GOOD: Use variables set in master.R
+df <- read_csv(file.path(build, "output", "census_clean.csv"))
+
+# Save output using path variables
+write_csv(results, file.path(analysis, "output", "regression_results.csv"))
+ggsave(file.path(analysis, "output", "figures", "event_study.pdf"))</code></pre>
+    <pre class="code-content python"><code class="language-python"># BAD: Hardcoded path (breaks on other computers)
+df = pd.read_csv("/Users/john/Desktop/project/data/census.csv")
+
+# GOOD: Use variables set in main.py
+df = pd.read_csv(BUILD / "output" / "census_clean.csv")
+
+# Save output using path variables
+results.to_csv(ANALYSIS / "output" / "regression_results.csv")
+fig.savefig(ANALYSIS / "output" / "figures" / "event_study.pdf")</code></pre>
+  </div>
+</section>
+
+<section id="best-practices" class="tutorial-section">
+  <h2>Best Practices</h2>
+
+  <h3>Code Style</h3>
+
+  <p>Well-formatted code is easier to read and debug. Use section headers to organize your scripts, and include comments that explain <em>why</em> you're doing something (not just what):</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* GOOD: Clear sections with headers
+*==============================================================================
+* SECTION 1: LOAD AND CLEAN DATA
+*==============================================================================
+
+use "$build/input/census_raw.dta", clear
+
+* Keep only working-age adults
+keep if age >= 25 & age <= 64
+
+* Create outcome variable
+gen employed = (empstat == 1)
+label var employed "Currently employed"
+
+*==============================================================================
+* SECTION 2: CREATE ANALYSIS SAMPLE
+*==============================================================================
+
+* Drop if missing key variables
+drop if missing(income, education, age)
+
+* Document sample size
+count
+di "Final sample: " r(N) " observations"</code></pre>
+    <pre class="code-content r"><code class="language-r"># GOOD: Clear sections with headers
+#==============================================================================
+# SECTION 1: LOAD AND CLEAN DATA
+#==============================================================================
+
+df <- read_csv(file.path(build, "input", "census_raw.csv"))
+
+# Keep only working-age adults
+df <- df %>%
+  filter(age >= 25, age <= 64)
+
+# Create outcome variable
+df <- df %>%
+  mutate(employed = as.integer(empstat == 1))
+
+#==============================================================================
+# SECTION 2: CREATE ANALYSIS SAMPLE
+#==============================================================================
+
+# Drop if missing key variables
+df <- df %>%
+  drop_na(income, education, age)
+
+# Document sample size
+cat("Final sample:", nrow(df), "observations\n")</code></pre>
+    <pre class="code-content python"><code class="language-python"># GOOD: Clear sections with headers
+#==============================================================================
+# SECTION 1: LOAD AND CLEAN DATA
+#==============================================================================
+
+df = pd.read_csv(BUILD / "input" / "census_raw.csv")
+
+# Keep only working-age adults
+df = df[(df['age'] >= 25) & (df['age'] <= 64)]
+
+# Create outcome variable
+df['employed'] = (df['empstat'] == 1).astype(int)
+
+#==============================================================================
+# SECTION 2: CREATE ANALYSIS SAMPLE
+#==============================================================================
+
+# Drop if missing key variables
+df = df.dropna(subset=['income', 'education', 'age'])
+
+# Document sample size
+print(f"Final sample: {len(df)} observations")</code></pre>
+  </div>
+
+  <h3>Debugging Tips</h3>
+
+  <ul>
+    <li><strong>Check your data often</strong> — After each transformation, verify the result is what you expected</li>
+    <li><strong>Print counts</strong> — After filters or drops, print how many observations remain</li>
+    <li><strong>Test on a subset</strong> — Run code on 1000 rows before processing millions</li>
+    <li><strong>Read error messages</strong> — They usually tell you exactly what's wrong</li>
+  </ul>
+
+  <p>Here's what defensive coding looks like in practice:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Before and after every major step:
+di "Before cleaning: " _N " observations"
+
+drop if age < 0 | age > 120
+
+di "After cleaning: " _N " observations"
+
+* Check for unexpected values
+tab state, missing
+summarize income, detail
+assert income >= 0 | missing(income)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Before and after every major step:
+cat("Before cleaning:", nrow(df), "observations\n")
+
+df <- df %>% filter(age >= 0, age <= 120)
+
+cat("After cleaning:", nrow(df), "observations\n")
+
+# Check for unexpected values
+table(df$state, useNA = "ifany")
+summary(df$income)
+stopifnot(all(df$income >= 0 | is.na(df$income)))</code></pre>
+    <pre class="code-content python"><code class="language-python"># Before and after every major step:
+print(f"Before cleaning: {len(df)} observations")
+
+df = df[(df['age'] >= 0) & (df['age'] <= 120)]
+
+print(f"After cleaning: {len(df)} observations")
+
+# Check for unexpected values
+print(df['state'].value_counts(dropna=False))
+print(df['income'].describe())
+assert (df['income'] >= 0).all() or df['income'].isna().any()</code></pre>
+  </div>
+
+  <h3>Save Intermediate Files</h3>
+
+  <p>Save your data after each major cleaning step with numbered prefixes:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* After each major cleaning step, save the data
+save "$build/output/01_imported.dta", replace
+* ... cleaning code ...
+save "$build/output/02_cleaned.dta", replace
+* ... more cleaning ...
+save "$build/output/03_merged.dta", replace</code></pre>
+    <pre class="code-content r"><code class="language-r"># After each major cleaning step, save the data
+saveRDS(df, file.path(build, "output", "01_imported.rds"))
+# ... cleaning code ...
+saveRDS(df, file.path(build, "output", "02_cleaned.rds"))
+# ... more cleaning ...
+saveRDS(df, file.path(build, "output", "03_merged.rds"))</code></pre>
+    <pre class="code-content python"><code class="language-python"># After each major cleaning step, save the data
+df.to_pickle(f"{BUILD}/output/01_imported.pkl")
+# ... cleaning code ...
+df.to_pickle(f"{BUILD}/output/02_cleaned.pkl")
+# ... more cleaning ...
+df.to_pickle(f"{BUILD}/output/03_merged.pkl")</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Why This Matters</h4>
+    <p>When something breaks at step 5, you can start debugging from step 4 instead of re-running everything from scratch. This saves hours of debugging time, especially with large datasets that take time to process.</p>
+  </div>
+</section>
+
+<section id="checklist" class="tutorial-section">
+  <h2>Project Checklist</h2>
+
+  <div class="callout-success">
+    <p style="margin: 0 0 12px; font-weight: 600;">Before submitting any project, verify:</p>
+    <ul style="margin: 0; padding-left: 20px;">
+      <li>☐ Running <code>master.do</code> reproduces all results from raw data</li>
+      <li>☐ All paths use globals/variables, not hardcoded paths</li>
+      <li>☐ Raw data in <code>build/input/</code> is untouched</li>
+      <li>☐ README explains how to run the project</li>
+      <li>☐ No temporary or test files left in folders</li>
+      <li>☐ Scripts are numbered in run order</li>
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stata Tutorial 1 - Teaching Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .header-links a {
+            color: #4ade80;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid #4ade80;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .header-links a:hover {
+            background: #4ade80;
+            color: #0f0f0f;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333;
+            z-index: 99;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #4ade80;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Main content */
+        .main {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Section */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section header */
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            color: #4ade80;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-time {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        /* Cards */
+        .card {
+            background: #1a1a1a;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .card-icon.say { background: #3b82f6; }
+        .card-icon.do { background: #f59e0b; }
+        .card-icon.poll { background: #4ade80; }
+        .card-icon.note { background: #8b5cf6; }
+
+        /* Say card - talking points */
+        .say-text {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: #fff;
+        }
+
+        .say-text em {
+            color: #4ade80;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #0d0d0d;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #252525;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: #888;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .copy-btn:hover {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .code-content .comment { color: #6a9955; }
+        .code-content .command { color: #4fc1ff; }
+        .code-content .string { color: #ce9178; }
+
+        /* Poll trigger */
+        .poll-trigger {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .poll-btn {
+            background: #4ade80;
+            color: #0f0f0f;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .poll-btn:hover {
+            background: #22c55e;
+            transform: scale(1.02);
+        }
+
+        .poll-questions {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+        }
+
+        .nav-btn {
+            background: #252525;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            border-color: #4ade80;
+            background: #1a1a1a;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.primary {
+            background: #4ade80;
+            border-color: #4ade80;
+            color: #0f0f0f;
+        }
+
+        .nav-btn.primary:hover {
+            background: #22c55e;
+        }
+
+        /* Section indicator */
+        .section-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dot.active {
+            background: #4ade80;
+        }
+
+        .dot.completed {
+            background: #22c55e;
+        }
+
+        /* Debrief box */
+        .debrief {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid #8b5cf6;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .debrief-title {
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Timer */
+        .timer {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4ade80;
+            font-family: 'SF Mono', monospace;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .highlight-box h3 {
+            color: #4ade80;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: 1rem;
+            }
+            .section-title {
+                font-size: 1.75rem;
+            }
+            .say-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Stata Tutorial 1: Teaching Guide</h1>
+        <div class="header-links">
+            <a href="presenter.html" target="_blank">Open Polls</a>
+            <a href="student.html" target="_blank">Student View</a>
+        </div>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <main class="main">
+        <!-- SECTION 0: Setup -->
+        <div class="section active" data-section="0">
+            <div class="section-header">
+                <div class="section-label">Before Class</div>
+                <div class="section-title">Setup Checklist</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">✓</div>
+                    Pre-flight Check
+                </div>
+                <ul style="margin-left: 1.5rem; line-height: 2;">
+                    <li>Open <a href="presenter.html" target="_blank" style="color: #4ade80;">Polls Presenter</a> → Load "Stata Tutorial 1 - Concepts"</li>
+                    <li>Open Stata on projector</li>
+                    <li>Have <code>state_economics.csv</code> ready to load</li>
+                    <li>This page open on your laptop for reference</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h3>Join Code: KY9XV5</h3>
+                <p>Students will see this on the polls presenter screen</p>
+            </div>
+        </div>
+
+        <!-- SECTION 1: The Hook -->
+        <div class="section" data-section="1">
+            <div class="section-header">
+                <div class="section-label">Section 1 • 5 minutes</div>
+                <div class="section-title">The Hook</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Walk in and say:
+                </div>
+                <div class="say-text">
+                    "Here's a puzzle: Do states with higher college graduation rates have higher median incomes?<br><br>
+                    Seems obvious, right? But <em>how much</em> higher? And is the relationship actually as strong as you'd think?<br><br>
+                    We have 5 minutes to figure this out. <em>Let's go.</em>"
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon note">📝</div>
+                    Why this works
+                </div>
+                <p>Creates urgency. Students feel like researchers, not tutorial-followers. No slides needed—just you talking.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Explore Data -->
+        <div class="section" data-section="2">
+            <div class="section-header">
+                <div class="section-label">Section 2 • 15 minutes</div>
+                <div class="section-title">Explore the Data</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Say:
+                </div>
+                <div class="say-text">
+                    "First rule of data analysis: <em>look at your data</em> before you do anything else."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">⌨️</div>
+                    Live code this (students follow along):
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>stata</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <div class="code-content">
+<span class="comment">* Load the data</span>
+<span class="command">import delimited</span> <span class="string">"state_economics.csv"</span>, clear
+
+<span class="comment">* What do we have?</span>
+<span class="command">describe</span>
+
+<span class="comment">* Look at it</span>
+<span class="command">browse</span>
+
+<span class="comment">* Quick summary</span>
+<span class="command">summarize</span>
+
+<span class="comment">* Focus on key variables</span>
+<span class="command">summarize</span> college_grad_rate median_income, detail
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon poll">📊</div>
+                    Poll Time: Q1-Q3
+                </div>
+                <div class="poll-trigger">
+                    <button class="poll-btn" onclick="window.open('presenter.html', '_blank')">Open Polls → Click Q1</button>
+                    <span class="poll-questions">Understanding data structure, missing values, first steps</span>
+                </div>
+                <div class="debrief">
+                    <div class="debrief-title">After the poll:</div>
+                    <p><strong>Q1:</strong> str10 = string up to 10 characters (text, not numbers)<br>
+                    <strong>Q2:</strong> N=980 means 20 observations have missing values<br>
+                    <strong>Q3:</strong> Look for "describe", "browse", "look", "summarize" in word cloud</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: Find an Answer -->
+        <div class="section" data-section="3">
+            <div class="section-header">
+                <div class="section-label">Section 3 • 15 minutes</div>
+                <div class="section-title">Find an Answer</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Say:
+                </div>
+                <div class="say-text">
+                    "Now let's actually answer our question. What's the relationship between education and income?"
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">⌨️</div>
+                    Live code:
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>stata</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <div class="code-content">
+<span class="comment">* Scatterplot first - always visualize!</span>
+<span class="command">scatter</span> median_income college_grad_rate
+
+<span class="comment">* Correlation</span>
+<span class="command">correlate</span> median_income college_grad_rate
+
+<span class="comment">* Simple regression</span>
+<span class="command">regress</span> median_income college_grad_rate
+
+<span class="comment">* Add a control</span>
+<span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon poll">📊</div>
+                    Poll Time: Q4-Q6
+                </div>
+                <div class="poll-trigger">
+                    <button class="poll-btn" onclick="window.open('presenter.html', '_blank')">Open Polls → Click Q4</button>
+                    <span class="poll-questions">Interpreting coefficients, R², causation</span>
+                </div>
+                <div class="debrief">
+                    <div class="debrief-title">After the poll:</div>
+                    <p><strong>Q4:</strong> t-stat = coef/SE = 500/100 = 5<br>
+                    <strong>Q5:</strong> R² = fraction of variance in Y explained by model<br>
+                    <strong>Q6:</strong> Use word cloud to discuss confounding, selection bias, reverse causality. Regression shows <em>association</em>, not causation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: Make It Pretty -->
+        <div class="section" data-section="4">
+            <div class="section-header">
+                <div class="section-label">Section 4 • 15 minutes</div>
+                <div class="section-title">Make It Pretty</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Say:
+                </div>
+                <div class="say-text">
+                    "Great, we have results! But you can't put raw Stata output in your paper. Let's make this <em>publication-ready</em>."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">⌨️</div>
+                    Live code:
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>stata</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <div class="code-content">
+<span class="comment">* Install estout if needed</span>
+<span class="command">ssc install</span> estout
+
+<span class="comment">* Create publication-quality table</span>
+<span class="command">eststo</span> clear
+<span class="command">eststo</span> m1: <span class="command">regress</span> median_income college_grad_rate
+<span class="command">eststo</span> m2: <span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+
+<span class="command">esttab</span> m1 m2, se r2 label
+
+<span class="comment">* Professional figure</span>
+<span class="command">twoway</span> (scatter median_income college_grad_rate, mcolor(navy%50)) ///
+       (lfit median_income college_grad_rate, lcolor(cranberry)), ///
+       title(<span class="string">"College Graduation and Median Income"</span>) ///
+       xtitle(<span class="string">"College Graduation Rate (%)"</span>) ///
+       ytitle(<span class="string">"Median Household Income ($)"</span>)
+
+<span class="command">graph export</span> <span class="string">"education_income.png"</span>, replace
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon poll">📊</div>
+                    Poll Time: Q7-Q8
+                </div>
+                <div class="poll-trigger">
+                    <button class="poll-btn" onclick="window.open('presenter.html', '_blank')">Open Polls → Click Q7</button>
+                    <span class="poll-questions">Understanding controls and confounding</span>
+                </div>
+                <div class="debrief">
+                    <div class="debrief-title">After the poll:</div>
+                    <p><strong>Q7:</strong> Coefficient dropped = part of the "education effect" was actually cost of living (confounding)<br>
+                    <strong>Q8:</strong> Adding controls isn't always better! Can introduce bias. "It depends."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 5: The Twist -->
+        <div class="section" data-section="5">
+            <div class="section-header">
+                <div class="section-label">Section 5 • 5 minutes</div>
+                <div class="section-title">The Twist</div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>⚠️ This is the key moment</h3>
+                <p>Build it up. Make them feel the pain of non-reproducibility.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Say:
+                </div>
+                <div class="say-text">
+                    "Beautiful. You just did real empirical research. Question, data, analysis, visualization.<br><br>
+                    Now I need everyone to do one thing: <em>Close Stata completely.</em> Not minimize—close it."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">⏳</div>
+                    Wait for everyone to close Stata
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Then say:
+                </div>
+                <div class="say-text">
+                    "Okay. Open Stata again.<br><br>
+                    You have <em>2 minutes</em> to reproduce that graph. The one showing education and income with the fitted line. Go."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon note">📝</div>
+                    Watch the chaos
+                </div>
+                <p><strong>Don't help.</strong> Let them struggle. After 2 minutes:</p>
+                <div class="say-text" style="margin-top: 1rem;">
+                    "Stop. Raise your hand if you successfully reproduced the graph."<br><br>
+                    <span style="color: #888;">(Probably 0-2 hands)</span><br><br>
+                    "This is the most important lesson today. <em>If you can't reproduce it, you didn't do it.</em><br><br>
+                    Now imagine it's 3 weeks from now. You're revising your paper. Your advisor asks 'what if we control for population?' You have no idea what you did.<br><br>
+                    After break, we're going to fix this."
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 6: Break -->
+        <div class="section" data-section="6">
+            <div class="section-header">
+                <div class="section-label">Break • 10 minutes</div>
+                <div class="section-title">Let it Sink In</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon note">☕</div>
+                    Let the anxiety marinate
+                </div>
+                <p>Students will be talking about it. That's good.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 7: The Solution -->
+        <div class="section" data-section="7">
+            <div class="section-header">
+                <div class="section-label">Section 6 • 20 minutes</div>
+                <div class="section-title">The Solution</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Say:
+                </div>
+                <div class="say-text">
+                    "Everything we just did—we're going to redo it. But this time, in a way we can reproduce <em>forever</em>."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon do">⌨️</div>
+                    Create a do-file together (File → New → Do-file):
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>analysis.do</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <div class="code-content">
+<span class="comment">/*==============================================================================
+Project:    Education and Income Analysis
+Author:     [Your Name]
+Date:       February 18, 2026
+Purpose:    Examine relationship between college graduation rates and income
+==============================================================================*/</span>
+
+<span class="comment">* SETUP</span>
+<span class="command">clear all</span>
+<span class="command">set more off</span>
+<span class="command">cd</span> <span class="string">"/path/to/your/project"</span>
+
+<span class="comment">* LOAD DATA</span>
+<span class="command">import delimited</span> <span class="string">"state_economics.csv"</span>, clear
+<span class="command">describe</span>
+<span class="command">summarize</span>
+
+<span class="comment">* ANALYSIS</span>
+<span class="command">eststo</span> clear
+<span class="command">eststo</span> m1: <span class="command">regress</span> median_income college_grad_rate
+<span class="command">eststo</span> m2: <span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+<span class="command">esttab</span> m1 m2, se r2 label
+
+<span class="comment">* FIGURE</span>
+<span class="command">twoway</span> (scatter median_income college_grad_rate, mcolor(navy%50)) ///
+       (lfit median_income college_grad_rate, lcolor(cranberry)), ///
+       title(<span class="string">"College Graduation and Median Income"</span>)
+<span class="command">graph export</span> <span class="string">"education_income.png"</span>, replace
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    After running it (Ctrl+D / Cmd+D):
+                </div>
+                <div class="say-text">
+                    "There. In 30 seconds, we reproduced everything.<br><br>
+                    And if your advisor asks for a change next month? You open this file, make the edit, re-run. <em>Done.</em>"
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon poll">📊</div>
+                    Poll Time: Q9-Q11
+                </div>
+                <div class="poll-trigger">
+                    <button class="poll-btn" onclick="window.open('presenter.html', '_blank')">Open Polls → Click Q9</button>
+                    <span class="poll-questions">Reproducibility concepts</span>
+                </div>
+                <div class="debrief">
+                    <div class="debrief-title">After the poll:</div>
+                    <p><strong>Q9:</strong> Commands in command window = gone when you close Stata<br>
+                    <strong>Q10:</strong> Edit one line, re-run whole file = power of do-files<br>
+                    <strong>Q11:</strong> Look for "reproducibility", "save", "remember" in word cloud</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 8: Wrap Up -->
+        <div class="section" data-section="8">
+            <div class="section-header">
+                <div class="section-label">Section 7 • 5 minutes</div>
+                <div class="section-title">Wrap Up</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon poll">📊</div>
+                    Exit Ticket: Q12
+                </div>
+                <div class="poll-trigger">
+                    <button class="poll-btn" onclick="window.open('presenter.html', '_blank')">Open Polls → Click Q12</button>
+                    <span class="poll-questions">"What will you do differently?"</span>
+                </div>
+                <p style="margin-top: 1rem; color: #888;">Review responses together. Look for: "use do-files", "save my code", "not type in command window"</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon say">💬</div>
+                    Closing:
+                </div>
+                <div class="say-text">
+                    "Before next session: Try loading <em>your own data</em> for your project proposal into a do-file.<br><br>
+                    Second Stata lab: <em>Monday 2/23</em>—we'll cover merging, reshaping, and more regression.<br><br>
+                    TA office hours: Fridays 3–5 PM if you need help."
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>🎉 You did it!</h3>
+                <p>Check poll results later: <code>python quiz_manager.py export KY9XV5</code></p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-btn" id="prev-btn" onclick="prevSection()">
+                ← Previous
+            </button>
+            <div class="section-dots" id="dots"></div>
+            <button class="nav-btn primary" id="next-btn" onclick="nextSection()">
+                Next →
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const sections = document.querySelectorAll('.section');
+        const totalSections = sections.length;
+        let currentSection = 0;
+
+        // Initialize dots
+        const dotsContainer = document.getElementById('dots');
+        for (let i = 0; i < totalSections; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.onclick = () => goToSection(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function updateUI() {
+            // Update sections
+            sections.forEach((s, i) => {
+                s.classList.toggle('active', i === currentSection);
+            });
+
+            // Update dots
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.className = 'dot';
+                if (i < currentSection) d.classList.add('completed');
+                if (i === currentSection) d.classList.add('active');
+            });
+
+            // Update progress bar
+            const progress = ((currentSection + 1) / totalSections) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+
+            // Update buttons
+            document.getElementById('prev-btn').disabled = currentSection === 0;
+            document.getElementById('next-btn').textContent =
+                currentSection === totalSections - 1 ? '✓ Done' : 'Next →';
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function nextSection() {
+            if (currentSection < totalSections - 1) {
+                currentSection++;
+                updateUI();
+            }
+        }
+
+        function prevSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                updateUI();
+            }
+        }
+
+        function goToSection(index) {
+            currentSection = index;
+            updateUI();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSection();
+            } else if (e.key === 'ArrowLeft') {
+                prevSection();
+            }
+        });
+
+        // Copy code function
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('.code-content').textContent;
+            navigator.clipboard.writeText(code.trim());
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>

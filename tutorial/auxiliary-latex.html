@@ -1,0 +1,210 @@
+---
+layout: layouts/tutorial.html
+title: LaTeX Basics | 14.33 Auxiliary Modules
+current_page: auxiliary-latex
+---
+<h1>LaTeX for Empirical Economics</h1>
+<p class="subtitle">Generate publication-quality tables and documents from your analysis scripts</p>
+
+<p>This is an auxiliary module covering practical tools that complement your main analysis workflow. You don't need LaTeX to do empirical research, but it makes producing publication-ready documents much easier and more reproducible.</p>
+
+<section id="why-latex" class="tutorial-section">
+  <h2>Why Use LaTeX?</h2>
+
+  <p>LaTeX is a document preparation system that separates content from presentation. Unlike Word or Google Docs where you manually format each table and figure, LaTeX lets you generate tables directly from your analysis scripts as PDF files.</p>
+
+  <h3 id="key-benefits">Key Benefits</h3>
+  <ul>
+    <li><strong>Reproducibility:</strong> Your entire paper—tables, figures, numbers—comes from your scripts. No copy-pasting data into tables. No "whoops, I updated the analysis but forgot to update Table 3."</li>
+    <li><strong>Version control:</strong> Your paper is plain text, so git diffs show exactly what changed. You can track who changed what and why.</li>
+    <li><strong>Publication quality:</strong> Tables and equations look professional. Fonts are consistent. Spacing is perfect.</li>
+    <li><strong>Vector graphics:</strong> Tables and figures generated in LaTeX are vector-based (infinitely scalable), unlike screenshots or raster images.</li>
+  </ul>
+
+  <div class="key-principle">
+    <h4>The Typical Workflow</h4>
+    <p>Run your analysis in R, Stata, or Python → generate individual table PDFs → embed them in a LaTeX document as figures. This gives you the best of both worlds: powerful data analysis tools plus beautiful document presentation.</p>
+  </div>
+</section>
+
+<section id="installation" class="tutorial-section">
+  <h2>Installation</h2>
+
+  <h3 id="install-mac">Mac</h3>
+  <p>Install MacTeX, which includes LaTeX and all necessary tools:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>brew install --cask mactex-no-gui</code></pre>
+  </div>
+  <p style="font-size: 0.95rem; color: var(--muted); margin-top: -10px;">This installs a minimal version (~2GB). For the full version with more fonts, use <code>mactex</code> instead.</p>
+
+  <h3 id="install-windows">Windows</h3>
+  <p>Download and install MiKTeX from <a href="https://miktex.org/" target="_blank">miktex.org</a>, or use:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>choco install miktex</code></pre>
+  </div>
+
+  <h3 id="install-linux">Linux</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal (Ubuntu/Debian)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>sudo apt-get install texlive-full</code></pre>
+  </div>
+
+  <h3 id="verify-install">Verify Installation</h3>
+  <p>Test that LaTeX is installed by checking the version:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>pdflatex --version</code></pre>
+  </div>
+</section>
+
+<section id="standalone-package" class="tutorial-section">
+  <h2>The Standalone Package</h2>
+
+  <p>The <code>standalone</code> package is the key tool for generating individual table PDFs from your scripts. It allows you to create a small LaTeX document that contains just a table (or figure), compiles it to PDF, and crops it to show only the content.</p>
+
+  <h3 id="why-standalone">Why Standalone?</h3>
+  <ul>
+    <li><strong>Minimal output:</strong> Creates a tight PDF with no margins, just your table.</li>
+    <li><strong>Reusable:</strong> Generate tables independently, then include them in your paper.</li>
+    <li><strong>Version control friendly:</strong> Each table is a single file you can track.</li>
+    <li><strong>Flexibility:</strong> You can regenerate any table by re-running one line of code.</li>
+  </ul>
+
+  <h3 id="basic-example">Basic Example</h3>
+  <p>Here's a minimal standalone document that creates a table PDF:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">LaTeX</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>\documentclass[border=10pt]{standalone}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{tabular}{lrr}
+\toprule
+ & Mean & Std Dev \\
+\midrule
+Age & 42.3 & 15.2 \\
+Income & 65000 & 28000 \\
+\bottomrule
+\end{tabular}
+
+\end{document}</code></pre>
+  </div>
+
+  <p>Compile this to PDF with:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>pdflatex table.tex</code></pre>
+  </div>
+
+  <p>You get <code>table.pdf</code>, a tight PDF containing just the table.</p>
+</section>
+
+<section id="workflow" class="tutorial-section">
+  <h2>The Recommended Workflow</h2>
+
+  <p>The typical approach in empirical economics research:</p>
+
+  <ol>
+    <li><strong>Run your analysis</strong> in R, Stata, or Python. Generate summary statistics, estimates, etc.</li>
+    <li><strong>Export table code to LaTeX.</strong> Most statistical software can output in LaTeX format. See the examples below.</li>
+    <li><strong>Create a standalone LaTeX file</strong> for each table, containing the LaTeX code from step 2.</li>
+    <li><strong>Compile to PDF.</strong> Your table becomes a clean, vector-based PDF file.</li>
+    <li><strong>Include in your paper.</strong> Insert the PDF as a figure in your main LaTeX document.</li>
+  </ol>
+
+  <h3 id="exporting-tables">Exporting Tables from Analysis Software</h3>
+
+  <p>Each language has packages for exporting regression results and summary statistics directly to LaTeX format:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Use estout or outreg2 for regression tables
+ssc install estout  // Install if needed
+
+regress y x1 x2
+esttab . using "table.tex", replace</code></pre>
+    <pre class="code-content r"><code class="language-r"># Use xtable, knitr, or kableExtra
+library(xtable)
+
+summary_table <- data.frame(
+  Variable = c("Age", "Income"),
+  Mean = c(42.3, 65000),
+  SD = c(15.2, 28000)
+)
+print(xtable(summary_table), file = "table.tex")</code></pre>
+    <pre class="code-content python"><code class="language-python"># Use pandas to_latex()
+import pandas as pd
+
+summary_table = pd.DataFrame({
+    'Variable': ['Age', 'Income'],
+    'Mean': [42.3, 65000],
+    'SD': [15.2, 28000]
+})
+summary_table.to_latex("table.tex", index=False)</code></pre>
+  </div>
+
+  <h3 id="including-pdf">Including the PDF in Your Paper</h3>
+
+  <p>In your main LaTeX document, include the PDF as a figure:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">LaTeX</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>\begin{figure}[h]
+\centering
+\includegraphics{tables/summary_statistics.pdf}
+\caption{Summary Statistics}
+\label{fig:summary}
+\end{figure}</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Organization Tip</h4>
+    <p>Keep your tables in a dedicated folder (e.g., <code>tables/</code>) and compile them separately. This keeps your main paper LaTeX file clean and makes it easy to regenerate any table if your analysis changes.</p>
+  </div>
+</section>

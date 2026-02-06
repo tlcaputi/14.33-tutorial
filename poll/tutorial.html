@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stata Tutorial 1 - Follow Along</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            background: #1a1a2e;
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .join-code {
+            background: #4ade80;
+            color: #0f0f0f;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Main */
+        .main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        /* Content blocks */
+        .concept {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .concept p {
+            color: #333;
+        }
+
+        .concept strong {
+            color: #1a1a2e;
+        }
+
+        .concept em {
+            color: #16a34a;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Key insight box */
+        .key-insight {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-left: 4px solid #16a34a;
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+
+        .key-insight-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            color: #16a34a;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .code-header {
+            background: #2d2d2d;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .code-content {
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .code-content .comment { color: #6a9955; }
+        .code-content .command { color: #4fc1ff; }
+        .code-content .string { color: #ce9178; }
+
+        /* Quiz card */
+        .quiz-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .quiz-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .quiz-card p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-btn {
+            display: inline-block;
+            background: #4ade80;
+            color: #0f0f0f;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .quiz-btn:hover {
+            background: #22c55e;
+            transform: translateY(-1px);
+        }
+
+        /* Warning box */
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: #b45309;
+        }
+
+        /* Steps list */
+        .steps {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .steps ol {
+            margin-left: 1.25rem;
+        }
+
+        .steps li {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        /* Break section */
+        .break-section {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: #f5f5f5;
+            border-radius: 1rem;
+            margin: 2rem 0;
+        }
+
+        .break-section h2 {
+            font-size: 2rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .break-section p {
+            color: #888;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a2e;
+            color: #888;
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #4ade80;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .main {
+                padding: 1rem 1rem 3rem;
+            }
+            .section-title {
+                font-size: 1.4rem;
+            }
+            .code-content {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Table of contents */
+        .toc {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        .toc a {
+            display: block;
+            color: #1a1a2e;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: color 0.2s;
+        }
+
+        .toc a:last-child {
+            border-bottom: none;
+        }
+
+        .toc a:hover {
+            color: #16a34a;
+        }
+
+        .toc .time {
+            color: #888;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <h1>14.33 Stata Tutorial 1</h1>
+            <span class="join-code">Join: KY9XV5</span>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h2>Today's Lesson</h2>
+            <a href="#question">The Question <span class="time">5 min</span></a>
+            <a href="#explore">Explore the Data <span class="time">15 min</span></a>
+            <a href="#analyze">Find an Answer <span class="time">15 min</span></a>
+            <a href="#pretty">Make It Pretty <span class="time">15 min</span></a>
+            <a href="#twist">The Challenge <span class="time">5 min</span></a>
+            <a href="#break">Break <span class="time">10 min</span></a>
+            <a href="#solution">The Solution <span class="time">20 min</span></a>
+            <a href="#wrapup">Wrap Up <span class="time">5 min</span></a>
+        </nav>
+
+        <!-- Section 1: The Question -->
+        <section class="section" id="question">
+            <div class="section-header">
+                <div class="section-number">Part 1</div>
+                <h2 class="section-title">The Question</h2>
+            </div>
+
+            <div class="concept">
+                <p>Here's our research question for today:</p>
+                <p style="font-size: 1.2rem; margin-top: 0.75rem;"><strong>Do states with higher college graduation rates have higher median incomes?</strong></p>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">Goal</div>
+                <p>We're going to find the answer using real data, make a publication-quality figure, and learn why <em>how</em> you do your analysis matters as much as the results.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Explore -->
+        <section class="section" id="explore">
+            <div class="section-header">
+                <div class="section-number">Part 2</div>
+                <h2 class="section-title">Explore the Data</h2>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">Rule #1</div>
+                <p><em>Always look at your data</em> before doing any analysis.</p>
+            </div>
+
+            <div class="concept">
+                <p>Type these commands in Stata to load and explore the data:</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span>stata</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <div class="code-content">
+<span class="comment">* Load the data</span>
+<span class="command">import delimited</span> <span class="string">"state_economics.csv"</span>, clear
+
+<span class="comment">* What variables do we have?</span>
+<span class="command">describe</span>
+
+<span class="comment">* Look at the actual data</span>
+<span class="command">browse</span>
+
+<span class="comment">* Summary statistics</span>
+<span class="command">summarize</span>
+
+<span class="comment">* Detailed summary of key variables</span>
+<span class="command">summarize</span> college_grad_rate median_income, detail
+                </div>
+            </div>
+
+            <div class="concept">
+                <p><strong>What each command does:</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><code>describe</code> - Shows variable names, types, and labels</li>
+                    <li><code>browse</code> - Opens a spreadsheet view of your data</li>
+                    <li><code>summarize</code> - Calculates mean, std dev, min, max</li>
+                </ul>
+            </div>
+
+            <!-- Quiz 1 -->
+            <div class="quiz-card">
+                <h3>Quiz 1: Understanding Your Data</h3>
+                <p>Answer questions about data types and missing values</p>
+                <a href="student.html" target="_blank" class="quiz-btn">Vote Now</a>
+            </div>
+        </section>
+
+        <!-- Section 3: Analyze -->
+        <section class="section" id="analyze">
+            <div class="section-header">
+                <div class="section-number">Part 3</div>
+                <h2 class="section-title">Find an Answer</h2>
+            </div>
+
+            <div class="concept">
+                <p>Now let's actually answer our question. What's the relationship between education and income?</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span>stata</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <div class="code-content">
+<span class="comment">* Scatterplot first - always visualize!</span>
+<span class="command">scatter</span> median_income college_grad_rate
+
+<span class="comment">* Correlation</span>
+<span class="command">correlate</span> median_income college_grad_rate
+
+<span class="comment">* Simple regression</span>
+<span class="command">regress</span> median_income college_grad_rate
+
+<span class="comment">* Add a control variable</span>
+<span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+                </div>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">Think About It</div>
+                <p>What happened to the coefficient on <code>college_grad_rate</code> when we added the cost of living control? Why?</p>
+            </div>
+
+            <!-- Quiz 2 -->
+            <div class="quiz-card">
+                <h3>Quiz 2: Interpreting Results</h3>
+                <p>Test your understanding of regression output</p>
+                <a href="student.html" target="_blank" class="quiz-btn">Vote Now</a>
+            </div>
+        </section>
+
+        <!-- Section 4: Pretty -->
+        <section class="section" id="pretty">
+            <div class="section-header">
+                <div class="section-number">Part 4</div>
+                <h2 class="section-title">Make It Pretty</h2>
+            </div>
+
+            <div class="concept">
+                <p>You can't put raw Stata output in your paper. Let's create <em>publication-quality</em> tables and figures.</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span>stata</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <div class="code-content">
+<span class="comment">* Install estout if needed (only once)</span>
+<span class="command">ssc install</span> estout
+
+<span class="comment">* Store regression results</span>
+<span class="command">eststo</span> clear
+<span class="command">eststo</span> m1: <span class="command">regress</span> median_income college_grad_rate
+<span class="command">eststo</span> m2: <span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+
+<span class="comment">* Create a nice table</span>
+<span class="command">esttab</span> m1 m2, se r2 label
+                </div>
+            </div>
+
+            <div class="concept">
+                <p>Now let's make a professional figure:</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span>stata</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <div class="code-content">
+<span class="comment">* Professional scatterplot with fitted line</span>
+<span class="command">twoway</span> (scatter median_income college_grad_rate, mcolor(navy%50)) ///
+       (lfit median_income college_grad_rate, lcolor(cranberry)), ///
+       title(<span class="string">"College Graduation and Median Income"</span>) ///
+       xtitle(<span class="string">"College Graduation Rate (%)"</span>) ///
+       ytitle(<span class="string">"Median Household Income ($)"</span>)
+
+<span class="comment">* Save the figure</span>
+<span class="command">graph export</span> <span class="string">"education_income.png"</span>, replace
+                </div>
+            </div>
+
+            <!-- Quiz 3 -->
+            <div class="quiz-card">
+                <h3>Quiz 3: Understanding Controls</h3>
+                <p>What happens when we add control variables?</p>
+                <a href="student.html" target="_blank" class="quiz-btn">Vote Now</a>
+            </div>
+        </section>
+
+        <!-- Section 5: The Twist -->
+        <section class="section" id="twist">
+            <div class="section-header">
+                <div class="section-number">Part 5</div>
+                <h2 class="section-title">The Challenge</h2>
+            </div>
+
+            <div class="warning">
+                <strong>Close Stata completely.</strong> Not minimize - close it.
+            </div>
+
+            <div class="concept">
+                <p style="font-size: 1.1rem;">Now open Stata again and try to reproduce that figure.</p>
+                <p style="margin-top: 0.75rem;">You have <strong>2 minutes</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Break -->
+        <section id="break">
+            <div class="break-section">
+                <h2>Break</h2>
+                <p>10 minutes - be back soon!</p>
+            </div>
+        </section>
+
+        <!-- Section 6: The Solution -->
+        <section class="section" id="solution">
+            <div class="section-header">
+                <div class="section-number">Part 6</div>
+                <h2 class="section-title">The Solution: Do-Files</h2>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">The Lesson</div>
+                <p><em>If you can't reproduce it, you didn't do it.</em></p>
+            </div>
+
+            <div class="concept">
+                <p>Everything we just did - we're going to redo it. But this time, in a way we can reproduce <em>forever</em>.</p>
+            </div>
+
+            <div class="steps">
+                <p><strong>Create a do-file:</strong></p>
+                <ol>
+                    <li>In Stata: File &rarr; New &rarr; Do-file</li>
+                    <li>Type your commands in the do-file editor</li>
+                    <li>Save it as <code>analysis.do</code></li>
+                    <li>Run it with <strong>Ctrl+D</strong> (Windows) or <strong>Cmd+D</strong> (Mac)</li>
+                </ol>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span>analysis.do</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <div class="code-content">
+<span class="comment">/*==============================================================================
+Project:    Education and Income Analysis
+Author:     [Your Name]
+Date:       February 18, 2026
+Purpose:    Examine relationship between college graduation rates and income
+==============================================================================*/</span>
+
+<span class="comment">* SETUP</span>
+<span class="command">clear all</span>
+<span class="command">set more off</span>
+<span class="command">cd</span> <span class="string">"/path/to/your/project"</span>  <span class="comment">// Change this!</span>
+
+<span class="comment">* LOAD DATA</span>
+<span class="command">import delimited</span> <span class="string">"state_economics.csv"</span>, clear
+<span class="command">describe</span>
+<span class="command">summarize</span>
+
+<span class="comment">* ANALYSIS</span>
+<span class="command">eststo</span> clear
+<span class="command">eststo</span> m1: <span class="command">regress</span> median_income college_grad_rate
+<span class="command">eststo</span> m2: <span class="command">regress</span> median_income college_grad_rate cost_of_living_index
+<span class="command">esttab</span> m1 m2, se r2 label
+
+<span class="comment">* FIGURE</span>
+<span class="command">twoway</span> (scatter median_income college_grad_rate, mcolor(navy%50)) ///
+       (lfit median_income college_grad_rate, lcolor(cranberry)), ///
+       title(<span class="string">"College Graduation and Median Income"</span>) ///
+       xtitle(<span class="string">"College Graduation Rate (%)"</span>) ///
+       ytitle(<span class="string">"Median Household Income ($)"</span>)
+<span class="command">graph export</span> <span class="string">"education_income.png"</span>, replace
+                </div>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">The Power</div>
+                <p>Press <strong>Ctrl+D</strong> and in 30 seconds, you reproduce everything. Need to change something? Edit one line, re-run. Done.</p>
+            </div>
+
+            <!-- Quiz 4 -->
+            <div class="quiz-card">
+                <h3>Quiz 4: Reproducibility</h3>
+                <p>Why do-files matter for research</p>
+                <a href="student.html" target="_blank" class="quiz-btn">Vote Now</a>
+            </div>
+        </section>
+
+        <!-- Wrap Up -->
+        <section class="section" id="wrapup">
+            <div class="section-header">
+                <div class="section-number">Part 7</div>
+                <h2 class="section-title">Wrap Up</h2>
+            </div>
+
+            <!-- Exit Ticket -->
+            <div class="quiz-card">
+                <h3>Exit Ticket</h3>
+                <p>What will you do differently after today?</p>
+                <a href="student.html" target="_blank" class="quiz-btn">Submit Response</a>
+            </div>
+
+            <div class="key-insight">
+                <div class="key-insight-label">Before Next Session</div>
+                <p>Try loading <em>your own data</em> for your project proposal into a do-file.</p>
+            </div>
+
+            <div class="concept">
+                <p><strong>Coming up:</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><strong>Stata Tutorial 2:</strong> Mon 2/23 - Merging, reshaping, more regression</li>
+                    <li><strong>TA Office Hours:</strong> Fridays 4-5 PM, E52-548</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>14.33 Economics Research and Communication | Spring 2026</p>
+        <p style="margin-top: 0.5rem;">Questions? Email <a href="mailto:tcaputi@gmail.com">tcaputi@gmail.com</a></p>
+    </footer>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('.code-content').textContent;
+            navigator.clipboard.writeText(code.trim());
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+    </script>
+</body>
+</html>

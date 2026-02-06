@@ -1,0 +1,583 @@
+---
+layout: layouts/tutorial.html
+title: Basic Regression | Intro to Data Analysis for Economics
+current_page: basic-regression
+---
+<h1>Basic Regression</h1>
+<p class="subtitle">OLS, standard errors, and fixed effects</p>
+
+<!-- Growth Mindset Message -->
+<div class="callout-success">
+  <strong>Regression is just a function</strong>
+  <p style="margin: 8px 0 0;">
+    Every regression command follows the same pattern: <code>reg Y X, options</code>. Fixed effects? Add <code>absorb()</code>. Clustered SEs? Add <code>cluster()</code>. Once you understand the basic syntax, everything else is just variations on a theme.
+  </p>
+</div>
+
+<section id="ols" class="tutorial-section">
+  <h2>OLS Basics</h2>
+
+  <h3>What Is OLS, Really?</h3>
+  <p><strong>Ordinary Least Squares is just finding the best-fitting line through your data.</strong> It's not magic. Here's the idea:</p>
+
+  <p>Suppose you have data on education and wages. You want to fit a line through these points. But which line? There are infinite possibilities. OLS picks the specific line that minimizes the sum of squared vertical distances from each point to the line. In other words, it finds the coefficients that make your predictions as close as possible to the actual data.</p>
+
+  <p>In one dimension (one X variable), this is literally the "line of best fit" you might draw by eye through a scatter plot. In higher dimensions (multiple X variables), it's the same idea—the "plane" (or hyperplane) that minimizes prediction errors.</p>
+
+  <div class="key-principle">
+    <h4>OLS Algorithm (Conceptual)</h4>
+    <ol style="margin: 8px 0 0;">
+      <li><strong>Guess</strong> some coefficients (β₀, β₁, β₂, ...)</li>
+      <li><strong>Make predictions:</strong> Ŷ = β₀ + β₁X₁ + β₂X₂ + ...</li>
+      <li><strong>Calculate errors:</strong> The vertical distance from each actual Y to your prediction Ŷ</li>
+      <li><strong>Square them:</strong> Errors are squared so negative and positive errors both "count"</li>
+      <li><strong>Sum them:</strong> Add up all squared errors</li>
+      <li><strong>Repeat:</strong> Try different coefficients until you find the ones that make this sum as small as possible</li>
+    </ol>
+  </div>
+
+  <p>In practice, you don't try coefficients randomly—there's a mathematical formula that solves for the optimal coefficients directly. But conceptually, OLS is just optimization: pick coefficients to minimize prediction error.</p>
+
+  <p>The result gives you the "best-fitting" linear relationship between your outcome variable Y and your predictors X. The slope coefficient tells you: holding everything else constant, how much does Y change when X increases by one unit?</p>
+
+  <h3>Simple Linear Regression</h3>
+
+  <!-- Anatomy of a regression -->
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
+    <div style="color: #666; margin-bottom: 8px;">The basic regression equation:</div>
+    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+      <span style="color: #1565c0;">income</span> =
+      β₀ + β₁<span style="color: #2e7d32;">education</span> +
+      β₂<span style="color: #2e7d32;">age</span> + ε
+    </div>
+    <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 0.85em; flex-wrap: wrap; justify-content: center;">
+      <span><span style="color: #1565c0;">■</span> Y (what we're predicting)</span>
+      <span><span style="color: #2e7d32;">■</span> X (predictors)</span>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Simple regression
+reg income education
+
+* Multiple regression
+reg income education age female
+
+* With categorical variables (factor notation)
+reg income education i.region i.year
+
+* Interactions
+reg income education##female    // Full interaction
+reg income c.education#c.age    // Continuous interaction</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+
+# Simple regression
+model <- feols(income ~ education, data = data)
+summary(model)
+
+# Multiple regression
+model <- feols(income ~ education + age + female, data = data)
+
+# With categorical variables
+model <- feols(income ~ education + factor(region) + factor(year),
+               data = data)
+
+# Interactions
+model <- feols(income ~ education * female, data = data)
+model <- feols(income ~ education:age, data = data)</code></pre>
+    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+import pandas as pd
+
+# Simple regression
+model = smf.ols('income ~ education', data=data).fit()
+print(model.summary())
+
+# Multiple regression
+model = smf.ols('income ~ education + age + female', data=data).fit()
+
+# With categorical variables
+model = smf.ols('income ~ education + C(region) + C(year)', data=data).fit()
+
+# Interactions
+model = smf.ols('income ~ education * female', data=data).fit()
+model = smf.ols('income ~ education:age', data=data).fit()</code></pre>
+  </div>
+
+  <h3>Interpreting Coefficients</h3>
+  <div class="key-principle">
+    <h4>Coefficient Interpretation</h4>
+    <ul>
+      <li><strong>Continuous X:</strong> A one-unit increase in X is associated with a beta-unit change in Y, holding other variables constant.</li>
+      <li><strong>Binary X:</strong> The difference in Y between X=1 and X=0, holding other variables constant.</li>
+      <li><strong>Log Y:</strong> A one-unit increase in X is associated with a (beta*100)% change in Y.</li>
+      <li><strong>Log X:</strong> A 1% increase in X is associated with a (beta/100)-unit change in Y.</li>
+      <li><strong>Log-Log:</strong> A 1% increase in X is associated with a beta% change in Y (elasticity).</li>
+    </ul>
+  </div>
+
+  <h3>Post-Estimation</h3>
+  <p>After running a regression, you often want to do more than just look at coefficients. <strong>Predicted values</strong> show what your model expects for each observation—useful for identifying outliers or visualizing fit. <strong>Residuals</strong> are the difference between actual and predicted values—patterns in residuals can reveal model problems. <strong>Hypothesis tests</strong> let you ask specific questions: Is this coefficient different from zero? Are two coefficients equal? What's the combined effect of multiple variables?</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">reg income education age female
+
+* Predicted values
+predict yhat
+
+* Residuals
+predict resid, residuals
+
+* Test coefficient equals zero
+test education = 0
+
+* Test multiple coefficients
+test education age
+
+* Linear combination of coefficients
+lincom education + 2*age</code></pre>
+    <pre class="code-content r"><code class="language-r">model <- lm(income ~ education + age + female, data = data)
+
+# Predicted values
+data$yhat <- predict(model)
+
+# Residuals
+data$resid <- residuals(model)
+
+# Test coefficient equals zero (from summary)
+summary(model)$coefficients
+
+# F-test for multiple coefficients
+pacman::p_load(car)
+linearHypothesis(model, c("education = 0", "age = 0"))
+
+# Linear combination
+pacman::p_load(multcomp)
+glht(model, linfct = c("education + 2*age = 0"))</code></pre>
+    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+
+model = smf.ols('income ~ education + age + female', data=data).fit()
+
+# Predicted values
+data['yhat'] = model.predict()
+
+# Residuals
+data['resid'] = model.resid
+
+# Test coefficient equals zero (from summary)
+print(model.summary())
+
+# F-test for multiple coefficients (joint hypothesis)
+print(model.f_test("(education = 0), (age = 0)"))
+
+# Linear combination
+print(model.t_test("education + 2*age = 0"))</code></pre>
+  </div>
+</section>
+
+<section id="standard-errors" class="tutorial-section">
+  <h2>Standard Errors</h2>
+
+  <p>Standard errors measure how precisely you've estimated each coefficient. A coefficient of 10 with a standard error of 2 is very different from a coefficient of 10 with a standard error of 50—the first is precisely estimated, the second is essentially noise. Standard errors determine your confidence intervals and p-values, so getting them right is crucial for inference.</p>
+
+  <p>The challenge is that standard OLS assumes errors are independent across observations. In real data, this is often violated: observations within the same state are correlated, the same person observed over time is correlated, etc. When errors are correlated, standard OLS standard errors are too small, leading to false confidence in your results.</p>
+
+  <div class="key-principle">
+    <h4>Always Cluster When in Doubt</h4>
+    <p>If observations within groups (states, firms, individuals over time) are correlated, standard OLS standard errors are too small. Cluster at the level of treatment variation or the highest level of aggregation that makes sense.</p>
+  </div>
+
+  <h3>Types of Standard Errors</h3>
+  <p>Here are the main options for computing standard errors, from simplest to most robust:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Heteroskedasticity-robust (HC1)
+reg income education, robust
+
+* Clustered by state
+reg income education, cluster(state)
+
+* Two-way clustering (requires reghdfe)
+reghdfe income education, noabsorb cluster(state year)
+
+* With reghdfe (recommended for fixed effects)
+reghdfe income education, absorb(state) cluster(state)</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+
+# Heteroskedasticity-robust
+model <- feols(income ~ education, data = data, vcov = "hetero")
+
+# Clustered by state
+model <- feols(income ~ education, data = data, vcov = ~state)
+
+# Two-way clustering
+model <- feols(income ~ education, data = data, vcov = ~state + year)
+
+# With fixed effects
+model <- feols(income ~ education | state, data = data, vcov = ~state)</code></pre>
+    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+
+# Heteroskedasticity-robust (HC1)
+model = smf.ols('income ~ education', data=data).fit(cov_type='HC1')
+
+# Clustered by state
+model = smf.ols('income ~ education', data=data).fit(
+    cov_type='cluster', cov_kwds={'groups': data['state']})
+
+# For fixed effects with clustering, use linearmodels
+from linearmodels.panel import PanelOLS
+data = data.set_index(['state', 'year'])
+model = PanelOLS.from_formula(
+    'income ~ education + EntityEffects',
+    data=data
+).fit(cov_type='clustered', cluster_entity=True)</code></pre>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>Clustering Rules of Thumb</h4>
+    <ul>
+      <li>Cluster at the level of treatment assignment (e.g., if policy varies by state, cluster by state)</li>
+      <li>With few clusters (<30), consider wild bootstrap or other small-sample corrections</li>
+      <li>Never cluster at a finer level than treatment variation</li>
+    </ul>
+  </div>
+</section>
+
+<section id="panel-data" class="tutorial-section">
+  <h2>Panel Data and Fixed Effects</h2>
+
+  <h3>Fixed Effects Regression</h3>
+  <p>Fixed effects control for all time-invariant characteristics of each unit (observed and unobserved).</p>
+
+  <!-- Fixed Effects Equation -->
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
+    <div style="color: #666; margin-bottom: 8px;">The fixed effects estimating equation:</div>
+    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+      <span style="color: #1565c0;">Y<sub>it</sub></span> =
+      β₀ + β₁<span style="color: #2e7d32;">X<sub>it</sub></span> +
+      <span style="color: #7b1fa2;">α<sub>i</sub></span> + ε<sub>it</sub>
+    </div>
+    <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 0.85em; flex-wrap: wrap; justify-content: center;">
+      <span><span style="color: #1565c0;">■</span> Y<sub>it</sub> = outcome for unit i in time t</span>
+      <span><span style="color: #2e7d32;">■</span> X<sub>it</sub> = time-varying predictors</span>
+      <span><span style="color: #7b1fa2;">■</span> α<sub>i</sub> = unit fixed effect (absorbs all time-invariant factors)</span>
+    </div>
+  </div>
+
+  <!-- Why fixed effects work -->
+  <div class="callout-warning">
+    <strong>🤔 Think about this:</strong> You want to know if minimum wage increases affect employment. But states with high minimum wages might differ from states with low minimum wages in many ways (cost of living, industry mix, politics). How do you separate the effect of minimum wage from these other differences?
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
+      <p style="margin: 8px 0 0;"><strong>State fixed effects!</strong> By including a dummy for each state, you're comparing each state to itself over time. California in 2020 is compared to California in 2015, not to Texas. This "differences out" all the permanent differences between states.</p>
+    </details>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Declare panel structure
+xtset state year
+
+* Entity fixed effects
+xtreg income policy, fe
+
+* Better: use reghdfe for speed and flexibility
+* Install: ssc install reghdfe
+reghdfe income policy, absorb(state)
+
+* Two-way fixed effects (entity + time)
+reghdfe income policy, absorb(state year)
+
+* With clustered standard errors
+reghdfe income policy, absorb(state year) cluster(state)</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+
+# Entity fixed effects
+model <- feols(income ~ policy | state, data = data)
+
+# Two-way fixed effects (entity + time)
+model <- feols(income ~ policy | state + year, data = data)
+
+# With clustered standard errors
+model <- feols(income ~ policy | state + year,
+               data = data, vcov = ~state)
+
+# View results
+summary(model)
+etable(model)</code></pre>
+    <pre class="code-content python"><code class="language-python">from linearmodels.panel import PanelOLS
+import pandas as pd
+
+# Set multi-index for panel data
+data = data.set_index(['state', 'year'])
+
+# Entity fixed effects
+model = PanelOLS.from_formula(
+    'income ~ policy + EntityEffects',
+    data=data
+).fit()
+
+# Two-way fixed effects (entity + time)
+model = PanelOLS.from_formula(
+    'income ~ policy + EntityEffects + TimeEffects',
+    data=data
+).fit()
+
+# With clustered standard errors
+model = PanelOLS.from_formula(
+    'income ~ policy + EntityEffects + TimeEffects',
+    data=data
+).fit(cov_type='clustered', cluster_entity=True)
+
+print(model.summary)</code></pre>
+  </div>
+
+  <h3>What Do Fixed Effects Actually Do?</h3>
+
+  <p><strong>Unit fixed effects</strong> control for all characteristics of a unit that don't change over time. To see why this matters, consider estimating the effect of education on wages.</p>
+
+  <p>You might worry that race and sex affect both education and wages. So you add them as controls:</p>
+
+  <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0; font-family: monospace; text-align: center;">
+    wage<sub>it</sub> = β₀ + β₁ education<sub>it</sub> + β₂ race<sub>i</sub> + β₃ sex<sub>i</sub> + ε<sub>it</sub>
+  </div>
+
+  <p>But what about other time-invariant characteristics you can't measure? Family background, innate ability, childhood neighborhood, personality traits—all of these might affect both education and wages. You can't observe them, so you can't control for them.</p>
+
+  <p><strong>Individual fixed effects solve this.</strong> By including a dummy for each person, you control for <em>everything</em> about that person that doesn't change over time—observed or unobserved:</p>
+
+  <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0; font-family: monospace; text-align: center;">
+    wage<sub>it</sub> = β₁ education<sub>it</sub> + <span style="color: var(--primary);">α<sub>i</sub></span> + ε<sub>it</sub>
+  </div>
+
+  <p>The α<sub>i</sub> absorbs race, sex, family background, innate ability, and every other time-invariant characteristic. You don't need to list them individually—the fixed effect captures them all. The cost is you can no longer estimate the effect of time-invariant variables (β₂ and β₃ disappear), but you've eliminated a whole class of omitted variable bias.</p>
+
+  <p><strong>Time fixed effects</strong> work the same way but for time periods. They control for anything that affects all units in a given period—recessions, policy changes, seasonal patterns:</p>
+
+  <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0; font-family: monospace; text-align: center;">
+    wage<sub>it</sub> = β₁ education<sub>it</sub> + <span style="color: var(--primary);">α<sub>i</sub></span> + <span style="color: var(--secondary);">γ<sub>t</sub></span> + ε<sub>it</sub>
+  </div>
+
+  <p>With both unit and time fixed effects (two-way fixed effects), your estimate of β₁ comes purely from <em>within-unit changes over time</em>, after removing any time trends common to all units. This is the workhorse specification for causal inference with panel data.</p>
+
+  <div class="callout-info">
+    <h4>TWFE Powers DiD and Event Studies</h4>
+    <p><strong>Difference-in-differences</strong> and <strong>event studies</strong>—the most common designs in applied microeconomics—are almost always estimated using two-way fixed effects. The unit fixed effects control for permanent differences between treated and control groups. The time fixed effects control for common shocks that hit everyone. What's left is the treatment effect: how treated units changed <em>relative to</em> control units, <em>relative to</em> the time trend. When you see a DiD or event study paper, you're almost certainly looking at a TWFE regression.</p>
+  </div>
+
+  <div class="callout-warning">
+    <h4>The Limitation</h4>
+    <p>Fixed effects only control for time-<em>invariant</em> confounders. If something changes over time and affects both your treatment and outcome (a time-varying confounder), fixed effects won't help. You'd need to control for it directly or find a different identification strategy.</p>
+  </div>
+
+</section>
+
+<section id="tables" class="tutorial-section">
+  <h2>Regression Tables</h2>
+
+  <p>Regression tables present your main results. The standard format in economics shows multiple specifications (columns) with the same outcome variable, progressively adding controls or changing samples. This shows readers how your results change as you adjust the model—stable coefficients across specifications build confidence in your findings.</p>
+
+  <div class="key-principle">
+    <h4>Never Copy Numbers by Hand</h4>
+    <p>Export tables directly from your code to LaTeX or Word. Manual copying introduces errors and makes your work non-reproducible. Use <code>estout</code>/<code>esttab</code> in Stata, <code>etable</code>/<code>modelsummary</code> in R, or <code>stargazer</code> in Python.</p>
+  </div>
+
+  <h3>Basic Regression Tables</h3>
+  <p>Standard elements include: coefficient estimates, standard errors (in parentheses below the coefficient), significance stars, the number of observations, R-squared or other fit statistics, and notes explaining what controls are included.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Run regressions and store results
+eststo clear
+eststo: reg income treatment
+eststo: reg income treatment age female
+eststo: reg income treatment age female education
+
+* Create table
+esttab using "regression_table.tex", ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    label r2 ///
+    title("Effect of Treatment on Income") ///
+    mtitles("(1)" "(2)" "(3)") ///
+    addnotes("Standard errors in parentheses") ///
+    replace
+
+* Common options:
+*   se           - show standard errors (not t-stats)
+*   star(...)    - significance stars
+*   label        - use variable labels
+*   r2           - show R-squared
+*   b(3) se(3)   - 3 decimal places
+*   drop(...)    - hide certain coefficients</code></pre>
+    <pre class="code-content r"><code class="language-r"># ============================================
+# Option 1: etable (from fixest) - simplest
+# ============================================
+pacman::p_load(fixest)
+
+# Run regressions with feols
+m1 <- feols(income ~ treatment, data = data)
+m2 <- feols(income ~ treatment + age + female, data = data)
+m3 <- feols(income ~ treatment + age + female + education, data = data)
+
+# Quick console table
+etable(m1, m2, m3)
+
+# Export to LaTeX
+etable(m1, m2, m3, tex = TRUE, file = "regression_table.tex")
+
+# ============================================
+# Option 2: modelsummary - most flexible
+# ============================================
+pacman::p_load(modelsummary)
+
+# Works with any model type (lm, feols, glm, etc.)
+m1 <- lm(income ~ treatment, data = data)
+m2 <- lm(income ~ treatment + age + female, data = data)
+m3 <- lm(income ~ treatment + age + female + education, data = data)
+
+# Create table
+modelsummary(
+  list("(1)" = m1, "(2)" = m2, "(3)" = m3),
+  stars = c('*' = 0.10, '**' = 0.05, '***' = 0.01),
+  gof_omit = "AIC|BIC|Log",
+  title = "Effect of Treatment on Income"
+)
+
+# Export to LaTeX, Word, or HTML
+modelsummary(list(m1, m2, m3), output = "table.tex")
+modelsummary(list(m1, m2, m3), output = "table.docx")
+modelsummary(list(m1, m2, m3), output = "table.html")</code></pre>
+    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+from stargazer.stargazer import Stargazer
+
+# Run regressions
+m1 = smf.ols("income ~ treatment", data=data).fit()
+m2 = smf.ols("income ~ treatment + age + female", data=data).fit()
+m3 = smf.ols("income ~ treatment + age + female + education", data=data).fit()
+
+# Create table with stargazer
+stargazer = Stargazer([m1, m2, m3])
+stargazer.title("Effect of Treatment on Income")
+print(stargazer.render_latex())
+
+# Or manual approach
+from statsmodels.iolib.summary2 import summary_col
+print(summary_col([m1, m2, m3], stars=True).as_latex())</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>R Table Packages: Which to Use?</h4>
+    <ul style="margin: 8px 0 0;">
+      <li><strong>etable</strong> (fixest): Best for quick tables with <code>feols()</code> models. Built into fixest, so no extra dependencies. Great for console output and fast LaTeX export.</li>
+      <li><strong>modelsummary</strong>: Most flexible and modern. Works with any model type, exports to LaTeX/Word/HTML/PNG, and has excellent customization. <em>Recommended for publication tables.</em></li>
+    </ul>
+  </div>
+
+  <h3>Customizing Tables</h3>
+  <p>Default table output rarely matches what you need for publication. You'll want to: rename variables, add rows showing which controls or fixed effects are included, report the mean of the dependent variable, and drop unimportant coefficients.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Add mean of dependent variable
+eststo clear
+eststo: reg income treatment age female
+    estadd local controls "Yes"
+    sum income if e(sample)
+    estadd scalar mean_y = r(mean)
+
+* Include in table
+esttab using "table.tex", ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    scalars("mean_y Mean of Dep. Var." "controls Controls") ///
+    label replace
+
+* Rename coefficients in output
+esttab, rename(treatment "Treatment Effect")</code></pre>
+    <pre class="code-content r"><code class="language-r"># ----- etable (fixest) customization -----
+etable(m1, m2, m3,
+  drop = "Constant",           # Hide intercept
+  dict = c(treatment = "Treatment Effect"),  # Rename
+  extralines = list(
+    "_^Controls" = c("No", "Yes", "Yes"),
+    "_^Mean of DV" = rep(round(mean(data$income), 2), 3)
+  ),
+  tex = TRUE, file = "table.tex"
+)
+
+# ----- modelsummary customization -----
+pacman::p_load(modelsummary, tibble)
+rows <- tribble(
+  ~term, ~"(1)", ~"(2)", ~"(3)",
+  "Controls", "No", "Yes", "Yes",
+  "Mean of DV", sprintf("%.2f", mean(data$income)),
+                sprintf("%.2f", mean(data$income)),
+                sprintf("%.2f", mean(data$income))
+)
+modelsummary(list(m1, m2, m3),
+  add_rows = rows,
+  coef_rename = c("treatment" = "Treatment Effect"),
+  coef_omit = "Intercept"
+)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Add custom rows with stargazer
+stargazer = Stargazer([m1, m2])
+stargazer.add_line("Controls", ["No", "Yes"])
+stargazer.add_line("Mean of DV", [f"{data['income'].mean():.2f}"] * 2)
+stargazer.rename_covariates({"treatment": "Treatment Effect"})
+print(stargazer.render_latex())</code></pre>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>Table Checklist</h4>
+    <ul>
+      <li>Do all columns have clear headers?</li>
+      <li>Are standard errors in parentheses (not t-stats)?</li>
+      <li>Is the dependent variable clearly labeled?</li>
+      <li>Are significance levels defined in a note?</li>
+      <li>Is sample size reported for each column?</li>
+      <li>Are controls indicated (even if not shown)?</li>
+    </ul>
+  </div>
+</section>

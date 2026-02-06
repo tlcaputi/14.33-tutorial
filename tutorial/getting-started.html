@@ -1,0 +1,415 @@
+---
+layout: layouts/tutorial.html
+title: Getting Started | Intro to Data Analysis for Economics
+current_page: getting-started
+---
+<h1>Getting Started</h1>
+<p class="subtitle">Install your tools, set up a project, and write your first script</p>
+
+<p>This guide will get you from zero to running your first regression. The goal isn't just to get code working—it's to set up habits that will make your work <strong>reproducible</strong>. Reproducibility means anyone (including future you) can run your code from scratch and get the same results. This is non-negotiable in empirical economics.</p>
+
+<section id="stata-vs-r" class="tutorial-section">
+  <h2>Stata vs. R vs. Python: Which Should I Use?</h2>
+
+  <p>This tutorial provides code in Stata, R, and Python. You can choose any of them, but the two course tutorials will be taught in Stata. Here's how they compare:</p>
+
+  <div class="lang-comparison">
+    <div class="lang-card stata">
+      <h3>Stata</h3>
+      <ul style="margin: 0; padding-left: 18px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>Not free</strong> — requires a license (MIT provides one)</li>
+        <li><strong>Often faster</strong> for large datasets</li>
+        <li><strong>Simpler syntax</strong> for common econometrics tasks</li>
+        <li><strong>One dataset</strong> in memory at a time</li>
+      </ul>
+    </div>
+    <div class="lang-card r">
+      <h3>R</h3>
+      <ul style="margin: 0; padding-left: 18px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>Free and open-source</strong></li>
+        <li><strong>Excellent for visualization</strong> (ggplot2)</li>
+        <li><strong>tidyverse</strong> makes data wrangling intuitive</li>
+        <li><strong>Multiple datasets</strong> in memory</li>
+      </ul>
+    </div>
+    <div class="lang-card python">
+      <h3>Python</h3>
+      <ul style="margin: 0; padding-left: 18px; line-height: 1.8; font-size: 0.95rem;">
+        <li><strong>Free and open-source</strong></li>
+        <li><strong>General-purpose</strong> — useful beyond statistics</li>
+        <li><strong>Excellent for data manipulation</strong> (pandas)</li>
+        <li><strong>Weaker for statistics</strong> and publication tables</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="key-principle">
+    <h4>My Recommendation</h4>
+    <p>Use <strong>R or Stata</strong> throughout your project unless you're working with very large datasets (100+ million observations). For big data, use Python or SQL for data manipulation, then switch to R or Stata for analysis and creating publication-ready output. R and Stata have much better support for econometric methods and producing the tables you'll need for papers.</p>
+  </div>
+
+  <div class="key-principle">
+    <h4>The Stata Mental Model</h4>
+    <p>Stata is unusual: it assumes you're working with <strong>one dataset at a time</strong>. Commands like <code>summarize</code> or <code>regress</code> automatically operate on "the data" without you specifying which data. If you need to work with a second dataset, you <code>save</code> the current one, then <code>use</code> the new one. This feels strange if you're used to Python or R, but it makes simple analyses very concise.</p>
+  </div>
+
+  <p>For this class, any works fine. The toggle at the top of the sidebar lets you switch between Stata, R, and Python code examples.</p>
+</section>
+
+<section id="installation" class="tutorial-section">
+  <h2>Installation</h2>
+
+  <h3>Stata</h3>
+  <p>MIT provides Stata licenses for students. Visit the <a href="https://ist.mit.edu/stata" target="_blank">MIT IST Stata page</a> to download and install.</p>
+
+  <h3>R and RStudio</h3>
+  <p>R is free and open-source. You'll also want RStudio, which provides a much nicer interface.</p>
+
+  <p><strong>Option 1: Graphical installers</strong></p>
+  <ol>
+    <li>Download R from <a href="https://cran.r-project.org" target="_blank">CRAN</a></li>
+    <li>Download RStudio from <a href="https://posit.co/download/rstudio-desktop/" target="_blank">Posit</a></li>
+  </ol>
+
+  <p><strong>Option 2: Command line (Mac)</strong></p>
+  <p>If you have <a href="https://brew.sh" target="_blank">Homebrew</a> installed, this is faster:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Install Homebrew first if you don't have it
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install R and RStudio
+brew install --cask r
+brew install --cask rstudio</code></pre>
+  </div>
+
+  <p><strong>Option 3: Command line (Windows)</strong></p>
+  <p>If you have <a href="https://chocolatey.org" target="_blank">Chocolatey</a> or <a href="https://scoop.sh" target="_blank">Scoop</a>:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Chocolatey
+choco install r.project rstudio
+
+# Or using Scoop
+scoop bucket add extras
+scoop install r rstudio</code></pre>
+  </div>
+
+  <h3>Python</h3>
+  <p>Python is free and open-source. We recommend using Anaconda or Miniconda for scientific computing.</p>
+
+  <p><strong>Option 1: Anaconda (recommended for beginners)</strong></p>
+  <p>Download from <a href="https://www.anaconda.com/download" target="_blank">anaconda.com</a>. Anaconda includes Python, Jupyter notebooks, and most data science packages pre-installed.</p>
+
+  <p><strong>Option 2: Command line (Mac)</strong></p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Homebrew
+brew install python
+
+# Or install Miniconda (lighter than Anaconda)
+brew install --cask miniconda</code></pre>
+  </div>
+
+  <p><strong>Option 3: Command line (Windows)</strong></p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Chocolatey
+choco install python anaconda3
+
+# Or using Scoop
+scoop install python
+scoop install anaconda3</code></pre>
+  </div>
+
+  </section>
+
+<section id="installing-packages" class="tutorial-section">
+  <h2>Installing Packages</h2>
+
+  <p>Out of the box, Stata, R, and Python can do basic statistics. But for modern econometrics—high-dimensional fixed effects, robust standard errors, publication-quality tables—you need additional packages written by the community. Think of packages as pre-written code that adds new commands to your toolkit. You install them once, then load them at the start of each script.</p>
+
+  <h3>Stata</h3>
+  <p>In Stata, you install packages using <code>ssc install</code> for packages from the Statistical Software Components archive:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Install commonly used packages
+ssc install estout      // For regression tables
+ssc install reghdfe     // Fast fixed effects regression
+ssc install ftools      // Required by reghdfe
+ssc install coefplot    // For coefficient plots
+ssc install binscatter  // For binned scatter plots</code></pre>
+  </div>
+
+  <h3>R</h3>
+  <p>In R, we recommend using the <code>pacman</code> package, which automatically installs packages if they're not already installed:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="r">R</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content r active"><code class="language-r"># Install pacman if you don't have it, then load packages
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, haven, fixest, modelsummary)</code></pre>
+  </div>
+
+  <h3>Python</h3>
+  <p>In Python, use <code>pip</code> to install packages from the command line:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="python">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content python active"><code class="language-python"># Install commonly used packages
+pip install pandas numpy matplotlib seaborn
+pip install statsmodels linearmodels
+pip install openpyxl  # For Excel files</code></pre>
+  </div>
+
+  <p>Then at the top of your Python scripts:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content python active"><code class="language-python">import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Put Imports at the Top of Every Script</h4>
+    <p>In R, use <code>pacman::p_load()</code>. In Python, put your <code>import</code> statements at the top. This ensures anyone running your code knows exactly what packages are needed.</p>
+  </div>
+</section>
+
+<section id="interface" class="tutorial-section">
+  <h2>Interface Basics</h2>
+
+  <h3>The Stata Interface</h3>
+  <p>When you open Stata, you'll see four main windows:</p>
+  <ul>
+    <li><strong>Command window</strong> — Type commands here and press Enter to run them</li>
+    <li><strong>Results window</strong> — Output from your commands appears here</li>
+    <li><strong>Variables window</strong> — Shows all variables in the current dataset</li>
+    <li><strong>Review window</strong> — History of commands you've run (click to re-run)</li>
+  </ul>
+  <p>You can type commands directly, but it's better to write them in a <strong>do-file</strong> (a script). Go to <em>File → New → Do-file</em> to create one. This makes your work reproducible.</p>
+
+  <h3>Working Directory</h3>
+  <p>The working directory is the folder your program looks in by default. Set it at the start of every script:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Set working directory
+cd "/Users/yourname/Dropbox/my_1433_project"
+
+* Check it worked
+pwd
+
+* Now use relative paths
+use "build/output/cleaned_data.dta", clear</code></pre>
+    <pre class="code-content r"><code class="language-r"># Set working directory
+setwd("/Users/yourname/Dropbox/my_1433_project")
+
+# Check it worked
+getwd()
+
+# Now use relative paths
+pacman::p_load(haven)
+data <- read_dta("build/output/cleaned_data.dta")</code></pre>
+    <pre class="code-content python"><code class="language-python">import os
+import pandas as pd
+
+# Set working directory
+os.chdir("/Users/yourname/Dropbox/my_1433_project")
+
+# Check it worked
+print(os.getcwd())
+
+# Now use relative paths
+data = pd.read_stata("build/output/cleaned_data.dta")</code></pre>
+  </div>
+
+  <h3>Getting Help</h3>
+  <p>When you encounter an unfamiliar command or forget the syntax, use the built-in help system:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Get help on a command
+help regress
+
+* Search for commands
+search panel data</code></pre>
+    <pre class="code-content r"><code class="language-r"># Get help on a function
+?lm
+help(lm)
+
+# Search for functions
+??regression</code></pre>
+    <pre class="code-content python"><code class="language-python"># Get help on a function
+help(pd.read_csv)
+
+# Or in Jupyter/IPython
+pd.read_csv?
+
+# Search documentation online
+# https://pandas.pydata.org/docs/</code></pre>
+  </div>
+</section>
+
+<section id="first-script" class="tutorial-section">
+  <h2>Your First Script</h2>
+
+  <div class="key-principle">
+    <h4>Always Use Scripts</h4>
+    <p>Never type commands directly into the console for real work. Write everything in a <code>.do</code> file (Stata) or <code>.R</code> file. This is the #1 habit that separates beginners from competent researchers.</p>
+    <p><strong>The test:</strong> Close everything, reopen, run your script. Does it work? If not, your analysis isn't reproducible.</p>
+  </div>
+
+  <p>Create a new file called <code>test.do</code>, <code>test.R</code>, or <code>test.py</code>:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">/*==============================================================================
+    test.do
+    My first Stata script
+==============================================================================*/
+
+clear all
+set more off
+
+* Load built-in dataset
+sysuse auto, clear
+
+* Look at the data
+describe
+summarize price mpg
+
+* Simple regression
+regress price mpg weight
+
+* Save a graph
+scatter price mpg
+graph export "my_first_graph.png", replace
+
+di "Script completed successfully!"</code></pre>
+    <pre class="code-content r"><code class="language-r">#===============================================================================
+#   test.R
+#   My first R script
+#===============================================================================
+
+# Load packages
+pacman::p_load(tidyverse)
+
+# Load built-in dataset
+data(mtcars)
+
+# Look at the data
+str(mtcars)
+summary(mtcars[, c("mpg", "hp", "wt")])
+
+# Simple regression
+model <- lm(mpg ~ hp + wt, data = mtcars)
+summary(model)
+
+# Save a graph
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "MPG vs Weight", x = "Weight (1000 lbs)", y = "MPG")
+ggsave("my_first_graph.png")
+
+cat("Script completed successfully!\n")</code></pre>
+    <pre class="code-content python"><code class="language-python">#===============================================================================
+#   test.py
+#   My first Python script
+#===============================================================================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+
+# Load built-in dataset (using seaborn's mpg dataset)
+url = "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/mpg.csv"
+mtcars = pd.read_csv(url)
+
+# Look at the data
+print(mtcars.info())
+print(mtcars[["mpg", "horsepower", "weight"]].describe())
+
+# Simple regression
+model = smf.ols("mpg ~ horsepower + weight", data=mtcars).fit()
+print(model.summary())
+
+# Save a graph
+plt.figure(figsize=(8, 6))
+plt.scatter(mtcars["weight"], mtcars["mpg"])
+plt.xlabel("Weight")
+plt.ylabel("MPG")
+plt.title("MPG vs Weight")
+plt.savefig("my_first_graph.png")
+
+print("Script completed successfully!")</code></pre>
+  </div>
+
+  <p>Run the entire script (not line by line!) and verify it works.</p>
+</section>

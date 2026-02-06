@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Join Poll</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Join Screen */
+        .join-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .join-screen h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .join-screen p {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 2rem;
+        }
+
+        .code-input-container {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 1.25rem;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 1rem;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .code-input::placeholder {
+            letter-spacing: 0.2rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .join-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 1rem;
+            margin-top: 1rem;
+            background: #4ade80;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .join-btn:hover {
+            background: #22c55e;
+        }
+
+        .join-btn:disabled {
+            background: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            color: #f87171;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Poll Screen */
+        .poll-screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+
+        .poll-header {
+            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .session-name {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .poll-status {
+            font-size: 0.875rem;
+            color: #4ade80;
+            margin-top: 0.25rem;
+        }
+
+        /* Question Display */
+        .question-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-number {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Answer Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 1rem;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        .option-btn.selected {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: #4ade80;
+        }
+
+        .option-btn.submitted {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .option-btn.selected .option-letter {
+            background: #4ade80;
+            color: #1a1a2e;
+        }
+
+        /* Text Input (for word cloud / open-ended) */
+        .text-input-container {
+            display: none;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 1rem;
+            color: #fff;
+            resize: none;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #4ade80;
+        }
+
+        .text-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            background: #4ade80;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #22c55e;
+        }
+
+        .submit-btn:disabled {
+            background: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            cursor: not-allowed;
+        }
+
+        /* Submitted State */
+        .submitted-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .submitted-message .checkmark {
+            width: 60px;
+            height: 60px;
+            background: rgba(74, 222, 128, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+        }
+
+        .submitted-message h2 {
+            color: #4ade80;
+            margin-bottom: 0.5rem;
+        }
+
+        .submitted-message p {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Waiting State */
+        .waiting-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 1rem;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .waiting-message.active {
+            display: flex;
+        }
+
+        .waiting-message .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .waiting-message h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .waiting-message p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.875rem;
+        }
+
+        /* Leave button */
+        .leave-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 0.5rem;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .leave-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Join Screen -->
+        <div class="join-screen" id="join-screen">
+            <h1>Join Poll</h1>
+            <p>Enter the code shown on screen</p>
+
+            <div class="code-input-container">
+                <input type="text"
+                       class="code-input"
+                       id="code-input"
+                       placeholder="CODE"
+                       maxlength="6"
+                       autocomplete="off"
+                       autocapitalize="characters">
+                <button class="join-btn" id="join-btn" onclick="joinSession()">Join</button>
+            </div>
+
+            <div class="error-msg" id="error-msg"></div>
+        </div>
+
+        <!-- Poll Screen -->
+        <div class="poll-screen" id="poll-screen">
+            <button class="leave-btn" onclick="leaveSession()">Leave</button>
+
+            <div class="poll-header">
+                <div class="session-name" id="display-session-name">Session Name</div>
+                <div class="poll-status" id="poll-status">Connected</div>
+            </div>
+
+            <!-- Waiting for question -->
+            <div class="waiting-message active" id="waiting-message">
+                <div class="spinner"></div>
+                <h2>Waiting for question...</h2>
+                <p>The presenter will display a question shortly</p>
+            </div>
+
+            <!-- Question container -->
+            <div class="question-container" id="question-container" style="display: none;">
+                <div class="question-number" id="question-number">Question 1</div>
+                <div class="question-text" id="question-text">Question text here</div>
+
+                <!-- Multiple choice options -->
+                <div class="options-container" id="options-container"></div>
+
+                <!-- Text input for word cloud / open-ended -->
+                <div class="text-input-container" id="text-input-container">
+                    <textarea class="text-input"
+                              id="text-input"
+                              rows="3"
+                              placeholder="Type your answer..."></textarea>
+                    <button class="submit-btn" id="text-submit-btn" onclick="submitTextResponse()">Submit</button>
+                </div>
+
+                <!-- Submitted message -->
+                <div class="submitted-message" id="submitted-message">
+                    <div class="checkmark">✓</div>
+                    <h2>Response submitted!</h2>
+                    <p>Waiting for next question...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // CONFIGURATION - Update these with your Supabase credentials
+        // =====================================================================
+        const SUPABASE_URL = 'https://zhuhmafxfbynydonogux.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodWhtYWZ4ZmJ5bnlkb25vZ3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNTgwOTgsImV4cCI6MjA4NTczNDA5OH0.8cTwykaV2YI-2oTnfe4eP4PmMIrZHE8SuJzA8afuLDQ';
+
+        // Initialize Supabase client
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // =====================================================================
+        // State
+        // =====================================================================
+        let currentSession = null;
+        let currentQuestion = null;
+        let voterId = getOrCreateVoterId();
+        let hasVotedOnCurrentQuestion = false;
+
+        // =====================================================================
+        // Voter ID (anonymous but persistent)
+        // =====================================================================
+        function getOrCreateVoterId() {
+            let id = localStorage.getItem('voter_id');
+            if (!id) {
+                id = 'voter_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+                localStorage.setItem('voter_id', id);
+            }
+            return id;
+        }
+
+        // =====================================================================
+        // Join Session
+        // =====================================================================
+        async function joinSession() {
+            const code = document.getElementById('code-input').value.trim().toUpperCase();
+            const errorMsg = document.getElementById('error-msg');
+
+            if (code.length !== 6) {
+                errorMsg.textContent = 'Please enter a 6-character code';
+                return;
+            }
+
+            document.getElementById('join-btn').disabled = true;
+            document.getElementById('join-btn').textContent = 'Joining...';
+
+            const { data, error } = await db
+                .from('sessions')
+                .select('*')
+                .eq('code', code)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !data) {
+                errorMsg.textContent = 'Session not found. Check the code and try again.';
+                document.getElementById('join-btn').disabled = false;
+                document.getElementById('join-btn').textContent = 'Join';
+                return;
+            }
+
+            currentSession = data;
+            localStorage.setItem('last_session_code', code);
+
+            // Show poll screen
+            document.getElementById('join-screen').style.display = 'none';
+            document.getElementById('poll-screen').style.display = 'flex';
+            document.getElementById('display-session-name').textContent = data.name;
+
+            // Subscribe to session updates
+            subscribeToSession();
+
+            // Check if there's an active question
+            if (data.active_question_id) {
+                await loadQuestion(data.active_question_id);
+            }
+        }
+
+        function leaveSession() {
+            currentSession = null;
+            currentQuestion = null;
+            document.getElementById('join-screen').style.display = 'flex';
+            document.getElementById('poll-screen').style.display = 'none';
+            document.getElementById('code-input').value = '';
+            document.getElementById('join-btn').disabled = false;
+            document.getElementById('join-btn').textContent = 'Join';
+        }
+
+        // =====================================================================
+        // Real-time Subscriptions
+        // =====================================================================
+        function subscribeToSession() {
+            db
+                .channel('session-updates')
+                .on('postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'sessions',
+                        filter: `id=eq.${currentSession.id}`
+                    },
+                    async (payload) => {
+                        const newActiveQuestion = payload.new.active_question_id;
+                        if (newActiveQuestion && newActiveQuestion !== currentQuestion?.id) {
+                            await loadQuestion(newActiveQuestion);
+                        }
+                    }
+                )
+                .subscribe();
+        }
+
+        // =====================================================================
+        // Question Display
+        // =====================================================================
+        async function loadQuestion(questionId) {
+            const { data: question, error } = await db
+                .from('questions')
+                .select('*')
+                .eq('id', questionId)
+                .single();
+
+            if (error || !question) {
+                console.error('Error loading question:', error);
+                return;
+            }
+
+            currentQuestion = question;
+            hasVotedOnCurrentQuestion = false;
+
+            // Check if already voted
+            const { data: existingVote } = await db
+                .from('votes')
+                .select('id')
+                .eq('question_id', questionId)
+                .eq('voter_id', voterId)
+                .single();
+
+            if (existingVote) {
+                hasVotedOnCurrentQuestion = true;
+            }
+
+            displayQuestion(question);
+        }
+
+        function displayQuestion(question) {
+            // Hide waiting message
+            document.getElementById('waiting-message').classList.remove('active');
+            document.getElementById('question-container').style.display = 'flex';
+
+            // Set question text
+            document.getElementById('question-number').textContent = `Question ${question.order_num}`;
+            document.getElementById('question-text').textContent = question.question_text;
+
+            // Reset submitted message
+            document.getElementById('submitted-message').style.display = 'none';
+
+            if (hasVotedOnCurrentQuestion) {
+                showSubmittedState();
+                return;
+            }
+
+            // Show appropriate input based on question type
+            if (question.question_type === 'multiple_choice') {
+                showMultipleChoice(question);
+            } else {
+                showTextInput(question);
+            }
+        }
+
+        function showMultipleChoice(question) {
+            document.getElementById('options-container').style.display = 'flex';
+            document.getElementById('text-input-container').style.display = 'none';
+
+            const options = question.options || [];
+            document.getElementById('options-container').innerHTML = options.map((opt, idx) => `
+                <button class="option-btn" onclick="selectOption(this, '${opt.replace(/'/g, "\\'")}')">
+                    <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
+                    <span>${opt}</span>
+                </button>
+            `).join('');
+        }
+
+        function showTextInput(question) {
+            document.getElementById('options-container').style.display = 'none';
+            document.getElementById('text-input-container').style.display = 'block';
+            document.getElementById('text-input').value = '';
+            document.getElementById('text-input').placeholder =
+                question.question_type === 'word_cloud'
+                    ? 'Enter one word...'
+                    : 'Type your answer...';
+        }
+
+        // =====================================================================
+        // Vote Submission
+        // =====================================================================
+        async function selectOption(button, response) {
+            if (hasVotedOnCurrentQuestion) return;
+
+            // Visual feedback
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+
+            // Submit vote
+            await submitVote(response);
+        }
+
+        async function submitTextResponse() {
+            const input = document.getElementById('text-input');
+            const response = input.value.trim();
+
+            if (!response) return;
+
+            await submitVote(response);
+        }
+
+        async function submitVote(response) {
+            if (!currentQuestion || hasVotedOnCurrentQuestion) return;
+
+            const { error } = await db
+                .from('votes')
+                .insert([{
+                    question_id: currentQuestion.id,
+                    response: response,
+                    voter_id: voterId
+                }]);
+
+            if (error) {
+                if (error.code === '23505') {
+                    // Duplicate vote - already voted
+                    console.log('Already voted on this question');
+                } else {
+                    console.error('Error submitting vote:', error);
+                    alert('Error submitting response. Please try again.');
+                    return;
+                }
+            }
+
+            hasVotedOnCurrentQuestion = true;
+            showSubmittedState();
+        }
+
+        function showSubmittedState() {
+            document.getElementById('options-container').style.display = 'none';
+            document.getElementById('text-input-container').style.display = 'none';
+            document.getElementById('submitted-message').style.display = 'block';
+        }
+
+        // =====================================================================
+        // Initialization
+        // =====================================================================
+        function init() {
+            // Auto-focus code input
+            document.getElementById('code-input').focus();
+
+            // Handle enter key on code input
+            document.getElementById('code-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    joinSession();
+                }
+            });
+
+            // Check URL for code parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('code');
+            if (codeParam) {
+                document.getElementById('code-input').value = codeParam;
+                joinSession();
+            }
+
+            // Or restore last session
+            const lastCode = localStorage.getItem('last_session_code');
+            if (lastCode && !codeParam) {
+                document.getElementById('code-input').value = lastCode;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

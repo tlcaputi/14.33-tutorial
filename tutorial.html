@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorial | 14.33 Economics Research and Communication</title>
+  <meta name="description" content="Stata and R tutorial for 14.33 Economics Research and Communication at MIT.">
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/latin-modern-roman@1.0.1/dist/LMRoman10-Regular.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="tutorial-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html">&larr; Back to 14.33</a>
+        <h1>Tutorial</h1>
+      </div>
+
+      <div class="global-lang-toggle">
+        <span>Show code in:</span>
+        <div class="lang-toggle-btns">
+          <button data-lang="stata" class="active">Stata</button>
+          <button data-lang="r">R</button>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <h3 class="nav-section-title">Applied Micro Concepts</h3>
+          <ul>
+            <li><a href="#causal-inference">Causal Inference</a></li>
+            <li><a href="#quasi-experiments">Quasi-Experiments</a></li>
+            <li><a href="#research-design">Research Design</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Project Organization</h3>
+          <ul>
+            <li><a href="#project-setup">Project Setup Script</a></li>
+            <li><a href="#directory-structure">Directory Structure</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Getting Started</h3>
+          <ul>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#interface-basics">Interface Basics</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Data Fundamentals</h3>
+          <ul>
+            <li><a href="#reading-writing">Reading & Writing Files</a></li>
+            <li><a href="#data-cleaning">Data Cleaning</a></li>
+            <li><a href="#reshaping">Reshaping (Long/Wide)</a></li>
+            <li><a href="#merging">Merging Datasets</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Descriptive Analysis</h3>
+          <ul>
+            <li><a href="#summary-stats">Summary Statistics</a></li>
+            <li><a href="#visualization">Data Visualization</a></li>
+            <li><a href="#publication-tables">Publication Tables</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Regression Methods</h3>
+          <ul>
+            <li><a href="#linear-regression">Linear Regression</a></li>
+            <li><a href="#panel-data">Panel Data Methods</a></li>
+            <li><a href="#iv">Instrumental Variables</a></li>
+            <li><a href="#did">Difference-in-Differences</a></li>
+            <li><a href="#event-studies">Event Studies</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-section-title">Advanced Topics</h3>
+          <ul>
+            <li><a href="#loops">Loops & Programming</a></li>
+            <li><a href="#large-data">Large Datasets</a></li>
+            <li><a href="#stata-traps">Stata Traps</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="tutorial-content">
+      <h1>Stata/R Tutorial</h1>
+      <p class="subtitle">A beginner-friendly guide to empirical research in economics</p>
+
+      <!-- ========== CAUSAL INFERENCE ========== -->
+      <section id="causal-inference" class="tutorial-section">
+        <h2>What is Causal Inference?</h2>
+
+        <p>The goal of most empirical economics research is to estimate <strong>causal effects</strong>: how does changing X affect Y? This is different from simply measuring correlations.</p>
+
+        <div class="key-principle">
+          <h4>Key Insight</h4>
+          <p><strong>Correlation does not imply causation.</strong> Just because two variables move together doesn't mean one causes the other. The classic example: ice cream sales and drowning deaths are correlated, but ice cream doesn't cause drowning. Both are driven by summer weather.</p>
+        </div>
+
+        <h3>The Fundamental Problem of Causal Inference</h3>
+        <p>To know the causal effect of a treatment on an individual, we would need to observe the same person both with and without treatment at the same time. This is impossible. We can only ever observe one potential outcome for each person.</p>
+
+        <p><strong>Potential Outcomes Framework:</strong></p>
+        <ul>
+          <li><strong>Y<sub>1</sub></strong> = outcome if treated</li>
+          <li><strong>Y<sub>0</sub></strong> = outcome if not treated</li>
+          <li><strong>Treatment effect</strong> = Y<sub>1</sub> - Y<sub>0</sub></li>
+        </ul>
+
+        <p>Since we can never observe both Y<sub>1</sub> and Y<sub>0</sub> for the same person, we need clever research designs to estimate average effects across groups.</p>
+
+        <h3>Selection Bias</h3>
+        <p>The core challenge: people who receive treatment are often systematically different from those who don't. If we simply compare outcomes between treated and untreated groups, we might be measuring these pre-existing differences rather than the effect of treatment.</p>
+
+        <div class="common-mistakes">
+          <h4>Example: Does College Increase Earnings?</h4>
+          <p>If we compare earnings of college graduates to non-graduates, we might find graduates earn more. But people who go to college may be more motivated, have wealthier parents, or have more innate ability. The earnings gap might reflect these differences, not the effect of college itself.</p>
+        </div>
+      </section>
+
+      <!-- ========== QUASI-EXPERIMENTS ========== -->
+      <section id="quasi-experiments" class="tutorial-section">
+        <h2>Quasi-Random Variation</h2>
+
+        <p>Randomized controlled trials (RCTs) are the gold standard for causal inference because random assignment ensures treatment and control groups are comparable. But RCTs are often impossible, unethical, or impractical.</p>
+
+        <p><strong>Quasi-experiments</strong> exploit naturally occurring variation that is "as good as random" for the purposes of causal identification.</p>
+
+        <h3>Sources of Quasi-Random Variation</h3>
+
+        <ul>
+          <li><strong>Natural experiments:</strong> The Vietnam draft lottery randomly assigned draft eligibility based on birthdate</li>
+          <li><strong>Policy discontinuities:</strong> Age cutoffs (drinking age at 21), geographic boundaries (minimum wage differences at state borders)</li>
+          <li><strong>Timing variation:</strong> Different states adopting policies at different times</li>
+          <li><strong>Instrumental variables:</strong> Finding a variable that affects treatment but not the outcome directly</li>
+        </ul>
+
+        <div class="key-principle">
+          <h4>The Identification Question</h4>
+          <p>Before running any regression, ask: <em>"What source of variation am I using to identify this effect? Why is this variation unrelated to other factors that affect my outcome?"</em></p>
+        </div>
+      </section>
+
+      <!-- ========== RESEARCH DESIGN ========== -->
+      <section id="research-design" class="tutorial-section">
+        <h2>Research Design</h2>
+
+        <p>Choosing a research project is like solving a puzzle with three pieces that must fit together: a <strong>question</strong> that interests you, <strong>data</strong> you can access, and an <strong>identification strategy</strong> that provides credibly exogenous variation.</p>
+
+        <div class="key-principle">
+          <h4>The Three-Legged Stool</h4>
+          <p>Your project needs all three legs to stand:</p>
+          <ol>
+            <li><strong>Question:</strong> A causal question you find interesting and that matters</li>
+            <li><strong>Data:</strong> An accessible dataset with the variables you need</li>
+            <li><strong>Identification:</strong> A source of variation that is plausibly exogenous</li>
+          </ol>
+          <p>Most project ideas fail because one leg is missing. A fascinating question is useless without data. Rich data is useless without a credible identification strategy. Start by exploring all three simultaneously—don't commit to a question before checking if the data and identification exist.</p>
+        </div>
+
+        <h3>Forming a Research Question</h3>
+        <ol>
+          <li><strong>Be specific:</strong> Not "How does education affect earnings?" but "What is the causal effect of an additional year of schooling on hourly wages for workers aged 25-55?"</li>
+          <li><strong>Be answerable:</strong> Can you actually get data to test this?</li>
+          <li><strong>Be important:</strong> Why should anyone care about the answer?</li>
+        </ol>
+
+        <p>Good questions often emerge from reading the news, noticing a policy change, or finding an interesting dataset. Some productive areas for undergraduate projects:</p>
+
+        <ul>
+          <li><strong>Health:</strong> Insurance expansions, hospital closures, drug pricing, public health interventions</li>
+          <li><strong>Labor:</strong> Minimum wage changes, unemployment benefits, job training programs</li>
+          <li><strong>Education:</strong> School funding, class size, teacher quality, college access</li>
+          <li><strong>Crime:</strong> Policing strategies, sentencing laws, legalization policies</li>
+          <li><strong>Environment:</strong> Pollution regulations, climate events, energy prices</li>
+          <li><strong>Housing:</strong> Rent control, zoning changes, eviction policies</li>
+        </ul>
+
+        <h3>Finding Data</h3>
+
+        <p>For this course, you'll likely use publicly available data. Here are some excellent sources:</p>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95rem;">
+          <tr style="background: var(--bg-subtle); border-bottom: 2px solid var(--border);">
+            <th style="padding: 12px; text-align: left;">Source</th>
+            <th style="padding: 12px; text-align: left;">What's in it</th>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://www.census.gov/data.html" target="_blank">U.S. Census</a></td>
+            <td style="padding: 12px;">Demographics, income, housing, employment (ACS, CPS, Decennial)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://www.bls.gov/data/" target="_blank">Bureau of Labor Statistics</a></td>
+            <td style="padding: 12px;">Employment, wages, prices, productivity</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://www.cdc.gov/nchs/data_access/ftp_data.htm" target="_blank">CDC/NCHS</a></td>
+            <td style="padding: 12px;">Health surveys (NHIS, BRFSS), vital statistics, mortality</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://www.icpsr.umich.edu/" target="_blank">ICPSR</a></td>
+            <td style="padding: 12px;">Archive of social science data (MIT has access)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://fred.stlouisfed.org/" target="_blank">FRED</a></td>
+            <td style="padding: 12px;">Economic time series (GDP, unemployment, interest rates)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://data.world/" target="_blank">data.world</a></td>
+            <td style="padding: 12px;">Community-curated datasets on many topics</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><a href="https://www.kaggle.com/datasets" target="_blank">Kaggle</a></td>
+            <td style="padding: 12px;">Diverse datasets, often cleaned and documented</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px;"><a href="https://opportunityinsights.org/data/" target="_blank">Opportunity Insights</a></td>
+            <td style="padding: 12px;">Mobility, education, economic opportunity by geography</td>
+          </tr>
+        </table>
+
+        <p>The MIT Libraries are also an excellent resource. Contact Economics Librarian Nicholas Albaugh (<a href="mailto:ncda1979@mit.edu">ncda1979@mit.edu</a>) for help finding data sources.</p>
+
+        <h3>Why We Need Quasi-Random Variation</h3>
+
+        <p>A natural instinct is to estimate causal effects by running a regression and "controlling for" potential confounders. If people who go to college differ from those who don't, just control for family income, parental education, test scores, etc. The problem: <strong>you can never be sure you've controlled for everything.</strong></p>
+
+        <div class="key-principle">
+          <h4>The Unobservables Problem</h4>
+          <p>Even if you control for 50 variables, there may be a 51st—motivation, family connections, health—that you can't measure but that affects both treatment and outcome. This <em>omitted variable bias</em> makes your estimate wrong, and you have no way to know by how much or even in which direction.</p>
+        </div>
+
+        <p>This is why applied microeconomists search for <strong>quasi-random variation</strong>: situations where treatment was assigned by something that looks like a coin flip, even if no one actually flipped a coin. If treatment is as-good-as-random, then treated and control groups are comparable <em>by construction</em>, and we don't need to worry about unobserved confounders.</p>
+
+        <p><strong>Examples of quasi-random variation:</strong></p>
+        <ul>
+          <li>The Vietnam draft lottery randomly assigned draft eligibility based on birthday → used to study effects of military service</li>
+          <li>Judges are randomly assigned to cases → used to study effects of incarceration</li>
+          <li>Weather shocks hit some areas and not others → used to study effects of income on various outcomes</li>
+          <li>Policy changes create sharp before/after or treated/untreated comparisons → the workhorse of modern applied micro</li>
+        </ul>
+
+        <p>The credibility revolution in economics is built on this insight: <em>the source of variation matters more than the sophistication of your statistical technique.</em> A simple difference-in-means with truly random assignment beats a fancy regression with questionable controls.</p>
+
+        <h3>Identification Strategies</h3>
+
+        <p>The identification strategy is <em>how</em> you isolate causal variation. Following Angrist &amp; Pischke's <em>Mostly Harmless Econometrics</em>, the main strategies are:</p>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95rem;">
+          <tr style="background: var(--bg-subtle); border-bottom: 2px solid var(--border);">
+            <th style="padding: 12px; text-align: left;">Strategy</th>
+            <th style="padding: 12px; text-align: left;">When to use it</th>
+            <th style="padding: 12px; text-align: left;">Key assumption</th>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><strong>Randomized experiment</strong></td>
+            <td style="padding: 12px;">Treatment was randomly assigned</td>
+            <td style="padding: 12px;">Random assignment was actually random</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><strong>Regression (selection on observables)</strong></td>
+            <td style="padding: 12px;">You can control for all confounders</td>
+            <td style="padding: 12px;">Conditional independence (CIA): no unobserved confounders</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><strong>Instrumental variables</strong></td>
+            <td style="padding: 12px;">You have an instrument that affects treatment but not outcome directly</td>
+            <td style="padding: 12px;">Exclusion restriction: instrument only affects outcome through treatment</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;"><strong>Difference-in-differences</strong></td>
+            <td style="padding: 12px;">Policy/treatment changed for some units but not others over time</td>
+            <td style="padding: 12px;">Parallel trends: treated and control would have trended similarly absent treatment</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px;"><strong>Regression discontinuity</strong></td>
+            <td style="padding: 12px;">Treatment jumps at a threshold (age, score, date)</td>
+            <td style="padding: 12px;">No manipulation: units can't precisely sort around the cutoff</td>
+          </tr>
+        </table>
+
+        <div class="common-mistakes">
+          <h4>Matching Strategy to Variation</h4>
+          <p>Your choice of strategy depends on what variation exists in the world, not on what you wish existed:</p>
+          <ul>
+            <li><strong>Policy changed at different times in different states?</strong> → Difference-in-differences</li>
+            <li><strong>Eligibility depends on an age or income cutoff?</strong> → Regression discontinuity</li>
+            <li><strong>Something affects treatment but shouldn't affect outcome directly?</strong> → Instrumental variables</li>
+            <li><strong>You observe the same units over time?</strong> → Fixed effects (controls for time-invariant confounders)</li>
+          </ul>
+        </div>
+
+        <h3>Putting It Together: Example</h3>
+
+        <p>Suppose you're interested in whether Medicaid expansion affects health outcomes.</p>
+
+        <ul>
+          <li><strong>Question:</strong> What is the effect of Medicaid expansion on mortality?</li>
+          <li><strong>Data:</strong> CDC mortality data + state Medicaid expansion dates</li>
+          <li><strong>Identification:</strong> Difference-in-differences comparing states that expanded vs. didn't, before vs. after expansion</li>
+          <li><strong>Key assumption:</strong> Mortality trends would have been parallel in expansion and non-expansion states absent the policy</li>
+        </ul>
+
+        <p>This project works because all three pieces fit together. You could also study the same question with different identification (RD using income eligibility cutoffs) or different data (survey data on health behaviors).</p>
+      </section>
+
+      <!-- ========== PROJECT SETUP ========== -->
+      <section id="project-setup" class="tutorial-section">
+        <h2>Project Setup Script</h2>
+
+        <p>Good project organization is essential for reproducible research. We provide a one-command setup script that creates a well-organized directory structure following best practices from Gentzkow & Shapiro's <a href="https://web.stanford.edu/~gentzkow/research/CodeAndData.pdf" target="_blank">"Code and Data for the Social Sciences"</a>.</p>
+
+        <div class="key-principle">
+          <h4>Key Principle: Keep Everything in Dropbox</h4>
+          <p>Before you do anything else, create your project folder in Dropbox. This gives you free version history, automatic backups, and access from anywhere. When you accidentally delete code or want to see what you changed, you can restore any file from the last 30-180 days.</p>
+        </div>
+
+        <h3>Installation</h3>
+
+        <p><strong>Mac/Linux:</strong></p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Terminal</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code>curl -fsSL https://theodorecaputi.com/teaching/14.33/files/setup.sh | bash -s my_project</code></pre>
+        </div>
+
+        <p><strong>Windows PowerShell:</strong></p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">PowerShell</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code>irm https://theodorecaputi.com/teaching/14.33/files/setup.ps1 | iex; Setup-Project "my_project"</code></pre>
+        </div>
+
+        <h3>What Gets Created</h3>
+        <pre style="background: var(--code-bg); padding: 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.5;">
+my_project/
+├── README.md              # Project description
+├── master.do              # Stata master script
+├── master.R               # R master script
+│
+├── build/                 # Data preparation
+│   ├── input/             # Raw data (NEVER modify)
+│   ├── code/              # Cleaning scripts
+│   ├── output/            # Cleaned datasets
+│   └── temp/              # Intermediate files
+│
+├── analysis/              # Analysis
+│   ├── input/             # From build/output
+│   ├── code/              # Analysis scripts
+│   └── output/
+│       ├── tables/
+│       └── figures/
+│
+└── paper/                 # Writing
+    ├── draft.tex
+    └── references.bib
+        </pre>
+      </section>
+
+      <!-- ========== DIRECTORY STRUCTURE ========== -->
+      <section id="directory-structure" class="tutorial-section">
+        <h2>Directory Structure Best Practices</h2>
+
+        <div class="key-principle">
+          <h4>The Golden Rule: Never Modify Raw Data</h4>
+          <p>Your raw data files in <code>build/input/</code> should be read-only. All cleaning and modifications happen in code, with results saved to <code>build/output/</code>. This ensures you can always reproduce your results from the original data.</p>
+        </div>
+
+        <h3>The Build → Analysis Pipeline</h3>
+        <ul>
+          <li><strong>Build:</strong> Transform raw data into cleaned, analysis-ready datasets</li>
+          <li><strong>Analysis:</strong> Use cleaned data to produce results (tables, figures)</li>
+          <li><strong>Paper:</strong> Incorporate results into your written document</li>
+        </ul>
+
+        <h3>Where Does Each File Go?</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <tr style="background: var(--bg-subtle); border-bottom: 2px solid var(--border);">
+            <th style="padding: 12px; text-align: left;">You have...</th>
+            <th style="padding: 12px; text-align: left;">Put it in...</th>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Downloaded CSV from Census</td>
+            <td style="padding: 12px;"><code>build/input/</code></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Script to clean that data</td>
+            <td style="padding: 12px;"><code>build/code/</code></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Cleaned .dta file</td>
+            <td style="padding: 12px;"><code>build/output/</code></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px;">Regression script</td>
+            <td style="padding: 12px;"><code>analysis/code/</code></td>
+          </tr>
+          <tr>
+            <td style="padding: 12px;">Publication-ready table</td>
+            <td style="padding: 12px;"><code>analysis/output/tables/</code></td>
+          </tr>
+        </table>
+
+        <div class="key-principle">
+          <h4>Key Principle: Save Intermediate Files</h4>
+          <p>Save your data after each major cleaning step with numbered prefixes:</p>
+          <ul>
+            <li><code>data_01_imported.dta</code></li>
+            <li><code>data_02_cleaned.dta</code></li>
+            <li><code>data_03_merged.dta</code></li>
+          </ul>
+          <p>When something breaks at step 5, you can start debugging from step 4 instead of re-running everything.</p>
+        </div>
+      </section>
+
+      <!-- ========== INSTALLATION ========== -->
+      <section id="installation" class="tutorial-section">
+        <h2>Installation</h2>
+
+        <h3>Stata</h3>
+        <p>MIT provides Stata licenses for students. Visit the <a href="https://ist.mit.edu/stata" target="_blank">MIT IST Stata page</a> to download and install.</p>
+
+        <h3>R and RStudio</h3>
+        <ol>
+          <li>Download R from <a href="https://cran.r-project.org" target="_blank">CRAN</a></li>
+          <li>Download RStudio from <a href="https://posit.co/download/rstudio-desktop/" target="_blank">Posit</a></li>
+        </ol>
+
+        <div class="key-principle">
+          <h4>Key Principle: Run Full Scripts, Not Individual Lines</h4>
+          <p>From day one, write everything in <code>.do</code> files (Stata) or <code>.R</code> scripts (R). Never type commands directly in the command window for real work. <strong>The test:</strong> Close everything, reopen, run your master script—does it work? This is the #1 habit that separates beginners from competent researchers.</p>
+        </div>
+      </section>
+
+      <!-- ========== INTERFACE BASICS ========== -->
+      <section id="interface-basics" class="tutorial-section">
+        <h2>Interface Basics</h2>
+
+        <div class="learning-objectives">
+          <h4>Learning Objectives</h4>
+          <ul>
+            <li>Navigate the Stata/RStudio interface</li>
+            <li>Understand working directories</li>
+            <li>Create and run script files</li>
+            <li>Get help when stuck</li>
+          </ul>
+        </div>
+
+        <h3>Stata Interface</h3>
+        <p>Stata has four main windows:</p>
+        <ul>
+          <li><strong>Command window:</strong> Type commands here (but prefer do-files!)</li>
+          <li><strong>Results window:</strong> Output appears here</li>
+          <li><strong>Variables window:</strong> Lists variables in your current dataset</li>
+          <li><strong>Review window:</strong> History of commands you've run</li>
+        </ul>
+
+        <h3>Working Directories</h3>
+        <p>The working directory is the folder where Stata/R looks for files by default. Always set this at the beginning of your script:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Set working directory to your project folder
+cd "/Users/yourname/Dropbox/my_project"
+
+* Check current working directory
+pwd
+
+* Now you can use relative paths
+use "build/output/cleaned_data.dta", clear</code></pre>
+          <pre class="code-content r"><code class="language-r"># Set working directory to your project folder
+setwd("/Users/yourname/Dropbox/my_project")
+
+# Check current working directory
+getwd()
+
+# Now you can use relative paths
+pacman::p_load(haven)
+data <- read_dta("build/output/cleaned_data.dta")</code></pre>
+        </div>
+
+        <h3>Getting Help</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Get help on a command
+help regress
+
+* Search for commands related to a topic
+search panel data
+
+* View examples for a command
+help regress##examples</code></pre>
+          <pre class="code-content r"><code class="language-r"># Get help on a function
+?lm
+help(lm)
+
+# Search for functions related to a topic
+??regression
+
+# View examples
+example(lm)</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== READING & WRITING FILES ========== -->
+      <section id="reading-writing" class="tutorial-section">
+        <h2>Reading & Writing Files</h2>
+
+        <div class="learning-objectives">
+          <h4>Learning Objectives</h4>
+          <ul>
+            <li>Load data from .dta, .csv, and .xlsx files</li>
+            <li>Save datasets in different formats</li>
+            <li>Understand when to use each format</li>
+          </ul>
+        </div>
+
+        <h3>Loading Data</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Load Stata dataset
+use "data.dta", clear
+
+* Load CSV file
+import delimited "data.csv", clear
+
+* Load Excel file
+import excel "data.xlsx", sheet("Sheet1") firstrow clear
+
+* Load only specific variables
+use income age education using "data.dta", clear
+
+* Load only observations meeting a condition
+use "data.dta" if year == 2020, clear</code></pre>
+          <pre class="code-content r"><code class="language-r"># Load required packages
+pacman::p_load(haven, readr, readxl)
+
+# Load Stata dataset
+data <- read_dta("data.dta")
+
+# Load CSV file
+data <- read_csv("data.csv")
+
+# Load Excel file
+data <- read_excel("data.xlsx", sheet = "Sheet1")
+
+# Load only specific columns
+data <- read_dta("data.dta") %>%
+  select(income, age, education)
+
+# Load only rows meeting a condition
+data <- read_dta("data.dta") %>%
+  filter(year == 2020)</code></pre>
+        </div>
+
+        <h3>Saving Data</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Save as Stata dataset
+save "cleaned_data.dta", replace
+
+* Export to CSV
+export delimited "cleaned_data.csv", replace
+
+* Export to Excel
+export excel "cleaned_data.xlsx", firstrow(variables) replace</code></pre>
+          <pre class="code-content r"><code class="language-r"># Save as Stata dataset
+write_dta(data, "cleaned_data.dta")
+
+# Export to CSV
+write_csv(data, "cleaned_data.csv")
+
+# Export to Excel
+pacman::p_load(writexl)
+write_xlsx(data, "cleaned_data.xlsx")</code></pre>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>Common Mistakes</h4>
+          <ul>
+            <li><strong>Forgetting <code>clear</code>:</strong> In Stata, you must use <code>clear</code> to replace the current dataset</li>
+            <li><strong>Overwriting raw data:</strong> Never save to the same file you loaded from <code>build/input/</code></li>
+            <li><strong>Losing variable labels:</strong> When exporting to CSV, variable labels are lost</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ========== DATA CLEANING ========== -->
+      <section id="data-cleaning" class="tutorial-section">
+        <h2>Data Cleaning</h2>
+
+        <div class="learning-objectives">
+          <h4>Learning Objectives</h4>
+          <ul>
+            <li>Inspect dataset structure and contents</li>
+            <li>Handle missing values</li>
+            <li>Create and modify variables</li>
+            <li>Filter observations</li>
+          </ul>
+        </div>
+
+        <h3>Inspecting Your Data</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Overview of dataset
+describe
+
+* Detailed variable information
+codebook income age
+
+* First few observations
+list in 1/10
+
+* Summary statistics
+summarize
+
+* Frequency table for categorical variable
+tabulate education</code></pre>
+          <pre class="code-content r"><code class="language-r"># Overview of dataset
+str(data)
+glimpse(data)
+
+# First few observations
+head(data, 10)
+
+# Summary statistics
+summary(data)
+
+# Frequency table for categorical variable
+table(data$education)</code></pre>
+        </div>
+
+        <h3>Creating and Modifying Variables</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Create new variable
+gen log_income = log(income)
+
+* Create variable based on condition
+gen high_earner = (income > 100000)
+
+* Modify existing variable
+replace age = . if age < 0
+
+* Recode categorical variable
+recode education (1/8 = 1 "Less than HS") ///
+                 (9/11 = 2 "Some HS") ///
+                 (12 = 3 "HS Grad") ///
+                 (13/15 = 4 "Some College") ///
+                 (16/20 = 5 "College+"), gen(educ_cat)
+
+* Rename variable
+rename oldname newname
+
+* Drop variable
+drop unwanted_var
+
+* Keep only certain variables
+keep id income age education</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+# Create new variable
+data <- data %>%
+  mutate(log_income = log(income))
+
+# Create variable based on condition
+data <- data %>%
+  mutate(high_earner = income > 100000)
+
+# Modify existing variable
+data <- data %>%
+  mutate(age = if_else(age < 0, NA_real_, age))
+
+# Recode categorical variable
+data <- data %>%
+  mutate(educ_cat = case_when(
+    education <= 8 ~ "Less than HS",
+    education <= 11 ~ "Some HS",
+    education == 12 ~ "HS Grad",
+    education <= 15 ~ "Some College",
+    education >= 16 ~ "College+",
+    TRUE ~ NA_character_
+  ))
+
+# Rename variable
+data <- data %>%
+  rename(newname = oldname)
+
+# Drop variable
+data <- data %>%
+  select(-unwanted_var)
+
+# Keep only certain variables
+data <- data %>%
+  select(id, income, age, education)</code></pre>
+        </div>
+
+        <h3>Filtering Observations</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Drop observations meeting condition
+drop if age < 18
+
+* Keep observations meeting condition
+keep if year >= 2010 & year <= 2020
+
+* Drop duplicates
+duplicates drop id, force
+
+* Drop missing values
+drop if missing(income)</code></pre>
+          <pre class="code-content r"><code class="language-r"># Filter observations
+data <- data %>%
+  filter(age >= 18)
+
+data <- data %>%
+  filter(year >= 2010 & year <= 2020)
+
+# Remove duplicates
+data <- data %>%
+  distinct(id, .keep_all = TRUE)
+
+# Remove missing values
+data <- data %>%
+  filter(!is.na(income))</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== RESHAPING ========== -->
+      <section id="reshaping" class="tutorial-section">
+        <h2>Reshaping Data (Long vs. Wide)</h2>
+
+        <div class="key-principle">
+          <h4>Key Principle: Long Data is (Almost) Always Better</h4>
+          <p>Most Stata/R commands expect data in <strong>long format</strong>: multiple rows per unit with one column for values. If you're copy-pasting variable names with different years (like <code>income_2018</code>, <code>income_2019</code>...), you probably want to reshape to long.</p>
+        </div>
+
+        <h3>Wide vs. Long Format</h3>
+        <p><strong>Wide format:</strong> One row per unit, multiple columns for different time periods</p>
+        <pre style="background: var(--code-bg); padding: 16px; border-radius: 6px; font-size: 0.85rem;">
+| id | income_2018 | income_2019 | income_2020 |
+|----|-------------|-------------|-------------|
+| 1  | 50000       | 52000       | 55000       |
+| 2  | 60000       | 61000       | 63000       |
+        </pre>
+
+        <p><strong>Long format:</strong> Multiple rows per unit, one column for time, one for value</p>
+        <pre style="background: var(--code-bg); padding: 16px; border-radius: 6px; font-size: 0.85rem;">
+| id | year | income |
+|----|------|--------|
+| 1  | 2018 | 50000  |
+| 1  | 2019 | 52000  |
+| 1  | 2020 | 55000  |
+| 2  | 2018 | 60000  |
+| 2  | 2019 | 61000  |
+| 2  | 2020 | 63000  |
+        </pre>
+
+        <h3>Reshaping Wide to Long</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Reshape from wide to long
+* i() = unit identifier (stays the same)
+* j() = new variable that captures what was in column names
+
+reshape long income_, i(id) j(year)
+
+* Rename for clarity
+rename income_ income</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(tidyr)
+
+# Reshape from wide to long
+data_long <- data %>%
+  pivot_longer(
+    cols = starts_with("income_"),
+    names_to = "year",
+    names_prefix = "income_",
+    values_to = "income"
+  ) %>%
+  mutate(year = as.numeric(year))</code></pre>
+        </div>
+
+        <h3>Reshaping Long to Wide</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Reshape from long to wide
+reshape wide income, i(id) j(year)</code></pre>
+          <pre class="code-content r"><code class="language-r"># Reshape from long to wide
+data_wide <- data_long %>%
+  pivot_wider(
+    names_from = year,
+    values_from = income,
+    names_prefix = "income_"
+  )</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== MERGING ========== -->
+      <section id="merging" class="tutorial-section">
+        <h2>Merging Datasets</h2>
+
+        <div class="key-principle">
+          <h4>Key Principle: Understand Your Merge Type (Avoid m:m!)</h4>
+          <p>Before merging, always ask: what should the merge type be?</p>
+          <ul>
+            <li><strong>1:1</strong> — Each observation in master matches exactly one in using (person → demographics)</li>
+            <li><strong>m:1</strong> — Many observations match one (individuals → state characteristics)</li>
+            <li><strong>1:m</strong> — One observation matches many (firm → firm-year panel)</li>
+            <li><strong>m:m</strong> — <strong>Almost always wrong!</strong> If you think you need this, reshape or collapse first</li>
+          </ul>
+        </div>
+
+        <h3>Basic Merge Syntax</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Load master dataset
+use "individuals.dta", clear
+
+* Merge with state-level data (many individuals per state)
+merge m:1 state using "state_characteristics.dta"
+
+* ALWAYS check merge results
+tab _merge
+
+* Investigate unmatched observations
+list if _merge == 1  // in master only
+list if _merge == 2  // in using only
+
+* Keep only matched (after investigating)
+keep if _merge == 3
+drop _merge</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+# Load datasets
+individuals <- read_dta("individuals.dta")
+state_chars <- read_dta("state_characteristics.dta")
+
+# Left join keeps all from individuals
+merged <- individuals %>%
+  left_join(state_chars, by = "state")
+
+# Check for unmatched
+merged %>%
+  filter(is.na(state_pop)) %>%  # assuming state_pop is from state_chars
+  count()
+
+# Inner join keeps only matched
+merged <- individuals %>%
+  inner_join(state_chars, by = "state")</code></pre>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>Common Mistakes</h4>
+          <ul>
+            <li><strong>Not checking <code>_merge</code>:</strong> Always inspect how many observations matched vs. didn't</li>
+            <li><strong>Duplicate keys:</strong> If you get unexpected results, check for duplicates with <code>duplicates report</code></li>
+            <li><strong>Using m:m:</strong> This creates a Cartesian product and is almost never what you want</li>
+          </ul>
+        </div>
+
+        <h3>Appending Datasets</h3>
+        <p>Use <code>append</code> to stack datasets vertically (same variables, different observations):</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Append multiple years
+use "data_2018.dta", clear
+append using "data_2019.dta"
+append using "data_2020.dta"</code></pre>
+          <pre class="code-content r"><code class="language-r"># Bind rows from multiple dataframes
+data_all <- bind_rows(
+  read_dta("data_2018.dta"),
+  read_dta("data_2019.dta"),
+  read_dta("data_2020.dta")
+)</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== SUMMARY STATS ========== -->
+      <section id="summary-stats" class="tutorial-section">
+        <h2>Summary Statistics</h2>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Basic summary statistics
+summarize income age education
+
+* Detailed statistics
+summarize income, detail
+
+* Summary by group
+bysort treatment: summarize outcome
+
+* Tabstat for custom statistics
+tabstat income, by(year) stat(mean sd p50 n)
+
+* Weighted statistics
+summarize income [aweight=pop_weight]</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+# Basic summary statistics
+summary(data %>% select(income, age, education))
+
+# Summary by group
+data %>%
+  group_by(treatment) %>%
+  summarize(
+    mean_outcome = mean(outcome, na.rm = TRUE),
+    sd_outcome = sd(outcome, na.rm = TRUE),
+    n = n()
+  )
+
+# Custom statistics
+data %>%
+  group_by(year) %>%
+  summarize(
+    mean = mean(income, na.rm = TRUE),
+    sd = sd(income, na.rm = TRUE),
+    median = median(income, na.rm = TRUE),
+    n = n()
+  )</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== LINEAR REGRESSION ========== -->
+      <section id="linear-regression" class="tutorial-section">
+        <h2>Linear Regression</h2>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Basic OLS regression
+regress income education age
+
+* With robust standard errors
+regress income education age, robust
+
+* With clustered standard errors
+regress income education age, cluster(state)
+
+* Fixed effects (using factor notation)
+regress income education age i.state
+
+* Store and compare results
+eststo clear
+eststo m1: regress income education
+eststo m2: regress income education age
+eststo m3: regress income education age i.state, cluster(state)
+esttab m1 m2 m3, se star(* 0.10 ** 0.05 *** 0.01)</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, modelsummary, sandwich, lmtest)
+
+# Basic OLS regression
+model <- lm(income ~ education + age, data = data)
+summary(model)
+
+# With robust standard errors
+coeftest(model, vcov = vcovHC(model, type = "HC1"))
+
+# With clustered standard errors (using fixest)
+model_cl <- feols(income ~ education + age,
+                  data = data,
+                  cluster = ~state)
+
+# Fixed effects
+model_fe <- feols(income ~ education + age | state,
+                  data = data,
+                  cluster = ~state)
+
+# Compare models
+modelsummary(list(model, model_cl, model_fe),
+             stars = c('*' = .1, '**' = .05, '***' = .01))</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== PANEL DATA ========== -->
+      <section id="panel-data" class="tutorial-section">
+        <h2>Panel Data Methods</h2>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Declare panel structure
+xtset id year
+
+* Fixed effects regression
+xtreg outcome treatment controls, fe
+
+* Two-way fixed effects
+reghdfe outcome treatment, absorb(id year) cluster(state)</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+
+# Fixed effects
+fe_model <- feols(outcome ~ treatment + controls | id,
+                  data = data)
+
+# Two-way fixed effects
+twfe_model <- feols(outcome ~ treatment | id + year,
+                    data = data,
+                    cluster = ~state)</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== DID ========== -->
+      <section id="did" class="tutorial-section">
+        <h2>Difference-in-Differences</h2>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Basic 2x2 DiD
+gen post = (year >= treatment_year)
+gen treat_post = treated * post
+
+regress outcome treated post treat_post, cluster(state)
+
+* Using factor notation (equivalent)
+regress outcome treated##post, cluster(state)
+
+* Two-way fixed effects DiD
+reghdfe outcome treat_post, absorb(id year) cluster(state)</code></pre>
+          <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+
+# Basic 2x2 DiD
+data <- data %>%
+  mutate(
+    post = year >= treatment_year,
+    treat_post = treated * post
+  )
+
+did_model <- feols(outcome ~ treated + post + treat_post,
+                   data = data,
+                   cluster = ~state)
+
+# Two-way fixed effects DiD
+twfe_did <- feols(outcome ~ treat_post | id + year,
+                  data = data,
+                  cluster = ~state)</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== LOOPS ========== -->
+      <section id="loops" class="tutorial-section">
+        <h2>Loops & Programming</h2>
+
+        <div class="key-principle">
+          <h4>Key Principle: Uniformity Enables Loops</h4>
+          <p>Use consistent, parallel naming conventions so you can loop over files and variables:</p>
+          <ul>
+            <li><strong>Bad:</strong> <code>income_2020</code>, <code>inc21</code>, <code>earnings_22</code></li>
+            <li><strong>Good:</strong> <code>income_2020</code>, <code>income_2021</code>, <code>income_2022</code></li>
+          </ul>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+              <button class="code-tab" data-lang="r">R</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* Loop over values
+forvalues year = 2018/2022 {
+    import delimited "data_`year'.csv", clear
+    save "data_`year'.dta", replace
+}
+
+* Loop over variable names
+foreach var in income age education {
+    summarize `var'
+}
+
+* Loop over files
+local files : dir "raw_data" files "*.csv"
+foreach f of local files {
+    import delimited "raw_data/`f'", clear
+    // cleaning code
+    local basename = subinstr("`f'", ".csv", "", .)
+    save "cleaned/`basename'.dta", replace
+}
+
+* Using macros
+local controls "age education experience"
+regress income treatment `controls'</code></pre>
+          <pre class="code-content r"><code class="language-r"># Loop over values
+for (year in 2018:2022) {
+  data <- read_csv(paste0("data_", year, ".csv"))
+  write_dta(data, paste0("data_", year, ".dta"))
+}
+
+# Loop over variable names
+for (var in c("income", "age", "education")) {
+  print(summary(data[[var]]))
+}
+
+# Loop over files
+pacman::p_load(purrr)
+files <- list.files("raw_data", pattern = "\\.csv$", full.names = TRUE)
+all_data <- map_dfr(files, read_csv)
+
+# Using functions for reusable code
+clean_data <- function(df) {
+  df %>%
+    filter(!is.na(income)) %>%
+    mutate(log_income = log(income))
+}
+
+data <- read_csv("raw_data.csv") %>%
+  clean_data()</code></pre>
+        </div>
+      </section>
+
+      <!-- ========== STATA TRAPS ========== -->
+      <section id="stata-traps" class="tutorial-section">
+        <h2>Stata Traps</h2>
+
+        <p>Stata has several behaviors that can silently produce wrong results if you're not aware of them. These "traps" have bitten even experienced researchers.</p>
+
+        <h3>Trap 1: Missing Values are Positive Infinity</h3>
+
+        <p>In Stata, missing values (<code>.</code>) are treated as <strong>larger than any number</strong> in comparisons. This is extremely counterintuitive and causes subtle bugs.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* This looks reasonable but is WRONG
+drop if age > 100
+
+* If age has missing values, this drops them too!
+* Because . > 100 evaluates to TRUE
+
+* CORRECT: explicitly handle missing
+drop if age > 100 & !missing(age)
+
+* Or equivalently
+drop if age > 100 & age < .</code></pre>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>Why This Matters</h4>
+          <p>Suppose you're creating a sample restriction like "keep adults only":</p>
+          <ul>
+            <li><code>keep if age >= 18</code> — This <strong>keeps</strong> observations where age is missing (since . >= 18 is TRUE)</li>
+            <li><code>drop if age < 18</code> — This <strong>keeps</strong> observations where age is missing (since . < 18 is FALSE)</li>
+          </ul>
+          <p>These two commands, which seem equivalent, produce different results when there are missing values!</p>
+        </div>
+
+        <h3>Trap 2: Silent Integer Overflow in egen group()</h3>
+
+        <p>When you create group identifiers with <code>egen</code>, Stata chooses a storage type based on the <em>first few observations</em>. With large datasets, this can silently overflow.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* DANGEROUS with large datasets
+egen patient_id = group(bene_id)
+
+* If you have more than 32,767 unique values (int max),
+* Stata may silently reuse numbers!
+* Patient 32,768 gets the same ID as patient 1.
+
+* SAFE: explicitly specify a larger type
+egen long patient_id = group(bene_id)
+
+* Or for very large datasets (>2 billion groups)
+egen double patient_id = group(bene_id)</code></pre>
+        </div>
+
+        <div class="key-principle">
+          <h4>Storage Type Limits</h4>
+          <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+            <tr style="background: var(--bg-subtle); border-bottom: 2px solid var(--border);">
+              <th style="padding: 8px; text-align: left;">Type</th>
+              <th style="padding: 8px; text-align: left;">Maximum Value</th>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 8px;"><code>byte</code></td>
+              <td style="padding: 8px;">127</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 8px;"><code>int</code></td>
+              <td style="padding: 8px;">32,767</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 8px;"><code>long</code></td>
+              <td style="padding: 8px;">2,147,483,647</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px;"><code>double</code></td>
+              <td style="padding: 8px;">~9 × 10<sup>15</sup> (integers)</td>
+            </tr>
+          </table>
+          <p>When in doubt, use <code>long</code>. The extra memory is worth the safety.</p>
+        </div>
+
+        <h3>Trap 3: Sorting Instability</h3>
+
+        <p>Stata's <code>sort</code> command is not stable—observations with the same values may appear in different orders each time you sort. This can cause non-reproducible results.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* DANGEROUS: non-reproducible
+sort state
+by state: gen first = (_n == 1)
+
+* Each time you run this, different observations
+* might be marked as "first"!
+
+* SAFE: sort by unique identifier too
+sort state person_id
+by state: gen first = (_n == 1)
+
+* Or use stable sort (slower but deterministic)
+sort state, stable</code></pre>
+        </div>
+
+        <h3>Trap 4: String Comparisons with Trailing Spaces</h3>
+
+        <p>String comparisons in Stata are sensitive to trailing spaces, which are often invisible.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* This might not match what you expect
+keep if state == "California"
+
+* If the data has "California " (with trailing space),
+* the comparison fails silently
+
+* SAFE: trim strings first
+replace state = strtrim(state)
+keep if state == "California"
+
+* Or use strmatch for pattern matching
+keep if strmatch(state, "California*")</code></pre>
+        </div>
+
+        <h3>Trap 5: Automatic Variable Abbreviation</h3>
+
+        <p>Stata allows you to abbreviate variable names, which can cause silent bugs when variable names are similar.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-tabs">
+              <button class="code-tab active" data-lang="stata">Stata</button>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre class="code-content stata active"><code class="language-stata">* With variables: income, income_spouse, income_adjusted
+summarize inc
+* Which variable did this use? Stata picks one!
+
+* SAFE: turn off abbreviation
+set varabbrev off
+
+* Now Stata will error instead of guessing
+summarize inc
+* Error: variable inc not found
+
+* Better: always use full variable names</code></pre>
+        </div>
+
+        <div class="common-mistakes">
+          <h4>General Defense</h4>
+          <p>Add these lines to the top of every do-file:</p>
+          <pre style="background: var(--code-bg); padding: 12px; border-radius: 6px; font-size: 0.85rem;">
+set varabbrev off       // Don't abbreviate variable names
+set more off           // Don't pause for --more--
+version 17             // Lock Stata version for reproducibility</pre>
+        </div>
+      </section>
+
+      <!-- Acknowledgements -->
+      <section id="acknowledgements" class="tutorial-section" style="margin-top: 60px; border-top: 1px solid var(--border); padding-top: 30px;">
+        <h2>Acknowledgements</h2>
+        <p>This tutorial draws on materials developed by previous 14.33 teaching staff and other sources:</p>
+        <ul>
+          <li><strong>Stata introduction:</strong> Based on materials by Sydnee Caldwell and Benjamin Deaner, with additional resources from UCLA, Princeton, and UNC tutorials</li>
+          <li><strong>Causal inference review:</strong> Draws from <em>Mastering 'Metrics</em> (Angrist &amp; Pischke) and notes by Advik Shreekumar, Viola Corradini, and Kelsey Moran; based on slides by Isabel Di Tella</li>
+          <li><strong>Difference-in-differences:</strong> Based on slides by Oscar Torres-Reyna (Princeton, 2015)</li>
+        </ul>
+      </section>
+
+      <!-- Footer -->
+      <footer class="site-footer" style="margin-top: 60px; text-align: left;">
+        <p>
+          <a href="../../teaching.html">Teaching</a> &bull;
+          <a href="../../index.html">Theodore L. Caputi</a> &bull;
+          <a href="https://economics.mit.edu">MIT Economics</a>
+        </p>
+      </footer>
+
+    </main>
+
+    <button class="mobile-menu-btn" aria-label="Toggle menu">&#9776;</button>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
+  <script src="prism-stata.js"></script>
+  <script src="tutorial.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Eleventy
+_site/
+dist/
+
+# Node
+node_modules/
+package-lock.json
+
+# Editor
+.DS_Store
+*.swp
+*.swo
+
+# Private notes
+.CHANGELOG/
+
+# Replication package outputs (data files only, keep directory structure)
+tutorial/worked-examples/*/build/input/*.dta
+tutorial/worked-examples/*/build/input/*.csv
+tutorial/worked-examples/*/build/output/*.dta
+tutorial/worked-examples/*/build/output/*.csv
+
+# Logs
+*.log

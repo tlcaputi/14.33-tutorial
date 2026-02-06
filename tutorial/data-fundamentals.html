@@ -1,0 +1,1450 @@
+---
+layout: layouts/tutorial.html
+title: Data Fundamentals | Intro to Data Analysis for Economics
+current_page: data-fundamentals
+---
+<h1>Data Fundamentals</h1>
+<p class="subtitle">Load, clean, reshape, and merge your data</p>
+
+<!-- Growth Mindset Message -->
+<div class="callout-success">
+  <strong>Data wrangling is 80% of the work</strong>
+  <p>
+    The glamorous part of empirical economics is running regressions. But most of your time will be spent cleaning, reshaping, and merging data. This is normal. Professional economists spend most of their coding time on data prep too. Once you get comfortable with these operations, the analysis becomes straightforward.
+  </p>
+</div>
+
+<div class="key-principle">
+  <h4>Think of Data as Excel Spreadsheets</h4>
+  <p>The datasets we work with in Stata and R are just <strong>tables</strong>—exactly like Excel spreadsheets. Each row is an observation (a person, a country-year, a transaction), and each column is a variable (age, GDP, price). If you've used Excel, you already understand the basic structure. The difference is that instead of clicking and dragging, we write code to manipulate these tables—which makes our work reproducible and scalable to millions of rows.</p>
+</div>
+
+<section id="unit-of-analysis" class="tutorial-section">
+  <h2>Choosing Your Unit of Analysis</h2>
+
+  <p>Before you write any code, ask yourself: <strong>What is one row in my final dataset?</strong> This is your <em>unit of analysis</em>, and it determines everything else.</p>
+
+  <div class="learning-objectives">
+    <h4>Common Units of Analysis in Economics</h4>
+    <ul>
+      <li><strong>Individual</strong> — One row per person (survey data, experiments)</li>
+      <li><strong>Individual-year</strong> — One row per person per year (labor panels)</li>
+      <li><strong>State-year</strong> — One row per state per year (policy studies)</li>
+      <li><strong>Country-year</strong> — One row per country per year (macro/trade)</li>
+      <li><strong>Firm</strong> — One row per company (cross-sectional)</li>
+      <li><strong>Firm-quarter</strong> — One row per company per quarter (finance panels)</li>
+      <li><strong>Transaction</strong> — One row per purchase/event (high-frequency data)</li>
+    </ul>
+  </div>
+
+  <p>Your research question determines your unit of analysis. Consider these examples:</p>
+
+  <div class="comparison-grid">
+    <div>
+      <strong style="color: var(--primary);">Question:</strong> Do minimum wage increases affect employment?
+      <p style="font-size: 0.9rem; margin: 8px 0 0;"><strong>Unit:</strong> State-year</p>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 4px 0 0;">Policy varies by state and year. Outcome (employment) is also measured at state-year level.</p>
+    </div>
+    <div>
+      <strong style="color: var(--primary);">Question:</strong> Does education affect individual earnings?
+      <p style="font-size: 0.9rem; margin: 8px 0 0;"><strong>Unit:</strong> Individual-year</p>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 4px 0 0;">Track individuals over time in panel data (e.g., NLSY, PSID) to see how education affects earnings trajectories.</p>
+    </div>
+  </div>
+
+  <div class="comparison-grid" style="margin-top: 16px;">
+    <div>
+      <strong style="color: var(--primary);">Question:</strong> Do lower BAC limits reduce drunk driving fatalities?
+      <p style="font-size: 0.9rem; margin: 8px 0 0;"><strong>Unit:</strong> State-year</p>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 4px 0 0;">Policy (BAC limit) varies by state and year. Fatalities are counted per state-year.</p>
+    </div>
+    <div>
+      <strong style="color: var(--primary);">Question:</strong> Does job training affect re-employment?
+      <p style="font-size: 0.9rem; margin: 8px 0 0;"><strong>Unit:</strong> Individual-month</p>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 4px 0 0;">Track each person's employment status over time after treatment.</p>
+    </div>
+  </div>
+
+  <div class="key-principle">
+    <h4>The Data Rarely Comes at the Right Level</h4>
+    <p>You'll often need to <strong>aggregate</strong> raw data to match your unit of analysis. For example:</p>
+    <ul style="margin: 8px 0 0 20px;">
+      <li>You want state-year data, but your raw data has one row per <em>car crash</em>. You need to count crashes per state-year.</li>
+      <li>You want individual-level data, but you have multiple survey responses per person. You need to collapse to one row per person.</li>
+      <li>You want firm-year data, but you have daily stock prices. You need to aggregate to annual averages.</li>
+    </ul>
+    <p style="margin-top: 12px;">The <a href="#aggregating">Aggregating Data</a> section below shows how to do this.</p>
+  </div>
+</section>
+
+<section id="reading-writing" class="tutorial-section">
+  <h2>Reading & Writing Files</h2>
+
+  <h3>Loading Data</h3>
+  <p>The first step in any analysis is loading your data into memory. Different file formats require different commands:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Load Stata dataset
+use "data.dta", clear
+
+* Load CSV file
+import delimited "data.csv", clear
+
+* Load Excel file
+import excel "data.xlsx", sheet("Sheet1") firstrow clear</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(haven, readr, readxl)
+
+# Load Stata dataset
+data <- read_dta("data.dta")
+
+# Load CSV file
+data <- read_csv("data.csv")
+
+# Load Excel file
+data <- read_excel("data.xlsx", sheet = "Sheet1")</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+
+# Load Stata dataset
+data = pd.read_stata("data.dta")
+
+# Load CSV file
+data = pd.read_csv("data.csv")
+
+# Load Excel file
+data = pd.read_excel("data.xlsx", sheet_name="Sheet1")</code></pre>
+  </div>
+
+  <h3>Loading Specific Variables or Observations</h3>
+  <p>For large datasets, you can load only what you need:</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Load only specific variables
+use income age education using "data.dta", clear
+
+* Load only observations meeting a condition
+use "data.dta" if year == 2020, clear
+
+* Combine both
+use income age using "data.dta" if state == "CA", clear</code></pre>
+    <pre class="code-content r"><code class="language-r"># Load specific columns from CSV
+data <- read_csv("data.csv", col_select = c(income, age, education))
+
+# Filter while reading (with data.table for large files)
+pacman::p_load(data.table)
+data <- fread("data.csv", select = c("income", "age"))[year == 2020]</code></pre>
+    <pre class="code-content python"><code class="language-python"># Load specific columns
+data = pd.read_csv("data.csv", usecols=["income", "age", "education"])
+
+# Load and filter (for very large files, use chunks)
+data = pd.read_stata("data.dta", columns=["income", "age"])
+data = data[data["year"] == 2020]</code></pre>
+  </div>
+
+  <h3>Saving Data</h3>
+  <p>After cleaning or transforming your data, save it so you don't have to re-run everything next time:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Save as Stata dataset
+save "cleaned_data.dta", replace
+
+* Export to CSV
+export delimited "cleaned_data.csv", replace</code></pre>
+    <pre class="code-content r"><code class="language-r"># Save as Stata dataset
+write_dta(data, "cleaned_data.dta")
+
+# Export to CSV
+write_csv(data, "cleaned_data.csv")</code></pre>
+    <pre class="code-content python"><code class="language-python"># Save as Stata dataset
+data.to_stata("cleaned_data.dta", write_index=False)
+
+# Export to CSV
+data.to_csv("cleaned_data.csv", index=False)</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Save Intermediate Files</h4>
+    <p>Save your data after each major step with numbered prefixes. When something breaks at step 5, you can start from step 4 instead of re-running everything:</p>
+    <ul style="margin: 8px 0 0 20px;">
+      <li><code>01_imported.dta</code></li>
+      <li><code>02_cleaned.dta</code></li>
+      <li><code>03_merged.dta</code></li>
+    </ul>
+  </div>
+</section>
+
+<section id="data-acquisition" class="tutorial-section">
+  <h2>Getting Your Data: Best Practices</h2>
+
+  <p>Before you can load data, you need to <em>get</em> it. How you acquire your data matters for reproducibility.</p>
+
+  <div class="callout-danger">
+    <strong>The Golden Rule: Raw Data is READ-ONLY</strong>
+    <p>
+      Never modify your original data files. Ever. If you need to clean or transform data, write code that reads the raw file and saves a new cleaned version. This way you can always trace back to the original source.
+    </p>
+  </div>
+
+  <h3>Download Programmatically When Possible</h3>
+  <p>The best way to get data is to download it with code. This makes your entire pipeline reproducible—anyone can run your script and get the same data.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Example: Download FARS data (fatal crash data from NHTSA)
+* Each year's data is a separate zip file
+
+local years "2000 2001 2002 2003 2004 2005"
+
+foreach year of local years {
+    * Download the zip file
+    copy "https://static.nhtsa.gov/nhtsa/downloads/FARS/`year'/National/FARS`year'NationalCSV.zip" ///
+         "data/raw/FARS`year'.zip", replace
+
+    * Unzip it
+    unzipfile "data/raw/FARS`year'.zip", replace
+}
+
+* Now you have reproducible data acquisition!</code></pre>
+    <pre class="code-content r"><code class="language-r"># Example: Download FARS data (fatal crash data from NHTSA)
+pacman::p_load(tidyverse)
+
+years <- 2000:2005
+
+for (year in years) {
+  url <- glue::glue(
+    "https://static.nhtsa.gov/nhtsa/downloads/FARS/{year}/National/FARS{year}NationalCSV.zip"
+  )
+  destfile <- glue::glue("data/raw/FARS{year}.zip")
+
+  # Download
+  download.file(url, destfile, mode = "wb")
+
+  # Unzip
+  unzip(destfile, exdir = glue::glue("data/raw/FARS{year}"))
+}
+
+# Now you have reproducible data acquisition!</code></pre>
+    <pre class="code-content python"><code class="language-python"># Example: Download FARS data (fatal crash data from NHTSA)
+import requests
+import zipfile
+from pathlib import Path
+
+years = range(2000, 2006)
+
+for year in years:
+    url = f"https://static.nhtsa.gov/nhtsa/downloads/FARS/{year}/National/FARS{year}NationalCSV.zip"
+    zip_path = Path(f"data/raw/FARS{year}.zip")
+
+    # Download
+    response = requests.get(url)
+    zip_path.write_bytes(response.content)
+
+    # Unzip
+    with zipfile.ZipFile(zip_path, 'r') as z:
+        z.extractall(f"data/raw/FARS{year}")
+
+# Now you have reproducible data acquisition!</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Why Programmatic Downloads Matter</h4>
+    <ul style="margin: 8px 0 0 20px;">
+      <li><strong>Reproducibility:</strong> Anyone can run your code and get the exact same data</li>
+      <li><strong>Documentation:</strong> The URL in your code shows exactly where the data came from</li>
+      <li><strong>Automation:</strong> Easy to update when new data is released</li>
+      <li><strong>Version control:</strong> Your git history shows when you downloaded the data</li>
+    </ul>
+  </div>
+
+  <h3>When You Can't Download Programmatically</h3>
+  <p>Sometimes data requires manual download (login required, CAPTCHA, web forms). In these cases, document thoroughly:</p>
+
+  <div class="callout-info">
+    <h4 style="margin: 0 0 12px;">Create a DATA_SOURCES.md File</h4>
+    <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code># Data Sources
+
+## FARS (Fatality Analysis Reporting System)
+- **Source:** NHTSA
+- **URL:** https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars
+- **Downloaded:** 2026-02-04
+- **Files:** FARS2000.zip through FARS2008.zip
+- **Archive:** https://web.archive.org/web/20260204/https://www.nhtsa.gov/...
+
+## State Policy Data
+- **Source:** Alcohol Policy Information System (APIS)
+- **URL:** https://alcoholpolicy.niaaa.nih.gov/
+- **Downloaded:** 2026-02-04
+- **Notes:** Required selecting "Blood Alcohol Concentration Limits"
+  and exporting to CSV. See screenshots in docs/data_download/</code></pre>
+  </div>
+
+  <h3>Archive Your Sources with archive.org</h3>
+  <p>Websites change. Data gets moved or deleted. Before you start a project, archive your data sources:</p>
+
+  <ol style="margin: 16px 0 0 20px;">
+    <li>Go to <a href="https://web.archive.org/" target="_blank">web.archive.org</a></li>
+    <li>Paste the URL of your data source</li>
+    <li>Click "Save Page" to create an archived version</li>
+    <li>Save the archive URL in your DATA_SOURCES.md</li>
+  </ol>
+
+  <p style="margin-top: 16px;">This way, even if the original website disappears, you (and anyone replicating your work) can see exactly where your data came from.</p>
+
+  <div class="callout-warning">
+    <strong>Pro Tip: Screenshot the Download Process</strong>
+    <p>For data that requires navigating a web interface, take screenshots of each step. Save them in a <code>docs/data_download/</code> folder. Future you (and your replicators) will thank you.</p>
+  </div>
+</section>
+
+<section id="cleaning" class="tutorial-section">
+  <h2>Data Cleaning</h2>
+
+  <h3>Inspecting Your Data</h3>
+  <p>Before doing anything else, look at your data. How many observations? What variables exist? Are there missing values? Any obvious errors? These commands give you a quick overview:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Overview of dataset
+describe
+
+* Summary statistics
+summarize
+
+* First few rows
+list in 1/10
+
+* Check for missing values
+misstable summarize
+
+* Detailed info on specific variables
+codebook income education</code></pre>
+    <pre class="code-content r"><code class="language-r"># Overview of dataset
+str(data)
+glimpse(data)
+
+# Summary statistics
+summary(data)
+
+# First few rows
+head(data, 10)
+
+# Check for missing values
+colSums(is.na(data))</code></pre>
+    <pre class="code-content python"><code class="language-python"># Overview of dataset
+data.info()
+data.dtypes
+
+# Summary statistics
+data.describe()
+
+# First few rows
+data.head(10)
+
+# Check for missing values
+data.isna().sum()</code></pre>
+  </div>
+
+  <h3>Creating and Modifying Variables</h3>
+  <p>Most analysis requires creating new variables—transformations like log income, indicators like "high earner," or cleaning up invalid values. Here are the essential operations:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Create new variable
+gen log_income = log(income)
+
+* Conditional assignment
+gen high_earner = (income > 100000)
+
+* Modify variable
+replace age = . if age < 0
+
+* Drop observations
+drop if missing(income)
+
+* Keep only certain variables
+keep id income age</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+data <- data %>%
+  mutate(
+    # Create new variable
+    log_income = log(income),
+    # Conditional assignment
+    high_earner = income > 100000,
+    # Modify variable
+    age = if_else(age < 0, NA_real_, age)
+  ) %>%
+  # Drop observations
+  filter(!is.na(income)) %>%
+  # Keep only certain variables
+  select(id, income, age)</code></pre>
+    <pre class="code-content python"><code class="language-python">import numpy as np
+
+# Create new variable
+data["log_income"] = np.log(data["income"])
+
+# Conditional assignment
+data["high_earner"] = data["income"] > 100000
+
+# Modify variable
+data.loc[data["age"] < 0, "age"] = np.nan
+
+# Drop observations
+data = data.dropna(subset=["income"])
+
+# Keep only certain variables
+data = data[["id", "income", "age"]]</code></pre>
+  </div>
+
+  <h3>Recoding Categorical Variables</h3>
+  <p>Often you need to convert continuous variables into categories (age groups, education levels) or simplify existing categories. This is called recoding:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Recode numeric values into categories
+recode education (1/8 = 1 "Less than HS") ///
+                 (9/11 = 2 "Some HS") ///
+                 (12 = 3 "HS Graduate") ///
+                 (13/15 = 4 "Some College") ///
+                 (16/20 = 5 "College+"), gen(educ_cat)
+
+* Simple recode
+recode age (18/29 = 1) (30/49 = 2) (50/64 = 3) (65/100 = 4), gen(age_group)</code></pre>
+    <pre class="code-content r"><code class="language-r">data <- data %>%
+  mutate(
+    educ_cat = case_when(
+      education <= 8 ~ "Less than HS",
+      education <= 11 ~ "Some HS",
+      education == 12 ~ "HS Graduate",
+      education <= 15 ~ "Some College",
+      education >= 16 ~ "College+"
+    ),
+    age_group = cut(age, breaks = c(18, 30, 50, 65, 100),
+                    labels = c("18-29", "30-49", "50-64", "65+"),
+                    right = FALSE)
+  )</code></pre>
+    <pre class="code-content python"><code class="language-python"># Using pd.cut for numeric ranges
+data["age_group"] = pd.cut(data["age"],
+                           bins=[18, 30, 50, 65, 100],
+                           labels=["18-29", "30-49", "50-64", "65+"])
+
+# Using np.select for complex recoding
+conditions = [
+    data["education"] <= 8,
+    data["education"] <= 11,
+    data["education"] == 12,
+    data["education"] <= 15,
+    data["education"] >= 16
+]
+choices = ["Less than HS", "Some HS", "HS Graduate", "Some College", "College+"]
+# Note: default="" required for numpy 1.25+ when choices are strings
+data["educ_cat"] = np.select(conditions, choices, default="")</code></pre>
+  </div>
+</section>
+
+<section id="reshaping" class="tutorial-section">
+  <h2>Reshaping Data</h2>
+
+  <div class="key-principle">
+    <h4>Long Data is (Almost) Always Better</h4>
+    <p>Most commands expect <strong>long format</strong>: multiple rows per unit, one column for values. If you're copy-pasting variable names with years (<code>income_2018</code>, <code>income_2019</code>...), you probably need to reshape to long.</p>
+  </div>
+
+  <h3>Wide vs. Long Format</h3>
+  <div class="comparison-grid">
+    <div>
+      <strong style="color: var(--primary);">Wide Format</strong>
+      <pre style="margin: 12px 0 0; font-size: 0.85rem; background: var(--bg-subtle); padding: 12px; border-radius: 4px;">
+id  income_2020  income_2021
+1   50000        52000
+2   60000        61000</pre>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0 0;">One row per unit. Each time period is a separate column.</p>
+    </div>
+    <div>
+      <strong style="color: var(--success);">Long Format</strong>
+      <pre style="margin: 12px 0 0; font-size: 0.85rem; background: var(--bg-subtle); padding: 12px; border-radius: 4px;">
+id  year  income
+1   2020  50000
+1   2021  52000
+2   2020  60000
+2   2021  61000</pre>
+      <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0 0;">Multiple rows per unit. <strong>Two columns (id + year) together identify each row.</strong></p>
+    </div>
+  </div>
+
+  <div class="learning-objectives">
+    <h4>Key Insight: Multiple Identifier Columns</h4>
+    <p>In long format, a <strong>single column no longer uniquely identifies each row</strong>. Instead, two or more columns together form the unique identifier:</p>
+    <ul>
+      <li><strong>Panel data:</strong> <code>country</code> + <code>year</code> together identify each observation</li>
+      <li><strong>Individual-time:</strong> <code>person_id</code> + <code>date</code> together identify each observation</li>
+      <li><strong>Repeated measures:</strong> <code>subject_id</code> + <code>treatment_round</code> together identify each observation</li>
+    </ul>
+    <p style="margin-bottom: 0;">This is why Stata's <code>reshape</code> command requires both <code>i()</code> (the unit identifier) and <code>j()</code> (the new time/category variable).</p>
+  </div>
+
+  <h3>Reshaping Wide to Long</h3>
+
+  <!-- Predict box -->
+  <div class="callout-warning">
+    <strong>Before running this code, predict:</strong> If you have wide data with 100 people and columns for <code>income_2020</code>, <code>income_2021</code>, <code>income_2022</code>, how many rows will you have after reshaping to long?
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
+      <p style="margin: 8px 0 0;">300 rows. Each of the 100 people will have 3 rows (one for each year). The data goes from 100 x 4 columns to 300 x 3 columns.</p>
+    </details>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* i() = unit identifier, j() = what becomes the new column
+reshape long income_, i(id) j(year)
+rename income_ income</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(tidyr)
+
+data_long <- data %>%
+  pivot_longer(
+    cols = starts_with("income_"),
+    names_to = "year",
+    names_prefix = "income_",
+    values_to = "income"
+  ) %>%
+  mutate(year = as.numeric(year))</code></pre>
+    <pre class="code-content python"><code class="language-python"># Melt wide to long
+data_long = pd.melt(
+    data,
+    id_vars=["id"],
+    value_vars=["income_2020", "income_2021"],
+    var_name="year",
+    value_name="income"
+)
+# Clean up year column
+data_long["year"] = data_long["year"].str.replace("income_", "").astype(int)</code></pre>
+  </div>
+
+  <h3>Reshaping Long to Wide</h3>
+  <p>Sometimes you need the opposite—converting long data to wide format (e.g., for certain graph commands or exporting).</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* i() = unit identifier, j() = column whose values become new variable names
+reshape wide income, i(id) j(year)
+
+* This creates: income2020, income2021, etc.</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(tidyr)
+
+data_wide <- data_long %>%
+  pivot_wider(
+    id_cols = id,
+    names_from = year,
+    names_prefix = "income_",
+    values_from = income
+  )</code></pre>
+    <pre class="code-content python"><code class="language-python"># Pivot long to wide
+data_wide = data_long.pivot(
+    index="id",
+    columns="year",
+    values="income"
+).reset_index()
+
+# Rename columns
+data_wide.columns = ["id"] + [f"income_{y}" for y in data_wide.columns[1:]]</code></pre>
+  </div>
+</section>
+
+<section id="aggregating" class="tutorial-section">
+  <h2>Aggregating Data</h2>
+
+  <p>Often your raw data comes at a finer level than your unit of analysis. You need to <strong>aggregate</strong> (collapse) it to match.</p>
+
+  <h3>A Real Example: Crash Data → State-Year Counts</h3>
+
+  <p>Suppose you're studying whether lower BAC limits reduce drunk driving fatalities. Your raw data is the <a href="https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars" target="_blank">FARS</a> database, which has <strong>one row per fatal crash</strong>:</p>
+
+  <div style="margin: 20px 0;">
+    <strong>Raw Data: Crash-Level (one row per crash)</strong>
+    <pre style="margin: 8px 0 0; font-size: 0.8rem; background: var(--bg-subtle); padding: 12px; border-radius: 4px; overflow-x: auto;">
+crash_id   state    year    drunk_driver    fatalities
+1001       MA       2010    1               1
+1002       MA       2010    0               2
+1003       MA       2010    1               1
+1004       CA       2010    0               3
+1005       CA       2010    1               1
+1006       MA       2011    1               2
+...</pre>
+    <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0 0;">~30,000 fatal crashes per year × 20 years = ~600,000 rows</p>
+  </div>
+
+  <p>But your unit of analysis is <strong>state-year</strong> because BAC policies vary at the state-year level. You need to aggregate:</p>
+
+  <div style="margin: 20px 0;">
+    <strong>Aggregated Data: State-Year Level (one row per state-year)</strong>
+    <pre style="margin: 8px 0 0; font-size: 0.8rem; background: var(--bg-subtle); padding: 12px; border-radius: 4px; overflow-x: auto;">
+state    year    total_crashes    drunk_crashes    total_fatalities
+MA       2010    3                2                4
+CA       2010    2                1                4
+MA       2011    1                1                2
+...</pre>
+    <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0 0;">50 states × 20 years = 1,000 rows</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Start with crash-level data
+use "fars_crashes.dta", clear
+
+* Collapse to state-year level
+collapse (count) total_crashes=crash_id ///
+         (sum) drunk_crashes=drunk_driver ///
+         (sum) total_fatalities=fatalities, ///
+         by(state year)
+
+* Now you have one row per state-year
+* Ready to merge with policy data</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+# Start with crash-level data
+crashes <- read_dta("fars_crashes.dta")
+
+# Collapse to state-year level
+state_year <- crashes %>%
+  group_by(state, year) %>%
+  summarize(
+    total_crashes = n(),
+    drunk_crashes = sum(drunk_driver, na.rm = TRUE),
+    total_fatalities = sum(fatalities, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Now you have one row per state-year</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+
+# Start with crash-level data
+crashes = pd.read_stata("fars_crashes.dta")
+
+# Collapse to state-year level
+state_year = crashes.groupby(["state", "year"]).agg(
+    total_crashes=("crash_id", "count"),
+    drunk_crashes=("drunk_driver", "sum"),
+    total_fatalities=("fatalities", "sum")
+).reset_index()
+
+# Now you have one row per state-year</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Always Check Your Aggregation</h4>
+    <p>After aggregating, verify the results make sense:</p>
+    <ul style="margin: 8px 0 0 20px;">
+      <li>Row count: Do you have the expected number of state-years?</li>
+      <li>Totals: Does <code>sum(total_crashes)</code> equal the original row count?</li>
+      <li>Unique IDs: Is each state-year now unique?</li>
+    </ul>
+  </div>
+
+  <h3>Group Calculations with egen</h3>
+  <p>The <code>egen</code> command ("extensions to generate") creates new variables based on functions applied across observations:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Mean across all observations
+egen income_mean = mean(income)
+
+* Mean within groups (by state)
+bysort state: egen income_mean_state = mean(income)
+
+* Other useful egen functions:
+bysort state: egen income_max = max(income)
+bysort state: egen income_sd = sd(income)
+bysort state: egen income_count = count(income)
+bysort state: egen income_p50 = pctile(income), p(50)</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+
+# Add group-level statistics while keeping all rows
+data <- data %>%
+  group_by(state) %>%
+  mutate(
+    income_mean_state = mean(income, na.rm = TRUE),
+    income_max = max(income, na.rm = TRUE),
+    income_sd = sd(income, na.rm = TRUE),
+    income_count = n(),
+    income_p50 = median(income, na.rm = TRUE)
+  ) %>%
+  ungroup()</code></pre>
+    <pre class="code-content python"><code class="language-python"># Add group-level statistics while keeping all rows
+data["income_mean_state"] = data.groupby("state")["income"].transform("mean")
+data["income_max"] = data.groupby("state")["income"].transform("max")
+data["income_sd"] = data.groupby("state")["income"].transform("std")
+data["income_count"] = data.groupby("state")["income"].transform("count")
+data["income_p50"] = data.groupby("state")["income"].transform("median")</code></pre>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>gen sum vs. egen sum</h4>
+    <p>In Stata, <code>gen sum()</code> creates a <em>running total</em>, while <code>egen sum()</code> creates the <em>group total</em>. Always read the help file—function names can be misleading!</p>
+  </div>
+
+  <h3>Collapsing to Group Level</h3>
+  <p>Use <code>collapse</code> to aggregate data to a higher level (e.g., individual → state, state-year → state):</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Collapse to state-level means
+collapse (mean) income age, by(state)
+
+* Multiple statistics
+collapse (mean) income_mean=income ///
+         (sd) income_sd=income ///
+         (count) n=income, by(state)
+
+* Different statistics for different variables
+collapse (mean) income (max) tax_rate (sum) population, by(state year)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Collapse to state level
+state_data <- data %>%
+  group_by(state) %>%
+  summarize(
+    income_mean = mean(income, na.rm = TRUE),
+    income_sd = sd(income, na.rm = TRUE),
+    n = n()
+  )
+
+# Different statistics for different variables
+state_year_data <- data %>%
+  group_by(state, year) %>%
+  summarize(
+    income = mean(income, na.rm = TRUE),
+    tax_rate = max(tax_rate, na.rm = TRUE),
+    population = sum(population, na.rm = TRUE),
+    .groups = "drop"
+  )</code></pre>
+    <pre class="code-content python"><code class="language-python"># Collapse to state level
+state_data = data.groupby("state").agg(
+    income_mean=("income", "mean"),
+    income_sd=("income", "std"),
+    n=("income", "count")
+).reset_index()
+
+# Different statistics for different variables
+state_year_data = data.groupby(["state", "year"]).agg(
+    income=("income", "mean"),
+    tax_rate=("tax_rate", "max"),
+    population=("population", "sum")
+).reset_index()</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>egen vs. collapse</h4>
+    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+      <li><strong>egen</strong> — Adds a new column but keeps all rows. Use when you need the group statistic alongside individual data.</li>
+      <li><strong>collapse</strong> — Reduces the dataset to one row per group. Use when you want aggregated data only.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="merging" class="tutorial-section">
+  <h2>Merging Datasets</h2>
+
+  <p>Merging combines two datasets that share a common identifier (like person ID or state-year).</p>
+
+  <h3>Types of Joins</h3>
+  <p>The most important thing to understand is what happens to rows that don't match:</p>
+
+  <div style="margin: 24px 0; text-align: center;">
+    <img src="https://www.datacourses.com/wp-content/uploads/2019/11/join-types-merge-names.jpg" alt="Visual diagram of join types showing inner, left, right, and full outer joins with Venn diagrams" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border);">
+    <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">Credit: datacourses.com</p>
+  </div>
+
+  <ul style="line-height: 2;">
+    <li><strong>Inner join:</strong> Keep only rows that match in <em>both</em> datasets</li>
+    <li><strong>Left join:</strong> Keep all rows from the left (master) dataset</li>
+    <li><strong>Right join:</strong> Keep all rows from the right (using) dataset</li>
+    <li><strong>Full outer join:</strong> Keep all rows from both datasets</li>
+  </ul>
+
+  <h3>Merge Types by Relationship</h3>
+
+  <div class="key-principle">
+    <h4>Know Your Merge Type</h4>
+    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+      <li><strong>1:1</strong> — Each row matches exactly one row (person → demographics)</li>
+      <li><strong>m:1</strong> — Many rows match one (students → school characteristics)</li>
+      <li><strong>1:m</strong> — One row matches many (firm → firm-year panel)</li>
+      <li><strong style="color: #c0392b;">m:m</strong> — <strong>Almost always wrong!</strong> If you think you need this, reshape first.</li>
+    </ul>
+  </div>
+
+  <h3>When Merges Create Duplicates</h3>
+
+  <p>Merges can increase your row count. This is <strong>sometimes expected</strong> and <strong>sometimes a bug</strong>.</p>
+
+  <div class="comparison-grid">
+    <div style="background: #e8f5e9; border-color: #c8e6c9;">
+      <h4 style="margin-top: 0; color: var(--success);">Expected: m:1 or 1:m Merges</h4>
+      <p style="font-size: 0.95rem; margin-bottom: 12px;">When merging individual data with aggregate data, rows <em>should</em> duplicate:</p>
+      <ul style="font-size: 0.9rem; margin: 0; padding-left: 18px;">
+        <li>100 students + 5 schools → still 100 rows (each student gets their school's data)</li>
+        <li>50 states + 10 years of policy data → 500 state-year rows</li>
+      </ul>
+    </div>
+    <div style="background: #ffebee; border-color: #ffcdd2;">
+      <h4 style="margin-top: 0; color: #c0392b;">Unexpected: Accidental Duplicates</h4>
+      <p style="font-size: 0.95rem; margin-bottom: 12px;">If your row count increases unexpectedly, you probably have duplicate keys:</p>
+      <ul style="font-size: 0.9rem; margin: 0; padding-left: 18px;">
+        <li>Two "John Smith" entries in one dataset → each gets merged twice</li>
+        <li>Forgot that some IDs appear multiple times</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* BEFORE merging: Check for unexpected duplicates
+duplicates report person_id      // Should say "all unique" for 1:1
+duplicates report state          // OK to have duplicates for m:1
+
+* Count rows before and after
+count
+local n_before = r(N)
+
+merge m:1 state using "state_data.dta"
+
+count
+local n_after = r(N)
+
+* If n_after > n_before in a m:1 merge, something is wrong!
+di "Rows before: `n_before'"
+di "Rows after: `n_after'"
+if `n_after' > `n_before' {
+    di as error "WARNING: Row count increased - check for duplicate keys!"
+}</code></pre>
+    <pre class="code-content r"><code class="language-r"># BEFORE merging: Check for duplicates
+individuals %>% count(person_id) %>% filter(n > 1)  # Should be empty for 1:1
+state_data %>% count(state) %>% filter(n > 1)       # Should be empty
+
+# Count rows before and after
+n_before <- nrow(individuals)
+
+merged <- individuals %>% left_join(state_data, by = "state")
+
+n_after <- nrow(merged)
+
+# Check if row count changed unexpectedly
+if (n_after > n_before) {
+  warning("Row count increased! Check for duplicate keys in state_data")
+  # Find the problem
+  state_data %>% count(state) %>% filter(n > 1)
+}</code></pre>
+    <pre class="code-content python"><code class="language-python"># BEFORE merging: Check for duplicates
+print(individuals.groupby("person_id").size().loc[lambda x: x > 1])  # Should be empty
+print(state_data.groupby("state").size().loc[lambda x: x > 1])       # Should be empty
+
+# Count rows before and after
+n_before = len(individuals)
+
+merged = individuals.merge(state_data, on="state", how="left")
+
+n_after = len(merged)
+
+# Check if row count changed unexpectedly
+if n_after > n_before:
+    print("WARNING: Row count increased! Check for duplicate keys")
+    print(state_data.groupby("state").size().loc[lambda x: x > 1])</code></pre>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>The Row Count Rule</h4>
+    <ul>
+      <li><strong>1:1 merge:</strong> Row count should stay exactly the same (or decrease if using inner join)</li>
+      <li><strong>m:1 merge:</strong> Row count should stay the same as master dataset</li>
+      <li><strong>1:m merge:</strong> Row count will increase (one master row → many using rows)</li>
+      <li>If row count increases when you didn't expect it, you have duplicate keys somewhere</li>
+    </ul>
+  </div>
+
+  <h3>Example: Merging Individual Data with State Data</h3>
+  <p>Suppose you have individual-level data and want to add state characteristics:</p>
+
+  <div class="comparison-grid">
+    <div>
+      <strong>individuals.dta</strong> (master)
+      <pre style="margin: 8px 0 0; font-size: 0.8rem; background: var(--bg-subtle); padding: 10px; border-radius: 4px;">
+person_id  state    income
+1          MA       50000
+2          MA       60000
+3          CA       70000
+4          NY       55000</pre>
+    </div>
+    <div>
+      <strong>state_data.dta</strong> (using)
+      <pre style="margin: 8px 0 0; font-size: 0.8rem; background: var(--bg-subtle); padding: 10px; border-radius: 4px;">
+state    min_wage  population
+MA       15.00    7000000
+CA       15.50    39500000
+TX       7.25     29500000</pre>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Load master data
+use "individuals.dta", clear
+
+* Merge: many individuals per state → m:1
+merge m:1 state using "state_data.dta"
+
+* ALWAYS check the results
+tab _merge
+
+/*
+   _merge |      Freq.
+----------+------------
+        1 |          1    ← Only in master (NY - no state data)
+        2 |          1    ← Only in using (TX - no individuals)
+        3 |          3    ← Matched (MA, CA)
+*/
+
+* Investigate unmatched
+list if _merge == 1   // NY had no state data
+list if _merge == 2   // TX had no individuals
+
+* Keep matched only (after understanding why others didn't match)
+keep if _merge == 3
+drop _merge</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr, haven)
+
+individuals <- read_dta("individuals.dta")
+state_data <- read_dta("state_data.dta")
+
+# Left join: keep all individuals, add state data where available
+merged <- individuals %>%
+  left_join(state_data, by = "state")
+
+# Check for unmatched
+merged %>% filter(is.na(min_wage))  # NY had no state data
+
+# Inner join: keep only matched
+merged <- individuals %>%
+  inner_join(state_data, by = "state")</code></pre>
+    <pre class="code-content python"><code class="language-python">individuals = pd.read_stata("individuals.dta")
+state_data = pd.read_stata("state_data.dta")
+
+# Left join: keep all individuals, add state data where available
+merged = individuals.merge(state_data, on="state", how="left", indicator=True)
+
+# Check merge results
+print(merged["_merge"].value_counts())
+
+# Check for unmatched
+print(merged[merged["min_wage"].isna()])  # NY had no state data
+
+# Inner join: keep only matched
+merged = individuals.merge(state_data, on="state", how="inner")</code></pre>
+  </div>
+
+  <h3>Pre-Merge Data Cleaning</h3>
+
+  <p>Merge variables must be <strong>exactly identical</strong> in both datasets—same name, same values, same type. Most merge problems come from subtle differences that require string cleaning.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Check if your variable is actually numeric or string
+browse, nolabel   // Shows actual values, not labels
+
+* Common string cleaning operations:
+
+* 1. Remove periods: "D.C." → "DC"
+replace state = subinstr(state, ".", "", .)
+
+* 2. Remove leading/trailing spaces: " MA " → "MA"
+replace state = trim(state)
+
+* 3. Extract substring: "Washington DC" → "DC"
+replace state = substr(state, -2, 2)  // Last 2 characters
+
+* 4. Convert case: "ma" → "MA"
+replace state = upper(state)
+
+* 5. Rename to match other dataset
+rename statefip state
+
+* 6. Convert string to numeric (or vice versa)
+destring state_code, replace
+tostring state_fips, replace</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(stringr)
+
+# Common string cleaning operations:
+
+# 1. Remove periods
+data$state <- str_replace_all(data$state, "\\.", "")
+
+# 2. Remove leading/trailing spaces
+data$state <- str_trim(data$state)
+
+# 3. Extract substring
+data$state <- str_sub(data$state, -2, -1)  # Last 2 characters
+
+# 4. Convert case
+data$state <- str_to_upper(data$state)
+
+# 5. Rename to match other dataset
+data <- data %>% rename(state = statefip)
+
+# 6. Convert types
+data$state_code <- as.numeric(data$state_code)
+data$state_fips <- as.character(data$state_fips)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Common string cleaning operations:
+
+# 1. Remove periods
+data["state"] = data["state"].str.replace(".", "", regex=False)
+
+# 2. Remove leading/trailing spaces
+data["state"] = data["state"].str.strip()
+
+# 3. Extract substring
+data["state"] = data["state"].str[-2:]  # Last 2 characters
+
+# 4. Convert case
+data["state"] = data["state"].str.upper()
+
+# 5. Rename to match other dataset
+data = data.rename(columns={"statefip": "state"})
+
+# 6. Convert types
+data["state_code"] = pd.to_numeric(data["state_code"])
+data["state_fips"] = data["state_fips"].astype(str)</code></pre>
+  </div>
+
+  <div class="key-principle">
+    <h4>Labels Can Be Deceiving</h4>
+    <p>In Stata, when you see "Washington" in the data browser, it might actually be stored as the number 53 with a label attached. Use <code>browse, nolabel</code> or <code>tab var, nolabel</code> to see the true values. Merges use the actual values, not the labels!</p>
+  </div>
+
+  <h3>Common Merge Problems</h3>
+
+  <div class="common-mistakes">
+    <h4>Watch Out For</h4>
+    <ul>
+      <li><strong>Duplicates on key:</strong> If your key isn't unique when it should be, you'll get unexpected results. Always run <code>duplicates report</code> first.</li>
+      <li><strong>Case sensitivity:</strong> "MA" ≠ "ma" in Stata. Use <code>upper()</code> or <code>lower()</code> to standardize.</li>
+      <li><strong>Trailing spaces:</strong> "MA " ≠ "MA". Use <code>trim()</code> to remove.</li>
+      <li><strong>Different variable types:</strong> String "1" ≠ numeric 1. Convert with <code>destring</code> or <code>tostring</code>.</li>
+      <li><strong>Labels hiding values:</strong> What looks like "California" might be stored as 6. Check with <code>nolabel</code>.</li>
+    </ul>
+  </div>
+
+  <h3>Appending (Stacking) Datasets</h3>
+  <p>Use <code>append</code> to stack datasets vertically (same variables, different observations):</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Append multiple years of data
+use "data_2020.dta", clear
+append using "data_2021.dta"
+append using "data_2022.dta"</code></pre>
+    <pre class="code-content r"><code class="language-r"># Bind rows from multiple dataframes
+data_all <- bind_rows(
+  read_dta("data_2020.dta"),
+  read_dta("data_2021.dta"),
+  read_dta("data_2022.dta")
+)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Concatenate multiple dataframes
+data_all = pd.concat([
+    pd.read_stata("data_2020.dta"),
+    pd.read_stata("data_2021.dta"),
+    pd.read_stata("data_2022.dta")
+], ignore_index=True)</code></pre>
+  </div>
+
+</section>
+
+<section id="stata-traps" class="tutorial-section">
+  <h2>Stata Traps</h2>
+
+  <p>Stata has some behaviors that can silently corrupt your analysis.</p>
+
+  <h3>Missing Values Are Infinity</h3>
+  <p>In Stata, missing values (<code>.</code>) are treated as <strong>larger than any number</strong>. This means comparisons like <code>if x > 100</code> will include missing values.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* This INCLUDES missing values (dangerous!)
+gen high_income = (income > 100000)
+
+* This is what you actually want
+gen high_income = (income > 100000) if !missing(income)
+
+* Or equivalently
+gen high_income = (income > 100000 & income < .)
+
+* The ordering is: all numbers < . < .a < .b < ... < .z
+* So . > 999999999 evaluates to TRUE</code></pre>
+    <pre class="code-content r"><code class="language-r"># R handles this more intuitively - NA propagates
+high_income <- income > 100000
+# Returns NA where income is NA, not TRUE
+
+# But still be explicit about NA handling
+high_income <- income > 100000 & !is.na(income)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Python/pandas handles this intuitively - NaN propagates
+high_income = data["income"] > 100000
+# Returns NaN where income is NaN, not True
+
+# But still be explicit about NA handling
+high_income = (data["income"] > 100000) & data["income"].notna()</code></pre>
+  </div>
+
+  <div class="callout-danger">
+    <strong>Why this matters:</strong> If you're creating indicator variables or filtering data, missing values will silently be included whenever you use <code>&gt;</code>, <code>&gt;=</code>, or <code>!=</code>. Your sample sizes will be wrong, and your estimates will be biased.
+  </div>
+
+  <h3>egen group Silently Top-Codes</h3>
+  <p>When you use <code>egen group()</code> to create a numeric ID from string or categorical variables, Stata uses an <code>int</code> by default. If you have more unique values than an int can hold (~32,000), <strong>it silently repeats the maximum value</strong>.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* DANGEROUS: If you have >32,767 unique beneficiaries,
+* later IDs will all be assigned the same number!
+egen bene_id = group(beneficiary_name)
+
+* SAFE: Explicitly use a long integer
+egen long bene_id = group(beneficiary_name)
+
+* Or for very large datasets (>2 billion unique values)
+egen double bene_id = group(beneficiary_name)
+
+* Always verify you got the right number of groups
+distinct beneficiary_name
+assert r(ndistinct) == r(N)  // This will fail if top-coded</code></pre>
+    <pre class="code-content r"><code class="language-r"># R doesn't have this problem - factors work fine
+data$bene_id <- as.numeric(factor(data$beneficiary_name))
+
+# Or use dplyr
+data <- data %>%
+  mutate(bene_id = as.numeric(factor(beneficiary_name)))</code></pre>
+    <pre class="code-content python"><code class="language-python"># Python doesn't have this problem - uses 64-bit integers by default
+data["bene_id"] = pd.factorize(data["beneficiary_name"])[0] + 1
+
+# Verify
+assert data["bene_id"].nunique() == data["beneficiary_name"].nunique()</code></pre>
+  </div>
+
+  <div class="callout-danger">
+    <strong>Why this matters:</strong> If you're creating panel identifiers, observations from different individuals will be assigned the same ID. Your fixed effects will be wrong, standard errors will be wrong, and you'll have no indication anything went wrong.
+  </div>
+
+  <h3>Numeric Precision</h3>
+  <p>Stata's <code>float</code> type only has ~7 digits of precision. Large IDs stored as floats will be silently corrupted.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* float has ~7 digits of precision
+* This can cause merge failures on IDs!
+gen float id = 1234567890
+* id is now 1234567936 (corrupted!)
+
+* Always use long or double for IDs
+gen long id = 1234567890      // integers up to ~2 billion
+gen double id = 1234567890    // integers up to ~9 quadrillion
+
+* Check if a variable might have precision issues
+summarize id
+* If max is > 16777216 and storage type is float, you have a problem
+
+* Fix: compress optimizes storage types automatically
+compress</code></pre>
+    <pre class="code-content r"><code class="language-r"># R uses double precision by default, so this is less of an issue
+# But be careful with very large integers
+id <- 1234567890  # Fine in R
+
+# For extremely large integers, use bit64 package
+pacman::p_load(bit64)
+big_id <- as.integer64("9223372036854775807")</code></pre>
+    <pre class="code-content python"><code class="language-python"># Python uses 64-bit integers by default, so this is less of an issue
+id = 1234567890  # Fine in Python
+
+# pandas also handles large integers well
+data["id"] = pd.to_numeric(data["id"], downcast=None)  # Keep full precision
+
+# Check dtypes
+print(data.dtypes)</code></pre>
+  </div>
+
+  <h3>Sorting Instability</h3>
+  <p>Stata's <code>sort</code> command is <strong>unstable</strong>—when there are ties, the order of tied observations is random and can change between runs. This causes reproducibility issues.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* DANGEROUS: Order of tied observations is random
+sort state
+gen observation_number = _n  // Different every time you run!
+
+* SAFE: Break ties with a unique identifier
+sort state id
+gen observation_number = _n  // Now reproducible
+
+* ALTERNATIVE: Use stable sort (preserves existing order for ties)
+sort state, stable
+
+* Best practice: Always sort by enough variables to eliminate ties
+* or use stable when you don't care about tie-breaking</code></pre>
+    <pre class="code-content r"><code class="language-r"># R's order() is stable by default (preserves original order for ties)
+data <- data[order(data$state), ]
+
+# To be explicit about tie-breaking:
+data <- data[order(data$state, data$id), ]
+
+# dplyr::arrange() is also stable
+pacman::p_load(dplyr)
+data <- data %>% arrange(state, id)</code></pre>
+    <pre class="code-content python"><code class="language-python"># pandas sort_values() has kind='stable' option
+data = data.sort_values('state', kind='stable')
+
+# Better: explicitly break ties
+data = data.sort_values(['state', 'id'])
+
+# Note: default sort is 'quicksort' which is unstable</code></pre>
+  </div>
+
+  <div class="callout-danger">
+    <strong>Why this matters:</strong> If you create variables based on sort order (like <code>_n</code> for observation numbers or <code>by: gen first = _n == 1</code>), your results will differ across runs, making your analysis non-reproducible.
+  </div>
+
+  <h3>Variable Abbreviation</h3>
+  <p>By default, Stata allows you to abbreviate variable names. This is <strong>dangerous</strong>—your code can silently operate on the wrong variable if you add new variables later.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Suppose you have: income, age, education
+summarize inc  // Works! Stata abbreviates to "income"
+
+* Later, you add: income_spouse
+summarize inc  // ERROR: "inc" is ambiguous (income vs income_spouse)
+* Or worse: no error, wrong variable used silently
+
+* SOLUTION: Disable variable abbreviation at the start of every do-file
+set varabbrev off
+
+* Now Stata requires exact variable names
+summarize income  // Must use full name</code></pre>
+    <pre class="code-content r"><code class="language-r"># R does NOT allow variable abbreviation by default
+# You must use exact column names
+summary(data$income)  # Must be exact
+
+# Partial matching only happens with $ on lists, not data frames
+# This is generally not a problem in R</code></pre>
+    <pre class="code-content python"><code class="language-python"># Python does NOT allow column abbreviation
+# You must use exact column names
+data['income'].describe()  # Must be exact
+
+# Autocomplete in IDEs helps with long names
+# No risk of silent abbreviation errors</code></pre>
+  </div>
+
+  <div class="callout-danger">
+    <strong>Why this matters:</strong> Code that works today can silently break when new variables are added to your dataset. Put <code>set varabbrev off</code> at the top of every do-file.
+  </div>
+
+  <div class="common-mistakes">
+    <h4>Defensive Coding Habits</h4>
+    <ul>
+      <li>Put <code>set varabbrev off</code> at the top of every do-file</li>
+      <li>Always use <code>if !missing(x)</code> with inequality comparisons</li>
+      <li>Always use <code>egen long</code> or <code>egen double</code> for group IDs</li>
+      <li>Sort by enough variables to eliminate ties, or use <code>sort ..., stable</code></li>
+      <li>Run <code>compress</code> after loading data to optimize storage types</li>
+      <li>Use <code>assert</code> liberally to catch problems early</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== PRACTICE ==================== -->
+<section id="practice" class="tutorial-section">
+  <h2>Practice Exercise</h2>
+
+  <p>Test your understanding with this data wrangling challenge.</p>
+
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 12px; margin: 16px 0;">
+    <h4 style="margin-top: 0;">Scenario</h4>
+    <p>You have two datasets:</p>
+    <ol>
+      <li><strong>students.csv</strong>: One row per student with columns <code>student_id</code>, <code>school_id</code>, <code>test_score</code></li>
+      <li><strong>schools.csv</strong>: One row per school with columns <code>school_id</code>, <code>school_type</code> (public/private), <code>total_enrollment</code></li>
+    </ol>
+    <p><strong>Task:</strong> Create a dataset where each row is a student, with their school's characteristics added.</p>
+
+    <p><strong>Questions to answer before coding:</strong></p>
+    <ol>
+      <li>What type of merge is this? (1:1, m:1, 1:m, m:m)</li>
+      <li>After the merge, how many rows should you have?</li>
+      <li>What should you check before merging?</li>
+    </ol>
+  </div>
+
+  <details style="margin: 16px 0; padding: 12px 16px; background: #e8f5e9; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: #2e7d32;">Click to see answers + code</summary>
+    <div style="margin: 12px 0 0;">
+      <p><strong>Answers:</strong></p>
+      <ol>
+        <li><strong>m:1</strong> — Many students per school, one school record per school</li>
+        <li>Same number of rows as students.csv (school info gets duplicated to each student)</li>
+        <li>Check that <code>school_id</code> is unique in schools.csv: <code>duplicates report school_id</code></li>
+      </ol>
+
+      <pre style="background: #1b5e20; color: #c8e6c9; padding: 16px; border-radius: 6px; overflow-x: auto;"><code>* Stata solution
+import delimited "students.csv", clear
+count  // Note: N students
+
+merge m:1 school_id using "schools.dta"
+tab _merge  // All should match (or investigate non-matches)
+
+count  // Should equal original N students
+keep if _merge == 3
+drop _merge</code></pre>
+    </div>
+  </details>
+</section>

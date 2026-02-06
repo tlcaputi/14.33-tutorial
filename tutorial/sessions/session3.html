@@ -1,0 +1,846 @@
+---
+layout: layouts/session.html
+title: Diff-in-Diff and Event Studies | 14.33
+current_page: session3
+---
+<h1>Diff-in-Diff and Event Studies</h1>
+<p class="subtitle">Two-way fixed effects and dynamic treatment effect estimation</p>
+
+<!-- Growth Mindset Message -->
+<div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+  <strong style="color: #2e7d32;">You already know this</strong>
+  <p style="margin: 8px 0 0; color: #1b5e20;">
+    Diff-in-diff is just a regression. If you can run <code>reghdfe y treat, absorb(state year)</code>, you can do diff-in-diff. Event studies are just DiD with more treatment indicators. The concepts might seem abstract, but the code is straightforward.
+  </p>
+</div>
+
+<div class="learning-objectives">
+  <h4>What You'll Learn</h4>
+  <ul>
+    <li>Setting up panel data for diff-in-diff estimation</li>
+    <li>Creating treatment timing and post-treatment variables</li>
+    <li>Two-way fixed effects (TWFE) regression</li>
+    <li>Event study specifications with leads and lags</li>
+    <li>Visualizing treatment effects over time</li>
+  </ul>
+</div>
+
+<div style="background: #f8f9fa; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+  <h4 style="margin: 0 0 12px; font-size: 0.95rem;">Download Complete Scripts</h4>
+  <p style="margin: 0 0 12px; font-size: 0.9rem; color: #666;">Run the full session code in your preferred language:</p>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <a href="../scripts/session3/session3.do" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #1a5f8a; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Stata</span> <span style="opacity: 0.7;">.do</span>
+    </a>
+    <a href="../scripts/session3/session3.R" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #276dc3; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>R</span> <span style="opacity: 0.7;">.R</span>
+    </a>
+    <a href="../scripts/session3/session3.py" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3776ab; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Python</span> <span style="opacity: 0.7;">.py</span>
+    </a>
+  </div>
+</div>
+
+<section id="background" class="tutorial-section">
+  <h2>Background: No-Fault Divorce and Female Suicide</h2>
+
+  <p>In this tutorial, we replicate a classic diff-in-diff analysis examining how <strong>no-fault divorce reform</strong> affected female suicide rates across US states.</p>
+
+  <!-- What is DiD - visual explanation -->
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 12px; margin: 20px 0;">
+    <h4 style="margin-top: 0;">The Diff-in-Diff Idea in 30 Seconds</h4>
+    <table style="width: 100%; border-collapse: collapse; text-align: center; margin: 12px 0;">
+      <tr style="background: #e0e0e0;">
+        <th style="padding: 12px; border: 1px solid #bdbdbd;"></th>
+        <th style="padding: 12px; border: 1px solid #bdbdbd;">Before Policy</th>
+        <th style="padding: 12px; border: 1px solid #bdbdbd;">After Policy</th>
+        <th style="padding: 12px; border: 1px solid #bdbdbd;">Difference</th>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">Treated States</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">A</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">B</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">B - A</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">Control States</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">C</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">D</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0;">D - C</td>
+      </tr>
+      <tr style="background: #e3f2fd;">
+        <td style="padding: 12px; border: 1px solid #bbdefb;" colspan="3"><strong>Diff-in-Diff Effect</strong></td>
+        <td style="padding: 12px; border: 1px solid #bbdefb;"><strong>(B - A) - (D - C)</strong></td>
+      </tr>
+    </table>
+    <p style="margin: 0; font-size: 0.9em;">
+      <strong>Logic:</strong> Compare how treated states changed (B - A) to how control states changed (D - C). The difference between these differences is the treatment effect.
+    </p>
+  </div>
+
+  <div class="key-principle">
+    <h4>The Research Question</h4>
+    <p>Did no-fault divorce laws reduce female suicide rates? The hypothesis is that women trapped in unhappy or abusive marriages might experience better mental health outcomes when divorce becomes easier to obtain.</p>
+  </div>
+
+  <h3>What is No-Fault Divorce?</h3>
+
+  <p>Before no-fault divorce, ending a marriage required proving that one spouse was at "fault" (adultery, abandonment, abuse, etc.). No-fault divorce allows couples to divorce simply by declaring the marriage "irretrievably broken."</p>
+
+  <ul>
+    <li>States adopted no-fault divorce at different times (1969-1985)</li>
+    <li>Some states never adopted it during our sample period</li>
+    <li>This <strong>staggered adoption</strong> creates our diff-in-diff design</li>
+  </ul>
+
+  <h3>The Data</h3>
+
+  <p>We use a balanced panel from 1964 to 1996 covering 49 US states:</p>
+
+  <ul>
+    <li><code>asmrs</code> - Age-standardized female suicide mortality rate (outcome Y)</li>
+    <li><code>pcinc</code> - Per capita income (control)</li>
+    <li><code>asmrh</code> - Age-standardized homicide rate (control)</li>
+    <li><code>cases</code> - Number of cases (control)</li>
+    <li><code>stfips</code> - State FIPS code</li>
+    <li><code>year</code> - Year</li>
+  </ul>
+
+  <div style="background: #e8f4fd; border-left: 4px solid #1565c0; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>📥 Download the data:</strong>
+    <a href="../data/bacon_example.dta" download style="margin-left: 8px; color: #1565c0;">bacon_example.dta</a> |
+    <a href="../data/bacon_example.csv" download style="color: #1565c0;">bacon_example.csv</a>
+  </div>
+</section>
+
+<section id="concepts" class="tutorial-section">
+  <h2>The Mechanics of TWFE, DiD, and Event Studies</h2>
+
+  <p>Before we write any code, let's understand exactly how these models work—what the data looks like, what the regression equations mean, and why we make certain choices.</p>
+
+  <h3>Panel Data Structure</h3>
+
+  <p>DiD and event studies require <strong>panel data</strong>: repeated observations of the same units over time. Each row is a unit-time observation:</p>
+
+  <div style="overflow-x: auto; margin: 20px 0;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.95em;">
+      <tr style="background: #f5f5f5;">
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">state</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">year</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">suicide_rate</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">treatment_year</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">post</th>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">California</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1968</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">12.3</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">California</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1969</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">11.8</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      </tr>
+      <tr style="background: #e8f5e9;">
+        <td style="padding: 10px; border: 1px solid #ddd;">California</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">10.5</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;"><strong>1</strong></td>
+      </tr>
+      <tr style="background: #e8f5e9;">
+        <td style="padding: 10px; border: 1px solid #ddd;">California</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1971</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">10.1</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;"><strong>1</strong></td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">Texas</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1968</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">14.2</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">.</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">Texas</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1969</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">14.0</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">.</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">Texas</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">1970</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">13.8</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">.</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      </tr>
+    </table>
+  </div>
+
+  <p>Key variables you need:</p>
+  <ul>
+    <li><strong>Unit identifier</strong> (state) — who is being observed</li>
+    <li><strong>Time identifier</strong> (year) — when they're observed</li>
+    <li><strong>Outcome</strong> (suicide_rate) — what you're measuring</li>
+    <li><strong>Treatment timing</strong> (treatment_year) — when each unit got treated (missing for never-treated)</li>
+    <li><strong>Post indicator</strong> (post) — equals 1 if year ≥ treatment_year, 0 otherwise. For never-treated units, this is always 0 (they're never "post-treatment")</li>
+  </ul>
+
+  <h3>The TWFE Regression Equation</h3>
+
+  <p>The basic two-way fixed effects DiD model is:</p>
+
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: monospace; text-align: center; font-size: 1.1em;">
+    Y<sub>it</sub> = β · Post<sub>it</sub> + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+  </div>
+
+  <p>Let's break this down:</p>
+
+  <ul>
+    <li><strong>Y<sub>it</sub></strong> — Outcome for unit i in time t (e.g., California's suicide rate in 1970)</li>
+    <li><strong>Post<sub>it</sub></strong> — Equals 1 if unit i has been treated by time t, 0 otherwise</li>
+    <li><strong>α<sub>i</sub></strong> — Unit fixed effects (a dummy for each state). These absorb all <em>time-invariant</em> differences between states—geography, culture, baseline health infrastructure, etc.</li>
+    <li><strong>γ<sub>t</sub></strong> — Time fixed effects (a dummy for each year). These absorb all shocks that hit <em>every</em> state in a given year—recessions, federal policy changes, national trends.</li>
+    <li><strong>β</strong> — The treatment effect. This is what you care about.</li>
+  </ul>
+
+  <div class="callout-info">
+    <h4>What β Captures</h4>
+    <p>The coefficient β tells you: <em>how much did treated units change, relative to control units, relative to the overall time trend?</em> It's the "difference-in-differences"—the difference in how treated and control units evolved over time.</p>
+  </div>
+
+  <h3>From DiD to Event Studies</h3>
+
+  <p>An event study is DiD with more detail. Instead of a single "post" indicator, we estimate <em>separate effects for each time period relative to treatment</em>:</p>
+
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: monospace; text-align: center; font-size: 1.05em;">
+    Y<sub>it</sub> = Σ<sub>k</sub> β<sub>k</sub> · 1[t - treatment_year<sub>i</sub> = k] + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+  </div>
+
+  <p>Now instead of one β, we get a β for each "time to treatment" period:</p>
+  <ul>
+    <li>β<sub>-3</sub> — Effect 3 years <em>before</em> treatment (should be ~0 if parallel trends holds)</li>
+    <li>β<sub>-2</sub> — Effect 2 years before treatment (should be ~0)</li>
+    <li>β<sub>-1</sub> — Reference period (omitted, normalized to 0)</li>
+    <li>β<sub>0</sub> — Effect in the year of treatment</li>
+    <li>β<sub>1</sub> — Effect 1 year after treatment</li>
+    <li>β<sub>2</sub> — Effect 2 years after treatment</li>
+  </ul>
+
+  <p>This gives you a plot showing how the treatment effect evolves over time—and critically, whether the pre-treatment coefficients are close to zero (supporting parallel trends).</p>
+
+  <h3>Why We Need a Reference Period</h3>
+
+  <p>You can't include dummies for <em>every</em> time-to-treatment period. If you did, you'd have perfect multicollinearity—the dummies would sum to 1 for every treated unit, which is already captured by the unit fixed effect.</p>
+
+  <p><strong>Solution:</strong> Omit one period as the "reference." All other coefficients are interpreted <em>relative to that period</em>.</p>
+
+  <p><strong>Why -1?</strong> We typically choose the period just before treatment (k = -1) as the reference. This makes interpretation easy: β<sub>0</sub> is the immediate treatment effect <em>relative to the period just before treatment</em>. Pre-treatment coefficients (β<sub>-3</sub>, β<sub>-2</sub>) show whether trends were parallel <em>relative to</em> the period right before treatment.</p>
+
+  <h3>The Never-Treated Problem</h3>
+
+  <p>What about units that never get treated? They don't have a "treatment year," so "time to treatment" is undefined for them.</p>
+
+  <p><strong>If you have never-treated units:</strong> You need to handle them carefully. The key insight is that never-treated units don't have a "time to treatment," so you can't create event-time dummies for them in the usual way. Common approaches:</p>
+  <ul>
+    <li><strong>Set their time-to-treatment to a far-away value</strong> (like -1000) and make sure that value gets excluded from the regression</li>
+    <li><strong>In Stata with <code>reghdfe</code>:</strong> Create your event-time dummies only for treated units. Never-treated units will have 0 for all event-time dummies, which is correct—they serve as the control group throughout. When you generate dummies like <code>gen evt_m3 = (time_to_treat == -3)</code>, units with missing <code>time_to_treat</code> will automatically get 0.</li>
+    <li><strong>In Stata with factor variables:</strong> If using <code>i.time_to_treat</code>, set never-treated to a value like -1000, then use <code>ib(-1).time_to_treat</code> to set -1 as the reference. Stata will estimate coefficients for -1000 but you can ignore them (or cap your event window to exclude it).</li>
+    <li><strong>In R's <code>fixest</code>:</strong> Use <code>ref = c(-1, -1000)</code> to exclude both the reference period AND the never-treated indicator from the regression.</li>
+  </ul>
+
+  <p><strong>If you have NO never-treated units</strong> (everyone eventually gets treated, just at different times): You need <em>two</em> reference periods—one to avoid collinearity with unit fixed effects, and one to avoid collinearity with time fixed effects. Typically you'd omit both k = -1 and one endpoint (like the last period).</p>
+
+  <div class="callout-warning">
+    <h4>Why Two Reference Periods?</h4>
+    <p>With staggered adoption and no never-treated group, the time-to-treatment dummies span the entire time dimension. Without a second normalization, the year fixed effects become collinear with the event-time dummies. Dropping an endpoint (like the last period in your event window) solves this.</p>
+  </div>
+
+  <h3>Interpreting the Event Study Plot</h3>
+
+  <p>A good event study plot shows:</p>
+
+  <ol>
+    <li><strong>Pre-treatment coefficients near zero</strong> — The β<sub>-3</sub>, β<sub>-2</sub> estimates should be close to zero and statistically insignificant. This supports parallel trends.</li>
+    <li><strong>A jump at treatment</strong> — β<sub>0</sub> should show the immediate effect (if there is one).</li>
+    <li><strong>Post-treatment dynamics</strong> — β<sub>1</sub>, β<sub>2</sub>, etc. show whether the effect persists, grows, or fades.</li>
+  </ol>
+
+  <div style="background: #fff3e0; border-left: 4px solid #f39c12; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+    <strong>Red flags in event study plots:</strong>
+    <ul style="margin-bottom: 0;">
+      <li>Pre-trends that aren't flat (suggests parallel trends violation)</li>
+      <li>A "jump" that starts before treatment (anticipation effects or misspecified timing)</li>
+      <li>Huge confidence intervals that include zero everywhere (not enough power)</li>
+    </ul>
+  </div>
+
+</section>
+
+<section id="setup" class="tutorial-section">
+  <h2>Setting Up the Analysis</h2>
+
+  <h3>Load and Explore the Data</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Load the data
+use bacon_example.dta, clear
+
+* Explore the structure
+tab year
+tab stfips
+
+* Examine the outcome and controls
+desc asmrs        // Female suicide rate (Y)
+desc pcinc asmrh cases  // Controls</code></pre>
+    <pre class="code-content r"><code class="language-r"># Load packages
+pacman::p_load(haven, tidyverse, fixest)
+
+# Load the data
+df <- read_dta("bacon_example.dta")
+
+# Explore the structure
+table(df$year)
+table(df$stfips)
+
+# Examine the outcome and controls
+summary(df[c("asmrs", "pcinc", "asmrh", "cases")])</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+import pyfixest as pf
+
+# Load the data
+df = pd.read_stata("bacon_example.dta")
+
+# Explore the structure
+print(df['year'].value_counts().sort_index())
+print(df['stfips'].value_counts().sort_index())
+
+# Examine the outcome and controls
+df[['asmrs', 'pcinc', 'asmrh', 'cases']].describe()</code></pre>
+  </div>
+
+  <h3>Create the Treatment Timing Variable</h3>
+
+  <p>First, we need to identify <strong>when</strong> each state adopted no-fault divorce. States that never adopted act as our control group.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Create variable for year state adopted no-fault divorce
+* Missing = never adopted (control state)
+gen _nfd = .
+
+* Fill in adoption years for each state
+replace _nfd = 1971 if stfips == 1   // Alabama
+replace _nfd = 1973 if stfips == 4   // Arizona
+replace _nfd = 1970 if stfips == 6   // California
+replace _nfd = 1971 if stfips == 8   // Colorado
+replace _nfd = 1973 if stfips == 9   // Connecticut
+replace _nfd = 1977 if stfips == 11  // DC
+replace _nfd = 1971 if stfips == 12  // Florida
+replace _nfd = 1973 if stfips == 13  // Georgia
+replace _nfd = 1971 if stfips == 16  // Idaho
+replace _nfd = 1984 if stfips == 17  // Illinois
+replace _nfd = 1973 if stfips == 18  // Indiana
+replace _nfd = 1970 if stfips == 19  // Iowa
+replace _nfd = 1969 if stfips == 20  // Kansas
+replace _nfd = 1972 if stfips == 21  // Kentucky
+replace _nfd = 1973 if stfips == 23  // Maine
+replace _nfd = 1975 if stfips == 25  // Massachusetts
+replace _nfd = 1972 if stfips == 26  // Michigan
+replace _nfd = 1974 if stfips == 27  // Minnesota
+replace _nfd = 1973 if stfips == 29  // Missouri
+replace _nfd = 1975 if stfips == 30  // Montana
+replace _nfd = 1972 if stfips == 31  // Nebraska
+replace _nfd = 1973 if stfips == 32  // Nevada
+replace _nfd = 1971 if stfips == 33  // New Hampshire
+replace _nfd = 1971 if stfips == 34  // New Jersey
+replace _nfd = 1973 if stfips == 35  // New Mexico
+replace _nfd = 1971 if stfips == 38  // North Dakota
+replace _nfd = 1974 if stfips == 39  // Ohio
+replace _nfd = 1973 if stfips == 41  // Oregon
+replace _nfd = 1980 if stfips == 42  // Pennsylvania
+replace _nfd = 1976 if stfips == 44  // Rhode Island
+replace _nfd = 1969 if stfips == 45  // South Carolina
+replace _nfd = 1985 if stfips == 46  // South Dakota
+replace _nfd = 1974 if stfips == 48  // Texas
+replace _nfd = 1973 if stfips == 53  // Washington
+replace _nfd = 1977 if stfips == 55  // Wisconsin
+replace _nfd = 1977 if stfips == 56  // Wyoming
+
+* States with missing _nfd never adopted (control group)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Create adoption year variable
+# NA = never adopted (control state)
+adoption_years <- c(
+  `1` = 1971, `4` = 1973, `6` = 1970, `8` = 1971, `9` = 1973,
+  `11` = 1977, `12` = 1971, `13` = 1973, `16` = 1971, `17` = 1984,
+  `18` = 1973, `19` = 1970, `20` = 1969, `21` = 1972, `23` = 1973,
+  `25` = 1975, `26` = 1972, `27` = 1974, `29` = 1973, `30` = 1975,
+  `31` = 1972, `32` = 1973, `33` = 1971, `34` = 1971, `35` = 1973,
+  `38` = 1971, `39` = 1974, `41` = 1973, `42` = 1980, `44` = 1976,
+  `45` = 1969, `46` = 1985, `48` = 1974, `53` = 1973, `55` = 1977,
+  `56` = 1977
+)
+
+df <- df %>%
+  mutate(nfd = adoption_years[as.character(stfips)])
+
+# States with NA never adopted (control group)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Create adoption year variable
+# NaN = never adopted (control state)
+adoption_years = {
+    1: 1971, 4: 1973, 6: 1970, 8: 1971, 9: 1973, 11: 1977,
+    12: 1971, 13: 1973, 16: 1971, 17: 1984, 18: 1973, 19: 1970,
+    20: 1969, 21: 1972, 23: 1973, 25: 1975, 26: 1972, 27: 1974,
+    29: 1973, 30: 1975, 31: 1972, 32: 1973, 33: 1971, 34: 1971,
+    35: 1973, 38: 1971, 39: 1974, 41: 1973, 42: 1980, 44: 1976,
+    45: 1969, 46: 1985, 48: 1974, 53: 1973, 55: 1977, 56: 1977
+}
+
+df['_nfd'] = df['stfips'].map(adoption_years)
+
+# States with NaN never adopted (control group)</code></pre>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>Key Insight: Staggered Adoption</h4>
+    <p>Notice that treatment is <strong>staggered</strong> - different states adopt at different times. Kansas and South Carolina adopted first (1969), while South Dakota adopted last (1985). This variation is what allows identification.</p>
+  </div>
+</section>
+
+<section id="twfe" class="tutorial-section">
+  <h2>Two-Way Fixed Effects (TWFE)</h2>
+
+  <h3>Create the Post-Treatment Indicator</h3>
+
+  <p>For the basic diff-in-diff, we need a binary indicator for whether a state-year is in the post-treatment period:</p>
+
+  <!-- Predict box -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>🤔 Think about this:</strong> California adopted no-fault divorce in 1970. For California in 1972, what should <code>treat_post</code> equal? What about California in 1968?
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Create post-treatment indicator
+* = 1 if year >= year state adopted no-fault divorce
+* = 0 otherwise (including never-adopters)
+gen treat_post = (year >= _nfd)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Create post-treatment indicator
+# = 1 if year >= year state adopted no-fault divorce
+# = 0 otherwise (including never-adopters)
+df <- df %>%
+  mutate(treat_post = ifelse(!is.na(`_nfd`) & year >= `_nfd`, 1, 0))</code></pre>
+    <pre class="code-content python"><code class="language-python"># Create post-treatment indicator
+# = 1 if year >= year state adopted no-fault divorce
+# = 0 otherwise (including never-adopters)
+df['treat_post'] = ((df['_nfd'].notna()) & (df['year'] >= df['_nfd'])).astype(int)</code></pre>
+  </div>
+
+  <!-- Answer to predict -->
+  <details style="margin: 16px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: var(--primary);">Answer: California's treat_post values</summary>
+    <p style="margin: 12px 0 0;">
+      California adopted in 1970, so:<br>
+      • California 1968: <code>treat_post = 0</code> (1968 < 1970)<br>
+      • California 1972: <code>treat_post = 1</code> (1972 ≥ 1970)<br>
+      • Massachusetts (never adopted): <code>treat_post = 0</code> always
+    </p>
+  </details>
+
+  <h3>Run the TWFE Regression</h3>
+
+  <!-- What TWFE does -->
+  <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>💡 What "two-way fixed effects" means:</strong>
+    <ul style="margin: 10px 0 0;">
+      <li><strong>State FE:</strong> Control for everything about a state that doesn't change over time (e.g., geography, culture)</li>
+      <li><strong>Year FE:</strong> Control for everything that affects all states equally in a year (e.g., recessions, federal policy)</li>
+      <li><strong>treat_post:</strong> The only remaining variation is states switching from 0 to 1 when they adopt the policy</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Two-way fixed effects regression
+* Y = female suicide rate
+* X = post-treatment indicator
+* FEs = state and year
+* Controls = income, homicide rate, cases
+reg asmrs treat_post i.stfips i.year pcinc asmrh cases, vce(cluster stfips)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Two-way fixed effects regression using fixest
+# Y = female suicide rate
+# X = post-treatment indicator
+# FEs = state and year
+# Controls = income, homicide rate, cases
+model_twfe <- feols(asmrs ~ treat_post + pcinc + asmrh + cases | stfips + year,
+                    cluster = ~stfips, data = df)
+summary(model_twfe)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Two-way fixed effects regression using pyfixest
+# Y = female suicide rate
+# X = post-treatment indicator
+# FEs = state and year
+# Controls = income, homicide rate, cases
+model_twfe = pf.feols('asmrs ~ treat_post + pcinc + asmrh + cases | stfips + year',
+                      vcov={'CRV1': 'stfips'}, data=df)
+print(model_twfe.summary())</code></pre>
+  </div>
+
+  <!-- Quiz: TWFE -->
+  <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h4 style="color: var(--primary); margin-top: 0;">Quick Check: TWFE</h4>
+    <p><strong>Question:</strong> In the TWFE regression, what does the coefficient on <code>treat_post</code> capture?</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">The level of suicide rates in treated states</button>
+      <button onclick="checkAnswer(this, true)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">The avg. diff-in-diff effect of the reform</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">The time trend in suicide rates</button>
+    </div>
+    <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
+  </div>
+
+  <div class="key-principle">
+    <h4>Interpreting the Coefficient</h4>
+    <p>The coefficient on <code>treat_post</code> represents the average effect of no-fault divorce on female suicide rates, controlling for state fixed effects, year fixed effects, and time-varying controls. A negative coefficient suggests the reform reduced suicide rates.</p>
+  </div>
+</section>
+
+<section id="event-study" class="tutorial-section">
+  <h2>Event Study</h2>
+
+  <p>The TWFE gives us one average effect, but we often want to see how the effect evolves over time. An <strong>event study</strong> lets us:</p>
+
+  <ul>
+    <li>Test the parallel trends assumption (pre-treatment coefficients should be near zero)</li>
+    <li>See how the effect builds over time after treatment</li>
+    <li>Identify any anticipation effects before treatment</li>
+  </ul>
+
+  <h3>Create Time-to-Treatment Variable</h3>
+
+  <!-- What time-to-treatment means -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>🎯 The event study idea:</strong> Instead of one <code>treat_post</code> coefficient, get a separate coefficient for each year relative to treatment.
+    <p style="margin: 10px 0 0;">
+      <em>Example:</em> California adopted in 1970. For California:<br>
+      • 1968 → time_to_treat = -2 (two years before)<br>
+      • 1970 → time_to_treat = 0 (year of adoption)<br>
+      • 1973 → time_to_treat = +3 (three years after)
+    </p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Create time relative to treatment
+* Negative = years before treatment
+* 0 = year of treatment
+* Positive = years after treatment
+gen time_to_treat = year - _nfd
+
+* IMPORTANT: Never-treated states don't have a meaningful "time to treatment"
+* Set them to -1000 (a value far outside the range of actual event times)
+* Then exclude -1000 from the event study dummies using ref = c(-1, -1000)
+replace time_to_treat = -1000 if missing(_nfd)
+
+* Create ever-treated indicator
+gen ever_treated = !missing(_nfd)</code></pre>
+    <pre class="code-content r"><code class="language-r"># Create time relative to treatment
+# Negative = years before treatment
+# 0 = year of treatment
+# Positive = years after treatment
+#
+# IMPORTANT: Never-treated states don't have a meaningful "time to treatment"
+# Set them to -1000 (outside the range of real event times)
+# Then exclude with ref = c(-1, -1000) in fixest
+df <- df %>%
+  mutate(
+    time_to_treat = ifelse(is.na(`_nfd`), -1000, year - `_nfd`),
+    ever_treated = !is.na(`_nfd`)
+  )</code></pre>
+    <pre class="code-content python"><code class="language-python"># Create time relative to treatment
+# Negative = years before treatment
+# 0 = year of treatment
+# Positive = years after treatment
+#
+# IMPORTANT: Never-treated states don't have a meaningful "time to treatment"
+# Set them to -1000 (outside the range of real event times)
+# Then exclude with ref = c(-1, -1000) in pyfixest
+df['time_to_treat'] = df['year'] - df['_nfd']
+df['time_to_treat'] = df['time_to_treat'].fillna(-1000).astype(int)
+df['ever_treated'] = df['_nfd'].notna().astype(int)</code></pre>
+  </div>
+
+  <h3>Run the Event Study Regression</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Handle Stata's factor variable limitation (no negatives)
+summ time_to_treat
+local min_val = r(min)
+
+* Shift so minimum is 0
+gen shifted_ttt = time_to_treat - `min_val'
+
+* Find the value that corresponds to t=-1 (our reference period)
+summ shifted_ttt if time_to_treat == -1
+local true_neg1 = r(mean)
+
+* Event study regression (manual approach for understanding)
+* ib`true_neg1' sets t=-1 as the reference category
+reg asmrs ib`true_neg1'.shifted_ttt pcinc asmrh cases i.stfips i.year, vce(cluster stfips)</code></pre>
+  </div>
+
+  <div class="callout-success">
+    <h4>Easier Package-Based Approach</h4>
+    <p>The manual approach above is good for understanding what's happening. In practice, use these cleaner methods:</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* EASY WAY: Use eventdd package
+* Install once: ssc install eventdd
+eventdd asmrs pcinc asmrh cases, timevar(time_to_treat) ///
+    absorb(i.stfips i.year) cluster(stfips) graph_op(ytitle("Effect on Female Suicide Rate"))</code></pre>
+    <pre class="code-content r"><code class="language-r"># EASY WAY: fixest with proper handling of never-treated
+# i(time_to_treat, ever_treated, ref = c(-1, -1000)) means:
+#   - Create dummies for each time_to_treat value
+#   - Interact with ever_treated (so never-treated don't get dummies)
+#   - Exclude t=-1 (reference) AND t=-1000 (never-treated)
+# See: https://lrberge.github.io/fixest/articles/fixest_walkthrough.html
+model_es <- feols(
+  asmrs ~ i(time_to_treat, ever_treated, ref = c(-1, -1000)) + pcinc + asmrh + cases | stfips + year,
+  cluster = ~stfips, data = df
+)
+
+# One-line plot
+iplot(model_es, main = "Event Study: No-Fault Divorce")</code></pre>
+    <pre class="code-content python"><code class="language-python"># EASY WAY: pyfixest with proper handling of never-treated
+# ref = c(-1, -1000) excludes both the reference period and never-treated
+model_es = pf.feols(
+    'asmrs ~ i(time_to_treat, ever_treated, ref=c(-1, -1000)) + pcinc + asmrh + cases | stfips + year',
+    vcov={'CRV1': 'stfips'}, data=df
+)
+
+# One-line plot
+model_es.iplot()</code></pre>
+    <pre class="code-content r"><code class="language-r"># Event study using fixest's i() syntax
+# i(time_to_treat, ever_treated, ref = c(-1, -1000)):
+#   - time_to_treat: relative time variable (-1000 for never-treated)
+#   - ever_treated: interaction (1 if ever treated, 0 if never)
+#   - ref = c(-1, -1000): exclude reference period AND never-treated
+model_es <- feols(
+  asmrs ~ i(time_to_treat, ever_treated, ref = c(-1, -1000)) + pcinc + asmrh + cases | stfips + year,
+  cluster = ~stfips, data = df
+)
+summary(model_es)
+
+# Create event study plot
+iplot(model_es,
+      xlab = "Time to Treatment",
+      main = "Event Study: No-Fault Divorce and Female Suicide")</code></pre>
+    <pre class="code-content python"><code class="language-python"># Event study using pyfixest's i() syntax
+# i(time_to_treat, ever_treated, ref=c(-1, -1000)):
+#   - time_to_treat: relative time (-1000 for never-treated)
+#   - ever_treated: interaction term
+#   - ref=c(-1, -1000): exclude reference AND never-treated
+model_es = pf.feols(
+    'asmrs ~ i(time_to_treat, ever_treated, ref=c(-1, -1000)) + pcinc + asmrh + cases | stfips + year',
+    vcov={'CRV1': 'stfips'}, data=df
+)
+print(model_es.summary())
+
+# Create event study plot
+model_es.iplot()</code></pre>
+  </div>
+
+  <!-- Quiz: Event Study -->
+  <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h4 style="color: var(--primary); margin-top: 0;">Quick Check: Event Studies</h4>
+    <p><strong>Question:</strong> In an event study plot, what should pre-treatment coefficients (t < 0) look like if parallel trends holds?</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+      <button onclick="checkAnswer(this, true)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Close to zero and statistically insignificant</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Trending upward over time</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Equal to the post-treatment effect</button>
+    </div>
+    <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
+  </div>
+
+  <div class="common-mistakes">
+    <h4>Why t = -1 as Reference?</h4>
+    <p>We use t = -1 (one year before treatment) as our reference period because it's the last pre-treatment period. All coefficients are then interpreted relative to this period. This is standard practice in event studies.</p>
+  </div>
+
+  <div class="key-principle">
+    <h4>Reading an Event Study Plot</h4>
+    <ul>
+      <li><strong>Pre-treatment coefficients</strong> (left of 0): Should be close to zero and statistically insignificant if parallel trends holds</li>
+      <li><strong>Post-treatment coefficients</strong> (right of 0): Show how the treatment effect evolves over time</li>
+      <li><strong>Reference period</strong> (t = -1): Always zero by construction</li>
+    </ul>
+  </div>
+</section>
+
+<section id="interpretation" class="tutorial-section">
+  <h2>Interpreting Results</h2>
+
+  <h3>What to Look For</h3>
+
+  <div class="key-principle">
+    <h4>Parallel Trends</h4>
+    <p>In the event study plot, pre-treatment coefficients should be statistically indistinguishable from zero. If you see a clear trend before treatment, the parallel trends assumption may be violated.</p>
+  </div>
+
+  <h3>Common Issues</h3>
+
+  <ul>
+    <li><strong>Pre-trends</strong>: If coefficients are trending before treatment, your estimate may be biased</li>
+    <li><strong>Anticipation effects</strong>: If coefficients become significant before t=0, states may have responded before official adoption</li>
+  </ul>
+
+  <div class="callout-info">
+    <h4>A Note on Staggered Timing</h4>
+    <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
+  </div>
+</section>
+
+<!-- ==================== PRACTICE ==================== -->
+<section id="practice" class="tutorial-section">
+  <h2>Practice: Interpreting Results</h2>
+
+  <p>Test your understanding by interpreting this hypothetical event study output.</p>
+
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 12px; margin: 16px 0;">
+    <h4 style="margin-top: 0;">Scenario: You run an event study and get these coefficients</h4>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em; margin: 12px 0;">
+      <tr style="background: #e0e0e0;">
+        <th style="padding: 8px; text-align: left; border: 1px solid #bdbdbd;">Time to Treatment</th>
+        <th style="padding: 8px; text-align: right; border: 1px solid #bdbdbd;">Coefficient</th>
+        <th style="padding: 8px; text-align: right; border: 1px solid #bdbdbd;">Std. Error</th>
+        <th style="padding: 8px; text-align: center; border: 1px solid #bdbdbd;">Significant?</th>
+      </tr>
+      <tr><td style="padding: 8px; border: 1px solid #e0e0e0;">t = -3</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.02</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.15</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;">No</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e0e0e0;">t = -2</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">-0.05</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.14</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;">No</td></tr>
+      <tr style="background: #fff3e0;"><td style="padding: 8px; border: 1px solid #e0e0e0;"><strong>t = -1 (ref)</strong></td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.00</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">—</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;">—</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e0e0e0;">t = 0</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">-0.35</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.12</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;"><strong>Yes</strong></td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e0e0e0;">t = 1</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">-0.42</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.13</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;"><strong>Yes</strong></td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e0e0e0;">t = 2</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">-0.48</td><td style="padding: 8px; text-align: right; border: 1px solid #e0e0e0;">0.14</td><td style="padding: 8px; text-align: center; border: 1px solid #e0e0e0;"><strong>Yes</strong></td></tr>
+    </table>
+
+    <p><strong>Questions:</strong></p>
+    <ol>
+      <li>Does the parallel trends assumption appear to hold?</li>
+      <li>What is the estimated effect of the policy?</li>
+      <li>Does the effect appear immediate or gradual?</li>
+    </ol>
+  </div>
+
+  <details style="margin: 16px 0; padding: 12px 16px; background: #e8f5e9; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: #2e7d32;">Click to see answers</summary>
+    <ol style="margin: 12px 0 0;">
+      <li><strong>Parallel trends:</strong> Yes, it appears to hold. The pre-treatment coefficients (t = -3, -2) are small and statistically insignificant, suggesting treated and control groups were on similar trends before the policy.</li>
+      <li><strong>Effect:</strong> The policy reduces the outcome by about 0.35-0.48 units. This is a negative effect that is statistically significant.</li>
+      <li><strong>Dynamics:</strong> The effect appears immediately at t = 0 and grows slightly over time (-0.35 → -0.42 → -0.48). This suggests both an immediate impact and some gradual strengthening of the effect.</li>
+    </ol>
+  </details>
+</section>
+
+<section id="quiz" class="tutorial-section">
+  <h2>Tutorial Complete!</h2>
+
+  <p>You've learned the essentials of diff-in-diff analysis and event studies.</p>
+
+  <div style="background: #e8f5e9; padding: 16px 20px; border-radius: 8px; margin: 16px 0;">
+    <h4 style="margin-top: 0;">Key Takeaways</h4>
+    <ul style="margin: 0; padding-left: 20px;">
+      <li><strong>DiD logic:</strong> Compare how treated units changed vs. how control units changed</li>
+      <li><strong>TWFE:</strong> State FE + year FE + treatment indicator gives you the average effect</li>
+      <li><strong>Event studies:</strong> Replace one treatment indicator with many (one per period)</li>
+      <li><strong>Parallel trends:</strong> Pre-treatment coefficients should be near zero</li>
+      <li><strong>Interpretation:</strong> Coefficients show effect relative to t = -1</li>
+    </ul>
+  </div>
+
+  <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);">
+    <a href="../index.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500;">
+      &larr; Back to Tutorials
+    </a>
+  </div>
+</section>
+
+<script>
+function checkAnswer(btn, isCorrect) {
+  const buttons = btn.parentElement.querySelectorAll('button');
+  const feedback = btn.parentElement.nextElementSibling;
+  buttons.forEach(b => { b.disabled = true; b.style.opacity = '0.7'; });
+  if (isCorrect) {
+    btn.style.background = '#d4edda';
+    btn.style.borderColor = '#28a745';
+    btn.style.opacity = '1';
+    feedback.textContent = 'Correct!';
+    feedback.style.background = '#d4edda';
+    feedback.style.color = '#155724';
+  } else {
+    btn.style.background = '#f8d7da';
+    btn.style.borderColor = '#dc3545';
+    btn.style.opacity = '1';
+    feedback.textContent = 'Not quite. Try reviewing the section above.';
+    feedback.style.background = '#f8d7da';
+    feedback.style.color = '#721c24';
+  }
+  feedback.style.display = 'block';
+}
+</script>
