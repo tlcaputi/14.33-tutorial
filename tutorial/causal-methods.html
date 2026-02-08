@@ -28,6 +28,15 @@ current_page: causal-methods
 
   <p>OLS mixes these together. Your coefficient captures both the true effect of education and the fact that "education" is partly a proxy for ability. This is called <strong>omitted variable bias</strong>—ability affects both X and Y, but you can't measure it.</p>
 
+  <div class="callout-info">
+    <h4>Famous IV Papers</h4>
+    <ul style="margin: 8px 0 0; padding-left: 18px;">
+      <li><strong>Angrist &amp; Krueger (1991), "Does Compulsory School Attendance Affect Schooling and Earnings?"</strong> <em>QJE.</em> Uses quarter of birth as an instrument for years of schooling. People born earlier in the year can drop out sooner due to compulsory attendance laws, generating exogenous variation in education. <a href="https://doi.org/10.2307/2937954" target="_blank">[Link]</a></li>
+      <li><strong>Angrist (1990), "Lifetime Earnings and the Vietnam Era Draft Lottery"</strong> <em>AER.</em> Uses the draft lottery number as an instrument for military service. The lottery randomly assigned draft eligibility, creating exogenous variation in who served in Vietnam. <a href="https://doi.org/10.3386/w3514" target="_blank">[Link]</a></li>
+      <li><strong>Gruber, Howard, Leder-Luis &amp; Caputi (2025), "Dying or Lying? For-Profit Hospices and End-of-Life Care"</strong> <em>AER.</em> Uses entry of for-profit hospices as an instrument to estimate the causal effect of hospice care on Medicare spending among Alzheimer's and dementia patients, finding that hospice enrollment reduces costs by offsetting more expensive treatments. <a href="https://doi.org/10.1257/aer.20230328" target="_blank">[Link]</a></li>
+    </ul>
+  </div>
+
   <h3>The IV Solution</h3>
 
   <p><strong>Instrumental variables</strong> solve this by finding something that affects education but has no direct effect on wages. This "instrument" creates variation in education that's unrelated to ability.</p>
@@ -216,6 +225,15 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   <h2>Difference-in-Differences</h2>
 
   <p>Difference-in-differences compares changes over time between a treated group and a control group. The key assumption is that both groups would have followed <strong>parallel trends</strong> in the absence of treatment.</p>
+
+  <div class="callout-info">
+    <h4>Famous DiD Papers</h4>
+    <ul style="margin: 8px 0 0; padding-left: 18px;">
+      <li><strong>Card &amp; Krueger (1994), "Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania"</strong> <em>AER.</em> Compares employment at fast-food restaurants in NJ (which raised its minimum wage) vs. PA (which didn't). Found no evidence that the minimum wage increase reduced employment—a result that reshaped the policy debate. <a href="https://doi.org/10.3386/w4509" target="_blank">[Link]</a></li>
+      <li><strong>Braghieri, Levy &amp; Makarin (2022), "Social Media and Mental Health"</strong> <em>AER.</em> Exploits the staggered rollout of Facebook across U.S. college campuses. Compares mental health outcomes at colleges that gained Facebook access to those that hadn't yet, finding that Facebook introduction worsened student mental health. <a href="https://doi.org/10.1257/aer.20211218" target="_blank">[Link]</a></li>
+      <li><strong>Meinhofer, Witman, Hinde &amp; Simon (2021), "Marijuana Liberalization Policies and Perinatal Health"</strong> <em>Journal of Health Economics.</em> Uses a DiD design to study how state-level marijuana legalization policies affect pregnancy and birth outcomes. <a href="https://doi.org/10.1016/j.jhealeco.2021.102537" target="_blank">[Link]</a></li>
+    </ul>
+  </div>
 
   <!-- DiD/TWFE Equation -->
   <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
@@ -798,6 +816,14 @@ ggiplot(model) +
   <h2>Regression Discontinuity</h2>
 
   <p>Regression discontinuity (RD) exploits a sharp threshold—a cutoff rule that determines who gets treated. When treatment is assigned based on whether someone crosses a threshold (e.g., a test score, age, income level), you can compare outcomes for people just barely above and just barely below the cutoff. These nearly-identical groups differ only in treatment status, creating a quasi-experimental setting.</p>
+
+  <div class="callout-info">
+    <h4>Famous RD Papers</h4>
+    <ul style="margin: 8px 0 0; padding-left: 18px;">
+      <li><strong>Almond &amp; Doyle (2011), "After Midnight: A Regression Discontinuity Design in Length of Postpartum Hospital Stays"</strong> <em>AEJ: Economic Policy.</em> Uses the midnight births cutoff: babies born just after midnight get counted as a new hospital day, leading to longer postpartum stays than babies born just before midnight. This discontinuity in hospital stay length lets them estimate the effect of extra hospital time on newborn health. <a href="https://doi.org/10.1257/pol.3.3.1" target="_blank">[Link]</a></li>
+      <li><strong>Almond, Doyle, Kowalski &amp; Williams (2010), "Estimating Marginal Returns to Medical Care: Evidence from At-risk Newborns"</strong> <em>QJE.</em> Exploits the "very low birth weight" (VLBW) classification at 1,500 grams. Newborns just below this cutoff receive substantially more medical care, allowing the authors to estimate whether the extra treatment improves infant health outcomes. <a href="https://doi.org/10.1162/qjec.2010.125.2.591" target="_blank">[Link]</a></li>
+    </ul>
+  </div>
 
   <h3>The RD Idea in One Picture</h3>
   <p>Imagine a college admissions test where anyone with a score ≥ 80 gets in, and anyone with a score < 80 is rejected. People with scores of 80 and 79 are nearly identical in ability, but vastly different in college attendance. If college causes higher earnings, we should see a jump in earnings right at the 80 cutoff.</p>
