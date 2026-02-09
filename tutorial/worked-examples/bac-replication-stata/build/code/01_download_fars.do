@@ -2,7 +2,7 @@
 * This script downloads real FARS crash data from NHTSA
 * Run time: ~10-15 minutes depending on internet speed
 
-clear all
+clear
 
 * Check if cache file exists
 capture confirm file "$build/output/fars_raw.dta"

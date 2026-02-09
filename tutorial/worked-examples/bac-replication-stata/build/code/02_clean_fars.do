@@ -1,6 +1,6 @@
 * 02_clean_fars.do - Clean and aggregate FARS data to state-year level
 
-clear all
+clear
 
 di "  Loading raw FARS data..."
 use "$build/output/fars_raw.dta", clear

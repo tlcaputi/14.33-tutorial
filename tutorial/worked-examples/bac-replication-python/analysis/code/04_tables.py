@@ -24,6 +24,7 @@ latex_table = r"""
 \centering
 \caption{Effect of 0.08 BAC Laws on Traffic Fatalities}
 \label{tab:main_results}
+\begin{threeparttable}
 \begin{tabular}{lcc}
 \toprule
  & Hit-Run & Non-Hit-Run \\
@@ -51,6 +52,7 @@ latex_table += r"""
 \small
 \item \textit{Notes:} Standard errors clustered by state in parentheses. * p<0.10, ** p<0.05, *** p<0.01.
 \end{tablenotes}
+\end{threeparttable}
 \end{table}
 """
 
@@ -64,6 +66,7 @@ es_table = r"""
 \centering
 \caption{Event Study Coefficients}
 \label{tab:event_study}
+\begin{threeparttable}
 \begin{tabular}{lcc}
 \toprule
 Event Time & Hit-Run & Non-Hit-Run \\
@@ -86,6 +89,7 @@ es_table += r"""
 \small
 \item \textit{Notes:} Reference period is $t=-1$. * p<0.10, ** p<0.05, *** p<0.01.
 \end{tablenotes}
+\end{threeparttable}
 \end{table}
 """
 
