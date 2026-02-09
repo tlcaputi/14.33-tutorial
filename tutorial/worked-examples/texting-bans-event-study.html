@@ -332,7 +332,7 @@ write_csv(state_year, "data/clean/state_year_fatalities.csv")</code></pre>
 * Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
 import delimited "data/raw/texting_ban_dates.csv", clear
 
-* Handle missing values for Montana (no ban)
+* Handle missing values for states without a ban (Montana, Missouri)
 * If CSV has "NA", import delimited reads it as a string; convert to numeric
 destring texting_ban_year, replace force
 
@@ -359,7 +359,7 @@ head(policy, 10)</code></pre>
             <li><strong>texting_ban_year</strong>: Year the texting ban took effect (NA for states without a ban)</li>
             <li><strong>primary_enforcement</strong>: 1 if the ban has primary enforcement (police can stop drivers solely for texting), 0 if secondary enforcement only</li>
           </ul>
-          <p>Montana is the only state without a texting ban during this period, so its <code>texting_ban_year</code> is NA. The <code>state</code> column uses numeric FIPS codes that match the FARS data, making the merge straightforward.</p>
+          <p>Montana and Missouri (which only banned texting for drivers under 21, not a statewide comprehensive ban) have <code>texting_ban_year</code> set to NA. The <code>state</code> column uses numeric FIPS codes that match the FARS data, making the merge straightforward.</p>
         </div>
 
         <h3>Merge and Create Treatment Variables</h3>
@@ -386,7 +386,7 @@ gen treated = (year >= texting_ban_year) & !missing(texting_ban_year)
 * Create event time variable (years since treatment)
 gen event_time = year - texting_ban_year
 
-* For never-treated states (Montana), set event_time to a placeholder
+* For never-treated states (Montana, Missouri), set event_time to a placeholder
 replace event_time = -999 if missing(texting_ban_year)
 
 * Tabulate treatment timing
