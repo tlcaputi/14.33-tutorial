@@ -304,8 +304,8 @@ state_year.to_csv("data/clean/state_year_fatalities.csv", index=False)</code></p
   <p>For a more rigorous analysis, you'd want to calculate fatality <em>rates</em> per 100,000 population. You can get state population data from the Census Bureau's API or from FRED.</p>
 
   <div class="common-mistakes">
-    <h4>Why Rates Matter</h4>
-    <p>Texas has more fatalities than Vermont simply because it's larger. If texting bans are correlated with state size, raw counts could give misleading results. Using per-capita rates addresses this concern.</p>
+    <h4>Why Rates Matter (Even with State Fixed Effects)</h4>
+    <p>State fixed effects already absorb time-invariant differences in population levels (Texas is always bigger than Vermont). The concern is <em>differential population growth</em> over the study period. If fast-growing states adopted texting bans at different times than slow-growing states, raw fatality counts could confound population trends with policy effects. Per-capita rates address this by removing variation due to changing population size.</p>
   </div>
 </section>
 
