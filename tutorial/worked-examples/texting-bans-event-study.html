@@ -822,6 +822,38 @@ print(event_study.summary)</code></pre>
     <h4>Standard Errors</h4>
     <p>We cluster standard errors at the state level because (1) treatment varies at the state level, and (2) fatalities within a state are likely correlated over time. This is essential for correct inference in DiD designs.</p>
   </div>
+
+  <h3>Results</h3>
+  <p>The event study coefficients (relative to t = &minus;1) with 95% confidence intervals:</p>
+  <div style="overflow-x: auto; margin: 20px 0;">
+    <table style="border-collapse: collapse; width: 100%; font-size: 0.9em; font-family: monospace;">
+      <thead>
+        <tr style="background: var(--bg-subtle); border-bottom: 2px solid var(--border);">
+          <th style="padding: 8px 12px; text-align: right;">Event Time</th>
+          <th style="padding: 8px 12px; text-align: right;">Coefficient</th>
+          <th style="padding: 8px 12px; text-align: right;">Std. Error</th>
+          <th style="padding: 8px 12px; text-align: right;">95% CI Lower</th>
+          <th style="padding: 8px 12px; text-align: right;">95% CI Upper</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;6</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0510</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0469</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.1431</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0411</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;5</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0141</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0274</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0680</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0398</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;4</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0187</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0191</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0562</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0187</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;3</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0055</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0191</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0430</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0319</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;2</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0085</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0167</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0243</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0414</td></tr>
+        <tr style="background: var(--bg-subtle);"><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;1</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0000</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&mdash;</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&mdash;</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&mdash;</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0221</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0191</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0153</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0595</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">1</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0126</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0207</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0281</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0533</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">2</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0115</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0262</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0400</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0630</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">3</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0135</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0279</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0413</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0683</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">4</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0115</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0343</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0558</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0788</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">5</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0068</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0330</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">&minus;0.0580</td><td style="padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--border);">0.0717</td></tr>
+        <tr><td style="padding: 6px 12px; text-align: right;">6</td><td style="padding: 6px 12px; text-align: right;">0.0063</td><td style="padding: 6px 12px; text-align: right;">0.0372</td><td style="padding: 6px 12px; text-align: right;">&minus;0.0667</td><td style="padding: 6px 12px; text-align: right;">0.0793</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size: 0.85em; color: var(--text-muted);">Reference period: t = &minus;1. Standard errors clustered at the state level.</p>
 </section>
 
 <section id="visualization" class="tutorial-section">
@@ -940,6 +972,35 @@ ax.annotate("Coefficients relative to t=-1. 95% CIs shown.\n"
 plt.tight_layout()
 plt.savefig("output/event_study.png", dpi=300)
 plt.show()</code></pre>
+  </div>
+
+  <h3>Output</h3>
+  <div style="margin: 20px 0; text-align: center;">
+    <img src="texting-bans-output/event_study.png" alt="Event study plot showing the effect of texting bans on traffic fatalities" style="max-width: 100%; border: 1px solid var(--border); border-radius: 8px;">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">Event study coefficients with 95% confidence intervals. Reference period: t = &minus;1. Clustered standard errors at the state level.</p>
+  </div>
+</section>
+
+<section id="replication-package" class="tutorial-section">
+  <h2>Replication Package</h2>
+
+  <p>Download a complete replication package that downloads the data, runs the analysis, and produces the event study plot above. Each package includes a master script that runs all steps sequentially.</p>
+
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0;">
+    <a href="texting-bans-replication-stata.zip" download style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--text); font-weight: 500; transition: border-color 0.2s;">
+      <span style="font-size: 1.2em;">&#128230;</span> Stata
+    </a>
+    <a href="texting-bans-replication-r.zip" download style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--text); font-weight: 500; transition: border-color 0.2s;">
+      <span style="font-size: 1.2em;">&#128230;</span> R
+    </a>
+    <a href="texting-bans-replication-python.zip" download style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--text); font-weight: 500; transition: border-color 0.2s;">
+      <span style="font-size: 1.2em;">&#128230;</span> Python
+    </a>
+  </div>
+
+  <div class="key-principle">
+    <h4>What's Included</h4>
+    <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (52 rows). FARS data (~400MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
   </div>
 </section>
 
