@@ -19,6 +19,8 @@ summary_cols = ['total_fatalities', 'hr_fatalities', 'nhr_fatalities',
                 'treated', 'ln_hr', 'ln_nhr']
 if 'unemployment' in analysis_data.columns:
     summary_cols.append('unemployment')
+if 'income' in analysis_data.columns:
+    summary_cols.append('income')
 
 summary_stats = analysis_data[summary_cols].describe().T
 summary_stats = summary_stats[['count', 'mean', 'std', 'min', 'max']]

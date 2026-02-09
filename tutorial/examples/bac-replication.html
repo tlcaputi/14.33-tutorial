@@ -189,9 +189,8 @@ bac_replication/
 │   │   └── fred/          # Economic controls
 │   ├── code/
 │   │   ├── 01_download_fars.do
-│   │   ├── 02_import_bac_dates.do
-│   │   ├── 03_aggregate_crashes.do
-│   │   └── 04_merge_all.do
+│   │   ├── 02_clean_fars.do
+│   │   └── 03_merge_controls.do
 │   └── output/
 │       └── analysis_data.dta
 │
@@ -237,9 +236,8 @@ global analysis "$root/analysis"
 
 * Build data
 do "$build/code/01_download_fars.do"
-do "$build/code/02_import_bac_dates.do"
-do "$build/code/03_aggregate_crashes.do"
-do "$build/code/04_merge_all.do"
+do "$build/code/02_clean_fars.do"
+do "$build/code/03_merge_controls.do"
 
 * Run analysis
 do "$analysis/code/01_summary_stats.do"
@@ -264,9 +262,8 @@ analysis <- file.path(root, "analysis")
 
 # Build data
 source(file.path(build, "code", "01_download_fars.R"))
-source(file.path(build, "code", "02_import_bac_dates.R"))
-source(file.path(build, "code", "03_aggregate_crashes.R"))
-source(file.path(build, "code", "04_merge_all.R"))
+source(file.path(build, "code", "02_clean_fars.R"))
+source(file.path(build, "code", "03_merge_controls.R"))
 
 # Run analysis
 source(file.path(analysis, "code", "01_summary_stats.R"))
@@ -292,9 +289,8 @@ ANALYSIS = ROOT / "analysis"
 
 # Build data
 exec(open(BUILD / "code" / "01_download_fars.py").read())
-exec(open(BUILD / "code" / "02_import_bac_dates.py").read())
-exec(open(BUILD / "code" / "03_aggregate_crashes.py").read())
-exec(open(BUILD / "code" / "04_merge_all.py").read())
+exec(open(BUILD / "code" / "02_clean_fars.py").read())
+exec(open(BUILD / "code" / "03_merge_controls.py").read())
 
 # Run analysis
 exec(open(ANALYSIS / "code" / "01_summary_stats.py").read())
@@ -543,7 +539,7 @@ accident.to_parquet(BUILD / "input" / "fars" / "accident_2000.parquet")</code></
       </div>
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre class="code-content stata active"><code class="language-stata">* 03_aggregate_crashes.do - Aggregate FARS to state-year
+    <pre class="code-content stata active"><code class="language-stata">* 02_clean_fars.do - Clean and aggregate FARS to state-year
 * Run from: $build/code/
 
 * Load vehicle file (has hit-run indicator)
@@ -563,12 +559,12 @@ merge 1:1 st_case using `vehicle_hitrun'
 
 * Aggregate to state-year
 collapse (count) total_crashes=st_case ///
-         (sum) hr_crashes=hit_run, ///
+         (sum) hr_fatalities=hit_run, ///
          by(state year)
 
-gen nhr_crashes = total_crashes - hr_crashes
+gen nhr_fatalities = total_crashes - hr_fatalities
 save "$build/output/state_year_crashes.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># 03_aggregate_crashes.R - Aggregate FARS to state-year
+    <pre class="code-content r"><code class="language-r"># 02_clean_fars.R - Clean and aggregate FARS to state-year
 pacman::p_load(tidyverse)
 
 # Load vehicle file and code hit-run
@@ -590,13 +586,13 @@ state_year <- crashes %>%
   group_by(state, year) %>%
   summarize(
     total_crashes = n(),
-    hr_crashes = sum(hit_run, na.rm = TRUE),
-    nhr_crashes = total_crashes - hr_crashes,
+    hr_fatalities = sum(hit_run, na.rm = TRUE),
+    nhr_fatalities = total_crashes - hr_fatalities,
     .groups = "drop"
   )
 
 write_rds(state_year, file.path(build, "output", "state_year_crashes.rds"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># 03_aggregate_crashes.py - Aggregate FARS to state-year
+    <pre class="code-content python"><code class="language-python"># 02_clean_fars.py - Clean and aggregate FARS to state-year
 import pandas as pd
 
 # Load vehicle file and code hit-run
@@ -613,9 +609,9 @@ crashes = accident.merge(crash_hitrun, on='st_case', how='left')
 # Aggregate to state-year
 state_year = crashes.groupby(['state', 'year']).agg(
     total_crashes=('st_case', 'count'),
-    hr_crashes=('hit_run', 'sum')
+    hr_fatalities=('hit_run', 'sum')
 ).reset_index()
-state_year['nhr_crashes'] = state_year['total_crashes'] - state_year['hr_crashes']
+state_year['nhr_fatalities'] = state_year['total_crashes'] - state_year['hr_fatalities']
 
 state_year.to_parquet(BUILD / "output" / "state_year_crashes.parquet")</code></pre>
   </div>
@@ -649,7 +645,7 @@ use `panel', clear
 merge 1:1 state year using "state_year_crashes.dta"
 
 * Fill missing values with zeros (not missing!)
-foreach var in total_crashes hr_crashes nhr_crashes {
+foreach var in total_crashes hr_fatalities nhr_fatalities {
     replace `var' = 0 if missing(`var')
 }</code></pre>
     <pre class="code-content r"><code class="language-r"># Create complete state-year panel
@@ -661,7 +657,7 @@ complete_panel <- expand.grid(
 # Merge and fill zeros
 state_year <- complete_panel %>%
   left_join(state_year, by = c("state", "year")) %>%
-  mutate(across(c(total_crashes, hr_crashes, nhr_crashes),
+  mutate(across(c(total_crashes, hr_fatalities, nhr_fatalities),
                 ~replace_na(., 0)))</code></pre>
     <pre class="code-content python"><code class="language-python"># Create complete state-year panel
 import itertools
@@ -675,7 +671,7 @@ complete_panel = pd.DataFrame(
 
 # Merge and fill zeros
 state_year = complete_panel.merge(state_year, on=['state', 'year'], how='left')
-state_year = state_year.fillna({'total_crashes': 0, 'hr_crashes': 0, 'nhr_crashes': 0})</code></pre>
+state_year = state_year.fillna({'total_crashes': 0, 'hr_fatalities': 0, 'nhr_fatalities': 0})</code></pre>
   </div>
 </section>
 
@@ -753,7 +749,7 @@ state_year = state_year.fillna({'total_crashes': 0, 'hr_crashes': 0, 'nhr_crashe
       </div>
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre class="code-content stata active"><code class="language-stata">* 04_merge_all.do - Merge all datasets
+    <pre class="code-content stata active"><code class="language-stata">* 03_merge_controls.do - Merge all datasets
 * Run from: $build/code/
 
 * Load BAC adoption dates (one row per state)
@@ -775,7 +771,7 @@ drop _merge
 * Create treatment variables
 gen event_time = year - adoption_year
 gen treated = (event_time >= 0)</code></pre>
-    <pre class="code-content r"><code class="language-r"># 04_merge_all.R - Merge all datasets
+    <pre class="code-content r"><code class="language-r"># 03_merge_controls.R - Merge all datasets
 
 # Load BAC adoption dates
 bac_dates <- read_csv(file.path(build, "input", "apis", "bac08_adoption_dates.csv")) %>%
@@ -798,7 +794,7 @@ state_year <- state_year %>%
 
 # Verify no missing adoption years
 stopifnot(sum(is.na(state_year$adoption_year)) == 0)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 04_merge_all.py - Merge all datasets
+    <pre class="code-content python"><code class="language-python"># 03_merge_controls.py - Merge all datasets
 import pandas as pd
 
 # Load BAC adoption dates
@@ -843,8 +839,8 @@ merge 1:1 state_fips year using "$build/input/fred/unemployment.dta", nogen
 merge 1:1 state_fips year using "$build/input/fred/income.dta", nogen
 
 * Create outcome variables
-gen ln_hr = ln(hr_crashes + 1)
-gen ln_nhr = ln(nhr_crashes + 1)
+gen ln_hr = ln(hr_fatalities + 1)
+gen ln_nhr = ln(nhr_fatalities + 1)
 
 * Save final analysis dataset
 save "$build/output/analysis_data.dta", replace</code></pre>
@@ -857,8 +853,8 @@ state_year <- state_year %>%
   left_join(unemployment, by = c("state_fips", "year")) %>%
   left_join(income, by = c("state_fips", "year")) %>%
   mutate(
-    ln_hr = log(hr_crashes + 1),
-    ln_nhr = log(nhr_crashes + 1)
+    ln_hr = log(hr_fatalities + 1),
+    ln_nhr = log(nhr_fatalities + 1)
   )
 
 # Save final analysis dataset
@@ -872,8 +868,8 @@ state_year = state_year.merge(income, on=['state_fips', 'year'], how='left')
 
 # Create outcome variables
 import numpy as np
-state_year['ln_hr'] = np.log(state_year['hr_crashes'] + 1)
-state_year['ln_nhr'] = np.log(state_year['nhr_crashes'] + 1)
+state_year['ln_hr'] = np.log(state_year['hr_fatalities'] + 1)
+state_year['ln_nhr'] = np.log(state_year['nhr_fatalities'] + 1)
 
 # Save final analysis dataset
 state_year.to_parquet(BUILD / "output" / "analysis_data.parquet")</code></pre>
@@ -941,17 +937,17 @@ state_year.to_parquet(BUILD / "output" / "analysis_data.parquet")</code></pre>
 use "$build/output/analysis_data.dta", clear
 
 * Overall summary
-summarize hr_crashes nhr_crashes unemployment income
+summarize hr_fatalities nhr_fatalities unemployment income
 
 * By treatment status
-bysort treated: summarize hr_crashes nhr_crashes
+bysort treated: summarize hr_fatalities nhr_fatalities
 
 * More detailed: mean and SD
-tabstat hr_crashes nhr_crashes unemployment, ///
+tabstat hr_fatalities nhr_fatalities unemployment, ///
     by(treated) stats(mean sd n) columns(statistics)
 
 * Publication table with estout
-estpost tabstat hr_crashes nhr_crashes unemployment income, ///
+estpost tabstat hr_fatalities nhr_fatalities unemployment income, ///
     by(treated) stats(mean sd) columns(statistics)
 esttab using "$analysis/output/tables/summary_stats.tex", ///
     cells("mean(fmt(2)) sd(fmt(2))") replace</code></pre>
@@ -965,7 +961,7 @@ state_year <- read_rds(file.path(build, "output", "analysis_data.rds"))
 summary_table <- state_year %>%
   group_by(treated) %>%
   summarize(
-    across(c(hr_crashes, nhr_crashes, unemployment, income),
+    across(c(hr_fatalities, nhr_fatalities, unemployment, income),
            list(mean = ~mean(., na.rm = TRUE),
                 sd = ~sd(., na.rm = TRUE))),
     n = n()
@@ -974,7 +970,7 @@ summary_table <- state_year %>%
 # Overall summary
 overall <- state_year %>%
   summarize(
-    across(c(hr_crashes, nhr_crashes, unemployment, income),
+    across(c(hr_fatalities, nhr_fatalities, unemployment, income),
            list(mean = mean, sd = sd)),
     n = n()
   ) %>%
@@ -991,12 +987,12 @@ state_year = pd.read_parquet(BUILD / "output" / "analysis_data.parquet")
 
 # Summary by treatment status
 summary_by_treated = state_year.groupby('treated')[
-    ['hr_crashes', 'nhr_crashes', 'unemployment', 'income']
+    ['hr_fatalities', 'nhr_fatalities', 'unemployment', 'income']
 ].agg(['mean', 'std', 'count'])
 
 # Overall summary
 overall = state_year[
-    ['hr_crashes', 'nhr_crashes', 'unemployment', 'income']
+    ['hr_fatalities', 'nhr_fatalities', 'unemployment', 'income']
 ].agg(['mean', 'std', 'count'])
 
 print("By Treatment Status:")
@@ -1078,9 +1074,12 @@ summary_by_treated.to_csv(ANALYSIS / "output" / "tables" / "summary_stats.csv")<
 
 use "$build/output/analysis_data.dta", clear
 
+* Encode state FIPS for use in absorb
+encode state_fips, gen(state_id)
+
 * Simple TWFE DiD
-reghdfe ln_hr treated unemployment, ///
-    absorb(state_fips year) cluster(state_fips)
+reghdfe ln_hr treated unemployment income, ///
+    absorb(state_id year) cluster(state_id)
 
 * Interpretation: coefficient on 'treated' is the DiD estimate
 * Positive = hit-run crashes increased after 0.08 law</code></pre>
@@ -1092,7 +1091,7 @@ state_year <- read_rds(file.path(build, "output", "analysis_data.rds"))
 
 # Simple TWFE DiD
 did_model <- feols(
-  ln_hr ~ treated + unemployment | state_fips + year,
+  ln_hr ~ treated + unemployment + income | state_fips + year,
   data = state_year,
   cluster = ~state_fips
 )
@@ -1110,7 +1109,7 @@ panel = state_year.set_index(['state_fips', 'year'])
 
 # Simple TWFE DiD
 model = PanelOLS.from_formula(
-    'ln_hr ~ treated + unemployment + EntityEffects + TimeEffects',
+    'ln_hr ~ treated + unemployment + income + EntityEffects + TimeEffects',
     data=panel
 )
 results = model.fit(cov_type='clustered', cluster_entity=True)
@@ -1144,15 +1143,17 @@ gen event_time_binned = event_time
 replace event_time_binned = -5 if event_time < -5
 replace event_time_binned = 10 if event_time > 10
 
-* Create dummies (omit -1 as reference)
-tab event_time_binned, gen(et_)
+* Shift to positive values for factor variable syntax
+* (add 6 so -5 becomes 1, -1 becomes 5, 0 becomes 6, +10 becomes 16)
+gen et_shifted = event_time_binned + 6
 
 * Event study regression
-reghdfe ln_hr et_* unemployment, ///
-    absorb(state_fips year) cluster(state_fips)
+* ib5. sets reference at et_shifted=5, which is t=-1
+reghdfe ln_hr ib5.et_shifted unemployment income, ///
+    absorb(state_id year) cluster(state_id)
 
 * Plot coefficients
-coefplot, vertical keep(et_*) ///
+coefplot, vertical keep(*.et_shifted) ///
     yline(0) xline(5.5, lpattern(dash)) ///
     title("Event Study: Hit-and-Run Crashes") ///
     xtitle("Years Since 0.08 BAC Law") ytitle("Coefficient")
@@ -1196,7 +1197,7 @@ state_year <- state_year %>%
 #   - Interact with ever_treated indicator
 #   - Exclude t=-1 (reference period) AND t=-1000 (never-treated)
 es_model <- feols(
-  ln_hr ~ i(event_time_binned, ever_treated, ref = c(-1, -1000)) + unemployment | state_fips + year,
+  ln_hr ~ i(event_time_binned, ever_treated, ref = c(-1, -1000)) + unemployment + income | state_fips + year,
   data = state_year,
   cluster = ~state_fips
 )
@@ -1281,11 +1282,14 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png", dpi=300)</code>
 
 use "$build/output/analysis_data.dta", clear
 
+* Encode state FIPS for use in absorb
+encode state_fips, gen(state_id)
+
 * Run both specifications
-reghdfe ln_hr treated unemployment, absorb(state_fips year) cluster(state_fips)
+reghdfe ln_hr treated unemployment income, absorb(state_id year) cluster(state_id)
 est store hr_model
 
-reghdfe ln_nhr treated unemployment, absorb(state_fips year) cluster(state_fips)
+reghdfe ln_nhr treated unemployment income, absorb(state_id year) cluster(state_id)
 est store nhr_model
 
 * Export to LaTeX
@@ -1303,9 +1307,9 @@ pacman::p_load(fixest, modelsummary, tidyverse)
 state_year <- read_rds(file.path(build, "output", "analysis_data.rds"))
 
 # Estimate both models
-hr_model <- feols(ln_hr ~ treated + unemployment | state_fips + year,
+hr_model <- feols(ln_hr ~ treated + unemployment + income | state_fips + year,
                   data = state_year, cluster = ~state_fips)
-nhr_model <- feols(ln_nhr ~ treated + unemployment | state_fips + year,
+nhr_model <- feols(ln_nhr ~ treated + unemployment + income | state_fips + year,
                    data = state_year, cluster = ~state_fips)
 
 # Create publication table
@@ -1323,9 +1327,9 @@ state_year = pd.read_parquet(BUILD / "output" / "analysis_data.parquet")
 
 # For publication tables in Python, export to CSV and format in LaTeX
 results_df = pd.DataFrame({
-    'Variable': ['treated', 'unemployment'],
-    'Hit-Run': [results_hr.params['treated'], results_hr.params['unemployment']],
-    'Non-Hit-Run': [results_nhr.params['treated'], results_nhr.params['unemployment']]
+    'Variable': ['treated', 'unemployment', 'income'],
+    'Hit-Run': [results_hr.params['treated'], results_hr.params['unemployment'], results_hr.params['income']],
+    'Non-Hit-Run': [results_nhr.params['treated'], results_nhr.params['unemployment'], results_nhr.params['income']]
 })
 results_df.to_csv(ANALYSIS / "output" / "tables" / "regression_results.csv", index=False)
 
@@ -1379,7 +1383,7 @@ from stargazer.stargazer import Stargazer
 use "$build/output/analysis_data.dta", clear
 
 * Event study plot with proper formatting
-coefplot, vertical keep(et_*) ///
+coefplot, vertical keep(*.et_shifted) ///
     yline(0, lcolor(gray)) ///            /* Reference line at zero */
     xline(5.5, lpattern(dash) lcolor(red)) /// /* Treatment timing */
     title("Effect of 0.08 BAC Law on Hit-and-Run Crashes", size(medium)) ///

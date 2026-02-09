@@ -534,6 +534,73 @@ use `main_data', clear
 merge m:1 state_fips year using `unemp_data', nogen keep(master match)
 
 * =============================================================================
+* Download per capita income data from FRED
+* =============================================================================
+di "  Downloading per capita income data from FRED..."
+
+* Save current data
+tempfile main_data2
+save `main_data2', replace
+
+* Create empty income dataset
+clear
+gen state_fips = ""
+gen year = .
+gen income = .
+tempfile income_data
+save `income_data', replace
+
+local income_list ALPCPI AKPCPI AZPCPI ARPCPI CAPCPI COPCPI CTPCPI DEPCPI FLPCPI GAPCPI HIPCPI IDPCPI ILPCPI INPCPI IAPCPI KSPCPI KYPCPI LAPCPI MEPCPI MDPCPI MAPCPI MIPCPI MNPCPI MSPCPI MOPCPI MTPCPI NEPCPI NVPCPI NHPCPI NJPCPI NMPCPI NYPCPI NCPCPI NDPCPI OHPCPI OKPCPI ORPCPI PAPCPI RIPCPI SCPCPI SDPCPI TNPCPI TXPCPI UTPCPI VTPCPI VAPCPI WAPCPI WVPCPI WIPCPI WYPCPI
+
+local inc_downloaded = 0
+
+forvalues i = 1/`n' {
+    local fips : word `i' of `fips_list'
+    local code : word `i' of `income_list'
+
+    quietly di "    Downloading `code' for state `fips'..."
+
+    local success = 0
+    forvalues try = 1/3 {
+        if `success' == 0 {
+            capture noisily {
+                local tempcsv "`tempdir'fred_`code'.csv"
+                copy "https://fred.stlouisfed.org/graph/fredgraph.csv?id=`code'" "`tempcsv'", replace
+                import delimited "`tempcsv'", clear varnames(1)
+                capture erase "`tempcsv'"
+
+                gen year = real(substr(observation_date, 1, 4))
+                local lccode = lower("`code'")
+                rename `lccode' income_val
+
+                keep if year >= 1982 & year <= 2008
+                collapse (mean) income = income_val, by(year)
+
+                gen state_fips = "`fips'"
+
+                append using `income_data'
+                save `income_data', replace
+
+                local inc_downloaded = `inc_downloaded' + 1
+                local success = 1
+            }
+            if _rc != 0 & `try' < 3 {
+                sleep 1000
+            }
+        }
+    }
+    if `success' == 0 {
+        di "      Could not download `code' after 3 attempts"
+    }
+}
+
+di "    Downloaded income data for `inc_downloaded' states"
+
+* Merge income data back to main data
+use `main_data2', clear
+merge m:1 state_fips year using `income_data', nogen keep(master match)
+
+* =============================================================================
 * Create log outcome variables
 * =============================================================================
 gen ln_hr = ln(hr_fatalities + 1)
@@ -550,7 +617,8 @@ encode state_fips, gen(state_id)
 * =============================================================================
 order state_fips state_id state_name year total_fatalities hr_fatalities nhr_fatalities ///
       ln_hr ln_nhr ln_total adoption_year event_time treated ///
-      alr zero_tolerance primary_seatbelt secondary_seatbelt mlda21 gdl speed_70 aggravated_dui
+      alr zero_tolerance primary_seatbelt secondary_seatbelt mlda21 gdl speed_70 aggravated_dui ///
+      unemployment income
 
 save "$build/output/analysis_data.dta", replace
 export delimited "$build/output/analysis_data.csv", replace

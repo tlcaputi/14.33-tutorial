@@ -6,12 +6,27 @@ library(tidyr)
 # Load analysis data
 analysis_data <- readRDS(file.path(build, "output", "analysis_data.rds"))
 
+# Core variables always present
+vars <- c("total_fatalities", "hr_fatalities", "nhr_fatalities",
+          "ln_hr", "ln_nhr", "treated")
+labels <- c("Total Fatalities", "HR Fatalities", "Non-HR Fatalities",
+            "Log HR Fatalities", "Log Non-HR Fatalities", "Treated")
+
+# Add control variables if available
+if ("unemployment" %in% names(analysis_data)) {
+  vars <- c(vars, "unemployment")
+  labels <- c(labels, "Unemployment")
+}
+if ("income" %in% names(analysis_data)) {
+  vars <- c(vars, "income")
+  labels <- c(labels, "Income")
+}
+
 # Summary statistics for main variables
 summary_stats <- analysis_data %>%
   summarise(
     n_obs = n(),
-    across(c(total_fatalities, hr_fatalities, nhr_fatalities,
-             ln_hr, ln_nhr, treated),
+    across(all_of(vars),
            list(
              mean = ~mean(., na.rm = TRUE),
              sd = ~sd(., na.rm = TRUE),
@@ -21,43 +36,14 @@ summary_stats <- analysis_data %>%
   ) %>%
   pivot_longer(everything(), names_to = "stat", values_to = "value")
 
-# Create formatted table
+# Create formatted table dynamically
 stats_table <- tibble(
-  Variable = c("Total Fatalities", "HR Fatalities", "Non-HR Fatalities",
-               "Log HR Fatalities", "Log Non-HR Fatalities", "Treated"),
+  Variable = labels,
   N = nrow(analysis_data),
-  Mean = c(
-    mean(analysis_data$total_fatalities),
-    mean(analysis_data$hr_fatalities),
-    mean(analysis_data$nhr_fatalities),
-    mean(analysis_data$ln_hr),
-    mean(analysis_data$ln_nhr),
-    mean(analysis_data$treated)
-  ),
-  SD = c(
-    sd(analysis_data$total_fatalities),
-    sd(analysis_data$hr_fatalities),
-    sd(analysis_data$nhr_fatalities),
-    sd(analysis_data$ln_hr),
-    sd(analysis_data$ln_nhr),
-    sd(analysis_data$treated)
-  ),
-  Min = c(
-    min(analysis_data$total_fatalities),
-    min(analysis_data$hr_fatalities),
-    min(analysis_data$nhr_fatalities),
-    min(analysis_data$ln_hr),
-    min(analysis_data$ln_nhr),
-    min(analysis_data$treated)
-  ),
-  Max = c(
-    max(analysis_data$total_fatalities),
-    max(analysis_data$hr_fatalities),
-    max(analysis_data$nhr_fatalities),
-    max(analysis_data$ln_hr),
-    max(analysis_data$ln_nhr),
-    max(analysis_data$treated)
-  )
+  Mean = sapply(vars, function(v) mean(analysis_data[[v]], na.rm = TRUE)),
+  SD = sapply(vars, function(v) sd(analysis_data[[v]], na.rm = TRUE)),
+  Min = sapply(vars, function(v) min(analysis_data[[v]], na.rm = TRUE)),
+  Max = sapply(vars, function(v) max(analysis_data[[v]], na.rm = TRUE))
 )
 
 # Save summary stats

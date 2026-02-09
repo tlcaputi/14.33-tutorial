@@ -248,6 +248,48 @@ if (length(all_unemp) > 0) {
   cat(sprintf("    Added unemployment data for %d states\n", length(all_unemp)))
 }
 
+# Download per capita income data from FRED
+cat("  Downloading per capita income data from FRED...\n")
+state_income_codes <- c(
+  "01" = "ALPCPI", "02" = "AKPCPI", "04" = "AZPCPI", "05" = "ARPCPI", "06" = "CAPCPI",
+  "08" = "COPCPI", "09" = "CTPCPI", "10" = "DEPCPI", "12" = "FLPCPI", "13" = "GAPCPI",
+  "15" = "HIPCPI", "16" = "IDPCPI", "17" = "ILPCPI", "18" = "INPCPI", "19" = "IAPCPI",
+  "20" = "KSPCPI", "21" = "KYPCPI", "22" = "LAPCPI", "23" = "MEPCPI", "24" = "MDPCPI",
+  "25" = "MAPCPI", "26" = "MIPCPI", "27" = "MNPCPI", "28" = "MSPCPI", "29" = "MOPCPI",
+  "30" = "MTPCPI", "31" = "NEPCPI", "32" = "NVPCPI", "33" = "NHPCPI", "34" = "NJPCPI",
+  "35" = "NMPCPI", "36" = "NYPCPI", "37" = "NCPCPI", "38" = "NDPCPI", "39" = "OHPCPI",
+  "40" = "OKPCPI", "41" = "ORPCPI", "42" = "PAPCPI", "44" = "RIPCPI", "45" = "SCPCPI",
+  "46" = "SDPCPI", "47" = "TNPCPI", "48" = "TXPCPI", "49" = "UTPCPI", "50" = "VTPCPI",
+  "51" = "VAPCPI", "53" = "WAPCPI", "54" = "WVPCPI", "55" = "WIPCPI", "56" = "WYPCPI"
+)
+
+all_income <- list()
+for (fips in names(state_income_codes)) {
+  code <- state_income_codes[fips]
+  tryCatch({
+    url <- sprintf("https://fred.stlouisfed.org/graph/fredgraph.csv?id=%s", code)
+    df <- read_csv(url, show_col_types = FALSE)
+    names(df) <- c("date", "income")
+    df <- df %>%
+      mutate(
+        date = as.Date(date),
+        year = as.integer(format(date, "%Y"))
+      ) %>%
+      filter(year >= 1982, year <= 2008) %>%
+      group_by(year) %>%
+      summarise(income = mean(income, na.rm = TRUE), .groups = "drop") %>%
+      mutate(state_fips = fips)
+    all_income[[fips]] <- df
+  }, error = function(e) NULL)
+}
+
+if (length(all_income) > 0) {
+  income_df <- bind_rows(all_income)
+  state_year <- state_year %>%
+    left_join(income_df, by = c("state_fips", "year"))
+  cat(sprintf("    Added income data for %d states\n", length(all_income)))
+}
+
 # Create log outcome variables
 state_year <- state_year %>%
   mutate(

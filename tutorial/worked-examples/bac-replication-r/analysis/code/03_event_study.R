@@ -26,9 +26,14 @@ event_times <- sort(unique(analysis_data$event_time_binned[!is.na(analysis_data$
 event_times <- event_times[event_times != -1]
 
 # Build formula with available controls
-controls <- c()
+# Policy controls are always present (created in build script)
+controls <- c("alr", "zero_tolerance", "primary_seatbelt", "secondary_seatbelt",
+              "mlda21", "gdl", "speed_70", "aggravated_dui")
 if ("unemployment" %in% names(analysis_data)) {
   controls <- c(controls, "unemployment")
+}
+if ("income" %in% names(analysis_data)) {
+  controls <- c(controls, "income")
 }
 
 # Event study: Hit-and-run

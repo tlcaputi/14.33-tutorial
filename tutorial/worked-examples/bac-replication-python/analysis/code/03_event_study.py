@@ -26,7 +26,13 @@ panel_data = analysis_data.set_index(['state_fips', 'year'])
 
 # Build formula
 et_cols = [f'et_m{abs(int(et))}' if et < 0 else f'et_p{int(et)}' for et in event_times]
-controls = ['unemployment'] if 'unemployment' in analysis_data.columns else []
+# Policy controls are always present (created in build script)
+controls = ['alr', 'zero_tolerance', 'primary_seatbelt', 'secondary_seatbelt',
+            'mlda21', 'gdl', 'speed_70', 'aggravated_dui']
+if 'unemployment' in analysis_data.columns:
+    controls.append('unemployment')
+if 'income' in analysis_data.columns:
+    controls.append('income')
 all_vars = et_cols + controls
 formula = f'ln_hr ~ {" + ".join(all_vars)} + EntityEffects + TimeEffects'
 

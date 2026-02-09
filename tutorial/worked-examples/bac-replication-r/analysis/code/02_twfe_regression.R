@@ -7,9 +7,14 @@ library(dplyr)
 analysis_data <- readRDS(file.path(build, "output", "analysis_data.rds"))
 
 # Build formula with available controls
-controls <- c()
+# Policy controls are always present (created in build script)
+controls <- c("alr", "zero_tolerance", "primary_seatbelt", "secondary_seatbelt",
+              "mlda21", "gdl", "speed_70", "aggravated_dui")
 if ("unemployment" %in% names(analysis_data)) {
   controls <- c(controls, "unemployment")
+}
+if ("income" %in% names(analysis_data)) {
+  controls <- c(controls, "income")
 }
 
 # TWFE regression: Hit-and-run fatalities

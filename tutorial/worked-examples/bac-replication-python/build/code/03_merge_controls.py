@@ -238,6 +238,44 @@ try:
 except Exception as e:
     print(f"    Could not download unemployment data: {e}")
 
+# Try to download per capita income data from FRED
+print("  Downloading per capita income data from FRED...")
+STATE_INCOME_CODES = {
+    '01': 'ALPCPI', '02': 'AKPCPI', '04': 'AZPCPI', '05': 'ARPCPI', '06': 'CAPCPI',
+    '08': 'COPCPI', '09': 'CTPCPI', '10': 'DEPCPI', '12': 'FLPCPI', '13': 'GAPCPI',
+    '15': 'HIPCPI', '16': 'IDPCPI', '17': 'ILPCPI', '18': 'INPCPI', '19': 'IAPCPI',
+    '20': 'KSPCPI', '21': 'KYPCPI', '22': 'LAPCPI', '23': 'MEPCPI', '24': 'MDPCPI',
+    '25': 'MAPCPI', '26': 'MIPCPI', '27': 'MNPCPI', '28': 'MSPCPI', '29': 'MOPCPI',
+    '30': 'MTPCPI', '31': 'NEPCPI', '32': 'NVPCPI', '33': 'NHPCPI', '34': 'NJPCPI',
+    '35': 'NMPCPI', '36': 'NYPCPI', '37': 'NCPCPI', '38': 'NDPCPI', '39': 'OHPCPI',
+    '40': 'OKPCPI', '41': 'ORPCPI', '42': 'PAPCPI', '44': 'RIPCPI', '45': 'SCPCPI',
+    '46': 'SDPCPI', '47': 'TNPCPI', '48': 'TXPCPI', '49': 'UTPCPI', '50': 'VTPCPI',
+    '51': 'VAPCPI', '53': 'WAPCPI', '54': 'WVPCPI', '55': 'WIPCPI', '56': 'WYPCPI'
+}
+
+try:
+    all_income = []
+    for fips, code in STATE_INCOME_CODES.items():
+        try:
+            url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={code}"
+            df = pd.read_csv(url)
+            df.columns = ['date', 'income']
+            df['date'] = pd.to_datetime(df['date'])
+            df['year'] = df['date'].dt.year
+            df = df[(df['year'] >= 1982) & (df['year'] <= 2008)]
+            annual = df.groupby('year')['income'].mean().reset_index()
+            annual['state_fips'] = fips
+            all_income.append(annual)
+        except:
+            pass
+
+    if all_income:
+        income_df = pd.concat(all_income, ignore_index=True)
+        state_year = state_year.merge(income_df, on=['state_fips', 'year'], how='left')
+        print(f"    Added income data for {len(all_income)} states")
+except Exception as e:
+    print(f"    Could not download income data: {e}")
+
 # Create log outcome variables
 state_year['ln_hr'] = np.log(state_year['hr_fatalities'] + 1)
 state_year['ln_nhr'] = np.log(state_year['nhr_fatalities'] + 1)
