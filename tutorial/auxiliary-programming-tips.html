@@ -13,7 +13,21 @@ current_page: auxiliary-programming-tips
 
   <p>Here's something that's easy to miss when you're starting out: Stata code, R code, and Python code are all just plain text files. A <code>.do</code> file is a text file. A <code>.R</code> file is a text file. A <code>.py</code> file is a text file. You could open any of them in Notepad and read them.</p>
 
-  <p>Programs like the Stata visual editor or RStudio make running that code easier and prettier, but they aren't necessary. They're just convenient wrappers around the text.</p>
+  <p>Programs like the Stata visual editor or RStudio make running that code easier and prettier, but they aren't necessary. They're just convenient wrappers around the text. Since code is just text, you can run it directly from the command line:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>stata -b do my_analysis.do    # Run a Stata .do file
+Rscript my_analysis.R          # Run an R script
+python3 my_analysis.py         # Run a Python script</code></pre>
+  </div>
+
+  <p>That's it. No GUI needed. This is how most researchers actually run their code in practice, especially for long-running analyses.</p>
 
   <p>I use <a href="https://code.visualstudio.com/" target="_blank">VS Code</a> as my text editor for everything. This lets me:</p>
 
