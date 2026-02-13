@@ -8,7 +8,7 @@ suppressPackageStartupMessages({
 
 # ── Load data ────────────────────────────────────────────────
 analysis_data <- readRDS(file.path(BUILD, "output", "analysis_data.rds"))
-analysis_data <- analysis_data |>
+analysis_data <- analysis_data %>%
   mutate(ln_fatalities = log(fatalities))
 
 # ── Simple TWFE ──────────────────────────────────────────────
@@ -21,18 +21,11 @@ cat(sprintf("    TWFE coefficient on treated: %.4f (SE: %.4f)\n",
             coef(twfe)["treatedTRUE"], se(twfe)["treatedTRUE"]))
 
 # ── Event study ──────────────────────────────────────────────
-analysis_data <- analysis_data |>
-  mutate(
-    event_time_binned = case_when(
-      event_time == -1000 ~ -1000L,
-      event_time <= -6    ~ -6L,
-      event_time >= 6     ~  6L,
-      TRUE                ~ as.integer(event_time)
-    )
-  )
-
+# Use fixest's bin argument to bin endpoint event times
+# instead of manually creating event_time_binned with case_when
 es <- feols(
-  ln_fatalities ~ i(event_time_binned, ever_treated, ref = c(-1, -1000)) +
+  ln_fatalities ~ i(event_time, ever_treated, ref = c(-1, -1000),
+                    bin = .("-6+" = ~x <= -6, "6+" = ~x >= 6)) +
     unemployment + income | state + year,
   data = analysis_data,
   cluster = ~state
@@ -42,11 +35,11 @@ cat("    Event study summary:\n")
 print(summary(es))
 
 # ── Export coefficients ──────────────────────────────────────
-coef_tbl <- broom::tidy(es, conf.int = TRUE) |>
-  filter(str_detect(term, "event_time")) |>
-  mutate(event_time = as.numeric(str_extract(term, "-?\\d+"))) |>
+coef_tbl <- broom::tidy(es, conf.int = TRUE) %>%
+  filter(str_detect(term, "event_time")) %>%
+  mutate(event_time = as.numeric(str_extract(term, "-?\\d+"))) %>%
   select(event_time, coefficient = estimate, std_error = std.error,
-         ci_lower = conf.low, ci_upper = conf.high) |>
+         ci_lower = conf.low, ci_upper = conf.high) %>%
   arrange(event_time)
 
 out_path <- file.path(ANALYSIS, "output", "event_study_coefs.csv")

@@ -205,6 +205,53 @@ restore
 *     title("Event Study: No-Fault Divorce and Female Suicide")
 
 * ============================================================================
+* STEP 7: Event Study using xtevent (Recommended for this course)
+* ============================================================================
+
+* xtevent is a user-written package that makes canonical event studies easy.
+* Install first: ssc install xtevent
+* ssc install xtevent
+
+* xtevent expects:
+*   - A policy variable that changes from 0 to 1 at treatment onset
+*   - Panel data with unit and time identifiers
+* It automatically handles:
+*   - Creating event-time dummies
+*   - Binning endpoints
+*   - Omitting reference period
+*   - Plotting results
+
+* Run the canonical event study with xtevent
+xtevent asmrs pcinc asmrh cases, ///
+    policyvar(treat_post) ///
+    panelvar(stfips) timevar(year) ///
+    window(10) ///
+    cluster(stfips)
+
+* Plot the event study
+xteventplot, ///
+    title("Event Study: No-Fault Divorce and Female Suicide") ///
+    note("95% CIs shown. SEs clustered at state level.")
+
+* ============================================================================
+* STEP 8: Alternative -- eventdd
+* ============================================================================
+
+* eventdd is another user-written package for event studies.
+* Install first: ssc install eventdd
+* ssc install eventdd
+
+* eventdd uses a similar syntax:
+* eventdd asmrs pcinc asmrh cases, ///
+*     timevar(time_to_treat) ///
+*     ci(rcap) ///
+*     baseline(-1) ///
+*     accum ///
+*     lags(10) leads(10) ///
+*     absorb(stfips year) cluster(stfips) ///
+*     graph_op(title("Event Study: No-Fault Divorce and Female Suicide"))
+
+* ============================================================================
 * NOTES
 * ============================================================================
 
@@ -213,6 +260,10 @@ restore
 * 2. Look for anticipation effects (significant coefficients before t=0)
 * 3. Post-treatment coefficients show the treatment effect over time
 
+* Packages for canonical event studies in Stata:
+* - xtevent: Easy canonical event study with automatic endpoint binning
+* - eventdd: Another canonical event study package with built-in plotting
+*
 * Modern DiD methods for staggered adoption:
 * - Goodman-Bacon decomposition: bacondecomp
 * - Callaway & Sant'Anna: csdid

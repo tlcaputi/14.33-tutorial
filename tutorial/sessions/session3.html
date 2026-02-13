@@ -200,6 +200,10 @@ current_page: session3
     Y<sub>it</sub> = β · Post<sub>it</sub> + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
   </div>
 
+  <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>In plain English:</strong> your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).
+  </div>
+
   <p>Let's break this down:</p>
 
   <ul>
@@ -246,6 +250,10 @@ current_page: session3
   <h3>The Never-Treated Problem</h3>
 
   <p>What about units that never get treated? They don't have a "treatment year," so "time to treatment" is undefined for them.</p>
+
+  <div style="background: #fff9e6; border-left: 4px solid #ffa726; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>Why is this a problem?</strong> Never-treated states (like those that never passed the law) don't have a "year of treatment," so we can't compute <code>event_time = year - treatment_year</code> — the result would be missing. But we still want these states in our regression as the comparison group. The solution: give them a fake event-time value (-1000) that's far outside the real range (-5, -4, ..., 0, 1, 2, ...), so their observations won't be assigned to any event-time coefficient. Then we exclude -1000 from the event study dummies while keeping these states in the regression to help estimate the fixed effects.
+  </div>
 
   <p><strong>If you have never-treated units:</strong> You need to handle them carefully. The key insight is that never-treated units don't have a "time to treatment," so you can't create event-time dummies for them in the usual way. Common approaches:</p>
   <ul>
@@ -308,7 +316,7 @@ tab stfips
 desc asmrs        // Female suicide rate (Y)
 desc pcinc asmrh cases  // Controls</code></pre>
     <pre class="code-content r"><code class="language-r"># Load packages
-pacman::p_load(haven, tidyverse, fixest)
+pacman::p_load(haven, tidyverse, fixest, ggfixest)
 
 # Load the data
 df <- read_dta("bacon_example.dta")
@@ -651,11 +659,27 @@ reg asmrs ib`true_neg1'.shifted_ttt pcinc asmrh cases i.stfips i.year, vce(clust
       </div>
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
-    <pre class="code-content stata active"><code class="language-stata">* EASY WAY: Use eventdd package
-* Install once: ssc install eventdd
-eventdd asmrs pcinc asmrh cases, timevar(time_to_treat) ///
-    absorb(i.stfips i.year) cluster(stfips) graph_op(ytitle("Effect on Female Suicide Rate"))</code></pre>
-    <pre class="code-content r"><code class="language-r"># EASY WAY: fixest with proper handling of never-treated
+    <pre class="code-content stata active"><code class="language-stata">* EASY WAY: Use xtevent package
+* Install once: ssc install xtevent
+xtevent asmrs pcinc asmrh cases, ///
+    policyvar(treat_post) ///
+    panelvar(stfips) timevar(year) ///
+    window(10) ///
+    cluster(stfips)
+
+* One-line plot
+xteventplot, ///
+    title("Event Study: No-Fault Divorce and Female Suicide") ///
+    note("95% CIs shown. SEs clustered at state level.")
+
+* Alternative: eventdd package (ssc install eventdd)
+* eventdd asmrs pcinc asmrh cases, timevar(time_to_treat) ///
+*     absorb(i.stfips i.year) cluster(stfips) ///
+*     graph_op(ytitle("Effect on Female Suicide Rate"))</code></pre>
+    <pre class="code-content r"><code class="language-r"># Load ggfixest for plotting
+pacman::p_load(haven, tidyverse, fixest, ggfixest)
+
+# EASY WAY: fixest with proper handling of never-treated
 # i(time_to_treat, ever_treated, ref = c(-1, -1000)) means:
 #   - Create dummies for each time_to_treat value
 #   - Interact with ever_treated (so never-treated don't get dummies)
@@ -666,8 +690,11 @@ model_es <- feols(
   cluster = ~stfips, data = df
 )
 
-# One-line plot
-iplot(model_es, main = "Event Study: No-Fault Divorce")</code></pre>
+# One-line plot using ggfixest
+p <- ggiplot(model_es,
+        main = "Event Study: No-Fault Divorce and Female Suicide",
+        xlab = "Years Relative to Treatment",
+        ylab = "Coefficient")</code></pre>
     <pre class="code-content python"><code class="language-python"># EASY WAY: pyfixest with proper handling of never-treated
 # ref = c(-1, -1000) excludes both the reference period and never-treated
 model_es = pf.feols(
@@ -677,7 +704,10 @@ model_es = pf.feols(
 
 # One-line plot
 model_es.iplot()</code></pre>
-    <pre class="code-content r"><code class="language-r"># Event study using fixest's i() syntax
+    <pre class="code-content r"><code class="language-r"># Load ggfixest for plotting
+library(ggfixest)
+
+# Event study using fixest's i() syntax
 # i(time_to_treat, ever_treated, ref = c(-1, -1000)):
 #   - time_to_treat: relative time variable (-1000 for never-treated)
 #   - ever_treated: interaction (1 if ever treated, 0 if never)
@@ -688,10 +718,11 @@ model_es <- feols(
 )
 summary(model_es)
 
-# Create event study plot
-iplot(model_es,
-      xlab = "Time to Treatment",
-      main = "Event Study: No-Fault Divorce and Female Suicide")</code></pre>
+# Create event study plot using ggfixest
+p <- ggiplot(model_es,
+        main = "Event Study: No-Fault Divorce and Female Suicide",
+        xlab = "Years Relative to Treatment",
+        ylab = "Coefficient")</code></pre>
     <pre class="code-content python"><code class="language-python"># Event study using pyfixest's i() syntax
 # i(time_to_treat, ever_treated, ref=c(-1, -1000)):
 #   - time_to_treat: relative time (-1000 for never-treated)

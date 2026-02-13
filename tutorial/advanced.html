@@ -11,6 +11,11 @@ current_page: advanced
 <section id="loops" class="tutorial-section">
   <h2>Loops and Iteration</h2>
 
+  <div class="key-principle">
+    <h4>Why Use Loops?</h4>
+    <p>Imagine you have 20 outcome variables (income, hours, wages, savings, ...) and need to run the same regression for each one. You could copy-paste the regression command 20 times, changing the outcome variable each time. But if you later decide to add a control variable, you'd have to edit all 20 copies. With a loop, you write the regression once, wrap it in a loop, and let the computer run all 20 versions. Change the control? Edit one line.</p>
+  </div>
+
   <p>A loop executes the same code multiple times, each time with different values. Instead of writing <code>summarize income</code>, <code>summarize age</code>, <code>summarize education</code> separately, you write one loop that summarizes each variable in a list. This is more concise, easier to modify, and less error-prone.</p>
 
   <h3>Basic Loops</h3>
@@ -63,9 +68,12 @@ for (f in files) {
   # ... do something ...
 }
 
-# Better: use lapply/map for functional approach
-pacman::p_load(purrr)
-all_data <- map_dfr(files, read_csv)</code></pre>
+# Better: collect into a list and combine
+data_list <- list()
+for (f in files) {
+  data_list[[f]] <- read_csv(f)
+}
+all_data <- bind_rows(data_list)</code></pre>
     <pre class="code-content python"><code class="language-python"># Loop over numbers
 for i in range(1, 11):
     print(f"Iteration {i}")
@@ -192,16 +200,18 @@ foreach s of local states {
     local row = `row' + 1
 }</code></pre>
     <pre class="code-content r"><code class="language-r"># Store results in a data frame
-results <- map_dfr(unique(data$state), function(s) {
+results_list <- list()
+for (s in unique(data$state)) {
   model <- lm(income ~ treatment, data = filter(data, state == s))
 
-  tibble(
+  results_list[[s]] <- tibble(
     state = s,
     beta = coef(model)["treatment"],
     se = sqrt(vcov(model)["treatment", "treatment"]),
     n = nobs(model)
   )
-})
+}
+results <- bind_rows(results_list)
 
 # View results
 print(results)
@@ -263,6 +273,11 @@ results_df = pd.DataFrame([
     <pre class="code-content stata active"><code class="language-stata">* Define a program (Stata's version of functions)
 capture program drop my_regression
 program define my_regression
+    * The syntax line defines what inputs your program expects:
+    * - varlist means "a list of variable names"
+    * - outcome(string) means "a required option called 'outcome' that takes text"
+    * - [controls(string)] means "an optional 'controls' option" (square brackets = optional)
+    * When you call the program, Stata parses your inputs according to this template
     syntax varlist, outcome(string) [controls(string)]
 
     * Parse variable list
@@ -305,8 +320,11 @@ run_regression(data, "income", "treatment", c("age", "female"))
 
 # Apply to multiple outcomes
 outcomes <- c("income", "hours", "wages")
-results <- map_dfr(outcomes, ~ run_regression(data, .x, "treatment"),
-                   .id = "outcome")</code></pre>
+results_list <- list()
+for (outcome in outcomes) {
+  results_list[[outcome]] <- run_regression(data, outcome, "treatment")
+}
+results <- bind_rows(results_list, .id = "outcome")</code></pre>
     <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
 
 # Define a function

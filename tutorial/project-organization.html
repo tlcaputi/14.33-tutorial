@@ -273,7 +273,7 @@ df <- read_csv(file.path(build, "output", "census_clean.csv"))
 
 # Save output using path variables
 write_csv(results, file.path(analysis, "output", "regression_results.csv"))
-ggsave(file.path(analysis, "output", "figures", "event_study.pdf"))</code></pre>
+ggsave(file.path(analysis, "output", "figures", "event_study.pdf"), p, width = 10, height = 6)</code></pre>
     <pre class="code-content python"><code class="language-python"># BAD: Hardcoded path (breaks on other computers)
 df = pd.read_csv("/Users/john/Desktop/project/data/census.csv")
 

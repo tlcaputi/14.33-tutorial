@@ -112,7 +112,7 @@ if (file.exists(cache_file)) {
             summarise(hit_run = max(hit_run, na.rm = TRUE), .groups = "drop")
 
           acc_df <- acc_df %>%
-            left_join(hr_by_crash, by = "st_case") %>%
+            merge(hr_by_crash, by = "st_case", all.x = TRUE) %>%
             mutate(hit_run = replace_na(hit_run, 0))
         } else {
           acc_df$hit_run <- 0

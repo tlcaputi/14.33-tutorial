@@ -208,7 +208,11 @@ get_policy_values <- function(fips, yr) {
 }
 
 # Create policy data for all state-years
-policy_data <- map2_dfr(state_year$state_fips, state_year$year, get_policy_values)
+policy_list <- list()
+for (i in seq_len(nrow(state_year))) {
+  policy_list[[i]] <- get_policy_values(state_year$state_fips[i], state_year$year[i])
+}
+policy_data <- bind_rows(policy_list)
 
 # Calculate secondary seatbelt (any seatbelt minus primary)
 policy_data <- policy_data %>%
@@ -217,7 +221,7 @@ policy_data <- policy_data %>%
 
 # Merge policy data
 state_year <- state_year %>%
-  left_join(policy_data, by = c("state_fips", "year"))
+  merge(policy_data, by = c("state_fips", "year"), all.x = TRUE)
 
 # Download unemployment data from FRED
 cat("  Downloading economic data from FRED...\n")
@@ -244,7 +248,7 @@ for (fips in names(state_unemp_codes)) {
 if (length(all_unemp) > 0) {
   unemp_df <- bind_rows(all_unemp)
   state_year <- state_year %>%
-    left_join(unemp_df, by = c("state_fips", "year"))
+    merge(unemp_df, by = c("state_fips", "year"), all.x = TRUE)
   cat(sprintf("    Added unemployment data for %d states\n", length(all_unemp)))
 }
 
@@ -286,7 +290,7 @@ for (fips in names(state_income_codes)) {
 if (length(all_income) > 0) {
   income_df <- bind_rows(all_income)
   state_year <- state_year %>%
-    left_join(income_df, by = c("state_fips", "year"))
+    merge(income_df, by = c("state_fips", "year"), all.x = TRUE)
   cat(sprintf("    Added income data for %d states\n", length(all_income)))
 }
 

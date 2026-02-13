@@ -914,7 +914,7 @@ state_data %>% count(state) %>% filter(n > 1)       # Should be empty
 # Count rows before and after
 n_before <- nrow(individuals)
 
-merged <- individuals %>% left_join(state_data, by = "state")
+merged <- merge(individuals, state_data, by = "state", all.x = TRUE)
 
 n_after <- nrow(merged)
 
@@ -1012,16 +1012,14 @@ drop _merge</code></pre>
 individuals <- read_dta("individuals.dta")
 state_data <- read_dta("state_data.dta")
 
-# Left join: keep all individuals, add state data where available
-merged <- individuals %>%
-  left_join(state_data, by = "state")
+# Left merge: keep all individuals, add state data where available
+merged <- merge(individuals, state_data, by = "state", all.x = TRUE)
 
 # Check for unmatched
 merged %>% filter(is.na(min_wage))  # NY had no state data
 
-# Inner join: keep only matched
-merged <- individuals %>%
-  inner_join(state_data, by = "state")</code></pre>
+# Inner merge: keep only matched
+merged <- merge(individuals, state_data, by = "state")</code></pre>
     <pre class="code-content python"><code class="language-python">individuals = pd.read_stata("individuals.dta")
 state_data = pd.read_stata("state_data.dta")
 
@@ -1036,6 +1034,17 @@ print(merged[merged["min_wage"].isna()])  # NY had no state data
 
 # Inner join: keep only matched
 merged = individuals.merge(state_data, on="state", how="inner")</code></pre>
+  </div>
+
+  <div class="callout-warning">
+    <h4>What To Do After Checking _merge</h4>
+    <p>After running <code>tab _merge</code>, ask yourself: <strong>Why didn't these match?</strong> Common reasons:</p>
+    <ul>
+      <li>Typos in merge keys ("NY" vs "New York")</li>
+      <li>Different time periods (state data goes 2000–2010, individual data goes 1995–2015)</li>
+      <li>Data errors or missing values in the key variable</li>
+    </ul>
+    <p>Investigate with <code>list state if _merge == 1</code> before deciding whether to <code>keep if _merge == 3</code>. Always document why you dropped unmatched observations.</p>
   </div>
 
   <h3>Pre-Merge Data Cleaning</h3>
@@ -1169,7 +1178,7 @@ data_all = pd.concat([
 </section>
 
 <section id="stata-traps" class="tutorial-section">
-  <h2>Stata Traps</h2>
+  <h2>Critical Stata Bugs That Will Break Your Analysis</h2>
 
   <p>Stata has some behaviors that can silently corrupt your analysis.</p>
 

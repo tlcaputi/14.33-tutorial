@@ -10,9 +10,9 @@ coef_df <- read_csv(file.path(ANALYSIS, "output", "event_study_coefs.csv"),
                     show_col_types = FALSE)
 
 # Add reference period (t = -1)
-coef_df <- coef_df |>
+coef_df <- coef_df %>%
   bind_rows(tibble(event_time = -1, coefficient = 0,
-                   std_error = 0, ci_lower = 0, ci_upper = 0)) |>
+                   std_error = 0, ci_lower = 0, ci_upper = 0)) %>%
   arrange(event_time)
 
 # ── Create plot ──────────────────────────────────────────────

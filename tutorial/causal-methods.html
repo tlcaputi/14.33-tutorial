@@ -410,7 +410,7 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-ggiplot(model) +
+p <- ggiplot(model) +
   labs(title = "Event Study: Pre-trends Check",
        x = "Years Relative to Treatment",
        y = "Coefficient Estimate") +
@@ -801,7 +801,7 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-ggiplot(model) +
+p <- ggiplot(model) +
   labs(title = "Event Study",
        x = "Years Relative to Treatment",
        y = "Effect on Outcome") +
@@ -990,7 +990,7 @@ placebo_model <- feols(
 summary(placebo_model)
 
 # Density check: histogram of running variable
-ggplot(data %>% filter(abs(score_centered) <= 5),
+p <- ggplot(data %>% filter(abs(score_centered) <= 5),
        aes(x = test_score, fill = treated)) +
   geom_histogram(bins = 20, alpha = 0.5) +
   geom_vline(xintercept = 80, linetype = "dashed") +

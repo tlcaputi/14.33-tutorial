@@ -751,7 +751,7 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-ggiplot(model) +
+p <- ggiplot(model) +
   labs(title = "Event Study: Pre-trends Check",
        x = "Years Relative to Treatment",
        y = "Coefficient Estimate") +
@@ -1142,7 +1142,7 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-ggiplot(model) +
+p <- ggiplot(model) +
   labs(title = "Event Study",
        x = "Years Relative to Treatment",
        y = "Effect on Outcome") +

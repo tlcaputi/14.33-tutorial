@@ -6,6 +6,7 @@
 # =============================================================================
 
 suppressPackageStartupMessages(library(tidyverse))
+# Note: we use %>% (magrittr pipe) throughout for clarity
 
 FARS_YEARS <- 2007:2022
 CACHE_FILE <- file.path(BUILD, "output", "fars_raw.rds")
@@ -47,8 +48,8 @@ if (file.exists(CACHE_FILE)) {
       cat(" OK\n")
     }
 
-    df <- read_csv(csv_path, show_col_types = FALSE) |>
-      select(STATE, STATENAME, YEAR, MONTH, FATALS) |>
+    df <- read_csv(csv_path, show_col_types = FALSE) %>%
+      select(STATE, STATENAME, YEAR, MONTH, FATALS) %>%
       rename_all(tolower)
     frames[[as.character(year)]] <- df
   }

@@ -579,7 +579,7 @@ crash_hitrun <- vehicle %>%
 # Merge with accident file
 accident <- read_rds(file.path(build, "input", "fars", "accident_2000.rds"))
 crashes <- accident %>%
-  left_join(crash_hitrun, by = "st_case")
+  merge(crash_hitrun, by = "st_case", all.x = TRUE)
 
 # Aggregate to state-year
 state_year <- crashes %>%
@@ -656,7 +656,7 @@ complete_panel <- expand.grid(
 
 # Merge and fill zeros
 state_year <- complete_panel %>%
-  left_join(state_year, by = c("state", "year")) %>%
+  merge(state_year, by = c("state", "year"), all.x = TRUE) %>%
   mutate(across(c(total_crashes, hr_fatalities, nhr_fatalities),
                 ~replace_na(., 0)))</code></pre>
     <pre class="code-content python"><code class="language-python"># Create complete state-year panel
@@ -786,7 +786,7 @@ state_year <- read_rds(file.path(build, "output", "state_year_crashes.rds"))
 
 # Merge with state-year data
 state_year <- state_year %>%
-  left_join(bac_dates, by = "state_fips") %>%
+  merge(bac_dates, by = "state_fips", all.x = TRUE) %>%
   mutate(
     event_time = year - adoption_year,
     treated = as.integer(event_time >= 0)
@@ -850,8 +850,8 @@ income <- read_rds(file.path(build, "input", "fred", "income.rds"))
 
 # Merge controls
 state_year <- state_year %>%
-  left_join(unemployment, by = c("state_fips", "year")) %>%
-  left_join(income, by = c("state_fips", "year")) %>%
+  merge(unemployment, by = c("state_fips", "year"), all.x = TRUE) %>%
+  merge(income, by = c("state_fips", "year"), all.x = TRUE) %>%
   mutate(
     ln_hr = log(hr_fatalities + 1),
     ln_nhr = log(nhr_fatalities + 1)
@@ -1158,9 +1158,22 @@ coefplot, vertical keep(*.et_shifted) ///
     title("Event Study: Hit-and-Run Crashes") ///
     xtitle("Years Since 0.08 BAC Law") ytitle("Coefficient")
 
-graph export "$analysis/output/figures/event_study.png", replace width(1200)</code></pre>
+graph export "$analysis/output/figures/event_study.png", replace width(1200)
+
+* =============================================================================
+* Alternative: Using xtevent for canonical event study
+* =============================================================================
+* xtevent simplifies event study estimation.
+* Install: ssc install xtevent
+
+* xtevent ln_hr `controls', ///
+*     policyvar(treated) ///
+*     panelvar(state_id) timevar(year) ///
+*     window(5 10) ///
+*     cluster(state_id)
+* xteventplot, title("Event Study: Hit-Run (xtevent)")</code></pre>
     <pre class="code-content r"><code class="language-r"># 03_event_study.R - Event study
-pacman::p_load(fixest, tidyverse)
+pacman::p_load(fixest, ggfixest, tidyverse)
 
 # Load analysis data
 state_year <- read_rds(file.path(build, "output", "analysis_data.rds"))
@@ -1182,33 +1195,24 @@ state_year <- state_year %>%
     ever_treated = !is.na(adoption_year)
   )
 
-# Bin endpoints to avoid sparse cells at extremes
-state_year <- state_year %>%
-  mutate(event_time_binned = case_when(
-    event_time == -1000 ~ -1000,  # Keep never-treated separate
-    event_time <= -5 ~ -5,        # Bin early periods
-    event_time >= 10 ~ 10,        # Bin late periods
-    TRUE ~ event_time
-  ))
-
 # Event study with fixest
-# i(event_time_binned, ever_treated, ref = c(-1, -1000)) means:
-#   - Create dummies for each event_time_binned value
-#   - Interact with ever_treated indicator
-#   - Exclude t=-1 (reference period) AND t=-1000 (never-treated)
+# Use the bin argument to handle endpoint binning automatically
+# instead of manually creating event_time_binned with case_when
 es_model <- feols(
-  ln_hr ~ i(event_time_binned, ever_treated, ref = c(-1, -1000)) + unemployment + income | state_fips + year,
+  ln_hr ~ i(event_time, ever_treated, ref = c(-1, -1000),
+            bin = .("-5+" = ~x <= -5, "10+" = ~x >= 10)) +
+    unemployment + income | state_fips + year,
   data = state_year,
   cluster = ~state_fips
 )
 
-# Plot (fixest has built-in event study plotting)
-png(file.path(analysis, "output", "figures", "event_study.png"), width = 1200, height = 800)
-iplot(es_model,
-      main = "Event Study: Hit-and-Run Crashes",
-      xlab = "Years Since 0.08 BAC Law",
-      ylab = "Coefficient")
-dev.off()</code></pre>
+# Plot (ggfixest provides ggplot2-based event study plotting)
+p <- ggiplot(es_model,
+        main = "Event Study: Hit-and-Run Crashes",
+        xlab = "Years Since 0.08 BAC Law",
+        ylab = "Coefficient")
+ggsave(file.path(analysis, "output", "figures", "event_study.png"),
+       p, width = 10, height = 6, dpi = 300)</code></pre>
     <pre class="code-content python"><code class="language-python"># 03_event_study.py - Event study
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -1407,7 +1411,7 @@ coef_data <- broom::tidy(es_model, conf.int = TRUE) %>%
   mutate(event_time = parse_number(term))
 
 # Publication-quality plot
-ggplot(coef_data, aes(x = event_time, y = estimate)) +
+p <- ggplot(coef_data, aes(x = event_time, y = estimate)) +
   geom_point() +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
@@ -1421,7 +1425,7 @@ ggplot(coef_data, aes(x = event_time, y = estimate)) +
   theme(panel.grid.minor = element_blank())
 
 ggsave(file.path(analysis, "output", "figures", "event_study.png"),
-       width = 8, height = 5, dpi = 300)</code></pre>
+       p, width = 8, height = 5, dpi = 300)</code></pre>
     <pre class="code-content python"><code class="language-python"># 05_figures.py - Publication figures
 import matplotlib.pyplot as plt
 import pandas as pd

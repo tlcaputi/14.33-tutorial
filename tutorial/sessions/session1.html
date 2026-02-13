@@ -77,6 +77,10 @@ set more off
 
 * Step 4: Set your working directory
 * IMPORTANT: Change this path to YOUR project folder!
+* To find your path: On Mac, right-click your project folder in Finder
+* → 'Get Info' → copy the path next to 'Where'.
+* On Windows, open the folder in Explorer → click the address bar → copy.
+* Use forward slashes (/) in Stata even on Windows.
 cd "/Users/yourname/Dropbox/my_project"
 
 * Step 5: Start a log file (records everything you do)
@@ -352,6 +356,10 @@ df = df[['id', 'age', 'income', 'sex', 'education']]</code></pre>
     <strong>🤔 Predict:</strong> In Stata, what's the difference between <code>gen married = 1 if marst == 1</code> and <code>gen married = (marst == 1)</code>? What happens to observations where <code>marst != 1</code> in each case?
   </div>
 
+  <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+    <strong>⚠️ Critical Warning About Indicator Variables:</strong> If you write <code>gen married = 1 if marst == 1</code>, Stata creates <code>married = 1</code> for married people, but <code>married = missing</code> (not 0!) for everyone else. This silently breaks your regressions because observations with missing values get dropped. Always use the two-step method with <code>replace</code>, or the safer one-step method shown below.
+  </div>
+
   <div class="code-block">
     <div class="code-header">
       <div class="code-tabs">
@@ -452,9 +460,6 @@ df['ln_income'] = np.log(df['income'] + 1)
 df['income_k'] = df['income'] / 1000</code></pre>
   </div>
 
-  <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <strong>⚠️ Common Mistake:</strong> In Stata, <code>gen x = 1 if condition</code> creates <strong>missing values</strong> where the condition is false, not zeros! Always follow with <code>replace x = 0 if !condition</code>, or use the one-line approach: <code>gen x = (condition)</code>.
-  </div>
 
   <div class="key-principle">
     <h4>Language Comparison</h4>
@@ -662,6 +667,10 @@ describe     // Check variable types
 summarize    // Check value ranges
 
 * Common issue: numbers imported as strings
+* WHY? If your CSV has a comma in any number (like '1,234'), Stata reads
+* the entire column as text. Same if there's any non-numeric character
+* ('$50', 'N/A'). You'll know this happened if `summarize income` says
+* 'no observations' or shows nothing.
 * Fix by destringing (converting to numeric)
 destring income, replace</code></pre>
     <pre class="code-content r"><code class="language-r"># Import CSV (read_csv from tidyverse is best)

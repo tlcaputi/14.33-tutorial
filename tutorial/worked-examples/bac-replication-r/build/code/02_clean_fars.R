@@ -50,7 +50,7 @@ complete_panel <- expand.grid(state_fips = all_states, year = all_years, strings
 
 # Merge and fill zeros for missing state-years
 state_year <- complete_panel %>%
-  left_join(state_year %>% select(-state_name), by = c("state_fips", "year")) %>%
+  merge(state_year %>% select(-state_name), by = c("state_fips", "year"), all.x = TRUE) %>%
   mutate(
     total_fatalities = replace_na(total_fatalities, 0),
     hr_fatalities = replace_na(hr_fatalities, 0),

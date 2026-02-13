@@ -13,7 +13,7 @@
 rm(list = ls())
 
 # Load packages
-pacman::p_load(tidyverse, haven, fixest, ggplot2)
+pacman::p_load(tidyverse, haven, fixest, ggfixest, ggplot2)
 
 # Set working directory (adjust as needed)
 # setwd("/Users/yourname/Dropbox/14.33")
@@ -127,12 +127,13 @@ summary(model_es)
 # STEP 6: Create Event Study Plot
 #===============================================================================
 
-# fixest provides a convenient plotting function
-iplot(model_es,
-      xlab = "Years Relative to No-Fault Divorce Adoption",
-      ylab = "Effect on Female Suicide Rate",
-      main = "Event Study: No-Fault Divorce and Female Suicide",
-      ref.line = TRUE)
+# Quick plot with ggiplot (one line!)
+library(ggfixest)
+p <- ggiplot(model_es,
+        xlab = "Years Relative to No-Fault Divorce Adoption",
+        ylab = "Effect on Female Suicide Rate",
+        main = "Event Study: No-Fault Divorce and Female Suicide")
+ggsave("output/event_study_quick.png", p, width = 10, height = 6, dpi = 300)
 
 # Or create a more customized ggplot
 # First extract coefficients
@@ -155,11 +156,11 @@ es_coefs <- bind_rows(
   arrange(time)
 
 # Create the plot
-ggplot(es_coefs, aes(x = time, y = estimate)) +
+p <- ggplot(es_coefs, aes(x = time, y = estimate)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
   geom_vline(xintercept = -0.5, linetype = "dashed", color = "red", alpha = 0.5) +
   geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), alpha = 0.2, fill = "steelblue") +
-  geom_line(color = "steelblue", size = 1) +
+  geom_line(color = "steelblue", linewidth = 1) +
   geom_point(color = "steelblue", size = 2) +
   labs(
     x = "Years Relative to No-Fault Divorce Adoption",
@@ -174,7 +175,7 @@ ggplot(es_coefs, aes(x = time, y = estimate)) +
   )
 
 # Save the plot
-ggsave("output/event_study_plot.png", width = 10, height = 6, dpi = 300)
+ggsave("output/event_study_plot.png", p, width = 10, height = 6, dpi = 300)
 
 #===============================================================================
 # NOTES

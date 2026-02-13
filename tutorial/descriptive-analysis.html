@@ -229,20 +229,20 @@ twoway (kdensity income if treatment == 0, lcolor(blue)) ///
     <pre class="code-content r"><code class="language-r">pacman::p_load(ggplot2)
 
 # Histogram
-ggplot(data, aes(x = income)) +
+p <- ggplot(data, aes(x = income)) +
   geom_histogram(bins = 30, fill = "steelblue", color = "white") +
   labs(title = "Distribution of Income",
        x = "Annual Income ($)", y = "Frequency") +
   theme_minimal()
-ggsave("hist_income.png", width = 8, height = 6)
+ggsave("hist_income.png", p, width = 8, height = 6)
 
 # Kernel density
-ggplot(data, aes(x = income)) +
+p <- ggplot(data, aes(x = income)) +
   geom_density(fill = "steelblue", alpha = 0.5) +
   labs(title = "Income Distribution", x = "Annual Income ($)")
 
 # Overlapping densities by group
-ggplot(data, aes(x = income, fill = factor(treatment))) +
+p <- ggplot(data, aes(x = income, fill = factor(treatment))) +
   geom_density(alpha = 0.5) +
   scale_fill_manual(values = c("blue", "red"),
                     labels = c("Control", "Treatment")) +
@@ -300,13 +300,13 @@ binscatter income education, ///
     title("Income vs. Education") ///
     xtitle("Years of Education") ytitle("Mean Income")</code></pre>
     <pre class="code-content r"><code class="language-r"># Basic scatter plot
-ggplot(data, aes(x = education, y = income)) +
+p <- ggplot(data, aes(x = education, y = income)) +
   geom_point(alpha = 0.5) +
   labs(title = "Income vs. Education",
        x = "Years of Education", y = "Income")
 
 # With fitted line
-ggplot(data, aes(x = education, y = income)) +
+p <- ggplot(data, aes(x = education, y = income)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", se = TRUE) +
   labs(title = "Income vs. Education")
@@ -367,7 +367,7 @@ yearly <- data %>%
   summarize(mean_income = mean(income, na.rm = TRUE))
 
 # Line plot
-ggplot(yearly, aes(x = year, y = mean_income)) +
+p <- ggplot(yearly, aes(x = year, y = mean_income)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
   labs(title = "Average Income Over Time",
@@ -378,7 +378,7 @@ yearly_by_group <- data %>%
   group_by(year, treatment) %>%
   summarize(mean_income = mean(income, na.rm = TRUE))
 
-ggplot(yearly_by_group, aes(x = year, y = mean_income,
+p <- ggplot(yearly_by_group, aes(x = year, y = mean_income,
                             color = factor(treatment))) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
@@ -417,7 +417,7 @@ plt.legend(["Control", "Treatment"])</code></pre>
 graph box income, over(education) ///
     title("Income Distribution by Education Level")</code></pre>
     <pre class="code-content r"><code class="language-r"># Box plot by group
-ggplot(data, aes(x = factor(education), y = income)) +
+p <- ggplot(data, aes(x = factor(education), y = income)) +
   geom_boxplot(fill = "steelblue", alpha = 0.7) +
   labs(title = "Income Distribution by Education Level",
        x = "Education Level", y = "Income")</code></pre>

@@ -152,17 +152,15 @@ state_data <- tibble(
   population = c(7000000, 39500000, 29500000)
 )
 
-# Left join: keep all individuals, add state data where available
-merged <- individuals %>%
-  left_join(state_data, by = "state")
+# Left merge: keep all individuals, add state data where available
+merged <- merge(individuals, state_data, by = "state", all.x = TRUE)
 
 # Check for unmatched (NY had no state data)
 merged %>%
   filter(is.na(min_wage))
 
-# Inner join: keep only matched
-merged_inner <- individuals %>%
-  inner_join(state_data, by = "state")
+# Inner merge: keep only matched
+merged_inner <- merge(individuals, state_data, by = "state")
 
 # View results
 print(merged)

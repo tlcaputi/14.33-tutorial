@@ -127,6 +127,16 @@ current_page: finding-project
     <p style="margin: 0; font-size: 1.05em;">Think: <strong>"Some [states/cities/countries] adopted [policy X] at different times. Did this affect [outcome Y]?"</strong></p>
   </div>
 
+  <div class="callout-warning">
+    <h4 style="margin: 0 0 12px;">What You Need for a DiD / Event Study Project</h4>
+    <p style="margin: 0 0 8px;">For a diff-in-diff or event study to work, you need <strong>two things</strong>:</p>
+    <ol style="margin: 0 0 12px; padding-left: 20px;">
+      <li><strong>A treatment that affects some units but not others.</strong> A policy that rolled out to some states but not others, or at different times, gives you a treatment group and a control group.</li>
+      <li><strong>Data on both groups, before and after the treatment.</strong> You need panel data (repeated observations over time) covering treated and untreated units in both the pre- and post-treatment periods.</li>
+    </ol>
+    <p style="margin: 0;">This means <strong>your treatment should have happened some time ago</strong>—you need enough post-treatment data to measure effects. Most successful projects involve policies introduced in the <strong>2000s or 2010s</strong>, not the 2020s. A policy from 2023 gives you very little post-treatment data to work with.</p>
+  </div>
+
   <p>Below are examples of policies with staggered adoption across states. Each is a potential <strong>treatment</strong> for a DiD design.</p>
 
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 20px 0;">
@@ -587,7 +597,18 @@ current_page: finding-project
 <section id="how-to-start" class="tutorial-section">
   <h2>How to Start</h2>
 
-  <p>You can start from any corner of the triangle:</p>
+  <div class="callout-success">
+    <h4 style="margin: 0 0 12px; color: #27ae60;">My Recommendation: Start with Identification</h4>
+    <p style="margin: 0 0 12px;">I personally recommend starting with an <strong>identification strategy</strong>—find a policy or treatment that was implemented in some places but not others. You can find these either in the news or from existing academic papers.</p>
+    <p style="margin: 0 0 12px;">Then, work outward from there:</p>
+    <ol style="margin: 0 0 12px; padding-left: 20px;">
+      <li><strong>Find treatment data:</strong> You need to know when and where the policy was implemented. Implementation dates are sometimes published alongside existing papers, or compiled by organizations like NCSL.</li>
+      <li><strong>Find outcome data:</strong> Look for data on an outcome <em>at the same or more granular level as the treatment</em>, covering both before and after the treatment. For example, if the policy varies at the county level, you need county-level (or more granular) measures of employment, health, education, etc.</li>
+      <li><strong>Form a question:</strong> Let the available data shape your research question. You don't need to start with a grand question—start with what's feasible and let the question emerge from what you can actually measure.</li>
+    </ol>
+  </div>
+
+  <p>That said, you can start from any corner of the triangle:</p>
 
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0;">
     <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-top: 4px solid #1565c0;">

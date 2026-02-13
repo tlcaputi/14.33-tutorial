@@ -121,3 +121,23 @@ export delimited "$analysis/output/tables/es_coefficients_nhr.csv", replace
 restore
 
 di "  Saved event study coefficients"
+
+* =============================================================================
+* Alternative: Using xtevent for canonical event study
+* =============================================================================
+* xtevent simplifies event study estimation.
+* Install: ssc install xtevent
+
+* xtevent ln_hr `controls', ///
+*     policyvar(treated) ///
+*     panelvar(state_id) timevar(year) ///
+*     window(5 10) ///
+*     cluster(state_id)
+* xteventplot, title("Event Study: Hit-Run (xtevent)")
+
+* xtevent ln_nhr `controls', ///
+*     policyvar(treated) ///
+*     panelvar(state_id) timevar(year) ///
+*     window(5 10) ///
+*     cluster(state_id)
+* xteventplot, title("Event Study: Non-Hit-Run (xtevent)")

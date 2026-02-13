@@ -63,3 +63,16 @@ foreach k in -6 -5 -4 -3 -2 0 1 2 3 4 5 6 {
             "  " %10.4f (_b[et_`klab'] - 1.96 * _se[et_`klab']) ///
             "  " %10.4f (_b[et_`klab'] + 1.96 * _se[et_`klab'])
 }
+
+* =============================================================================
+* Alternative: Using xtevent for canonical event study
+* =============================================================================
+* xtevent simplifies event study estimation with automatic endpoint binning.
+* Install: ssc install xtevent
+
+* xtevent ln_fatalities unemployment income, ///
+*     policyvar(treated) ///
+*     panelvar(state) timevar(year) ///
+*     window(6) ///
+*     cluster(state)
+* xteventplot, title("Event Study: Texting Bans (xtevent)")

@@ -5,8 +5,8 @@ suppressPackageStartupMessages(library(tidyverse))
 
 fars_raw <- readRDS(file.path(BUILD, "output", "fars_raw.rds"))
 
-state_year <- fars_raw |>
-  group_by(state, statename, year) |>
+state_year <- fars_raw %>%
+  group_by(state, statename, year) %>%
   summarize(
     fatalities = sum(fatals),
     n_crashes  = n(),

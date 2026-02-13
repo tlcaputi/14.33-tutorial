@@ -380,11 +380,11 @@ model <- lm(mpg ~ hp + wt, data = mtcars)
 summary(model)
 
 # Save a graph
-ggplot(mtcars, aes(x = wt, y = mpg)) +
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point() +
   geom_smooth(method = "lm") +
   labs(title = "MPG vs Weight", x = "Weight (1000 lbs)", y = "MPG")
-ggsave("my_first_graph.png")
+ggsave("my_first_graph.png", p, width = 8, height = 6)
 
 cat("Script completed successfully!\n")</code></pre>
     <pre class="code-content python"><code class="language-python">#===============================================================================
