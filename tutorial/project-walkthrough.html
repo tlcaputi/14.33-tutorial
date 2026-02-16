@@ -14,15 +14,35 @@ current_page: project-walkthrough
 <section id="project-setup" class="tutorial-section">
   <h2>Project Setup</h2>
 
-  <p>An empirical project separates <strong>raw data</strong> from <strong>processed data</strong>, and <strong>build code</strong> (data processing) from <strong>analysis code</strong> (regressions, tables, figures). The download below contains the full project with this structure already in place.</p>
+  <p>An empirical project separates <strong>raw data</strong> from <strong>processed data</strong>, and <strong>build code</strong> (data processing) from <strong>analysis code</strong> (regressions, tables, figures). Download a package below and unzip — you're ready to go.</p>
 
   {% capture callout_content %}<div style="text-align: center;">
-    <p>Each ZIP contains all six datasets, the full directory structure shown below, and code in your chosen language. Pick one and unzip — you're ready to go.</p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="data/pkg-stata.zip" download class="download-btn">Stata</a>
-      <a href="data/pkg-r.zip" download class="download-btn">R</a>
-      <a href="data/pkg-python.zip" download class="download-btn">Python</a>
-    </div>
+    <p><strong>Starter</strong> — code and raw data with empty output folders. Run <code>master</code> to generate everything.</p>
+    <table style="margin: 0 auto; border-collapse: collapse; width: auto;">
+      <thead>
+        <tr>
+          <th style="padding: 8px 16px; text-align: left;"></th>
+          <th style="padding: 8px 16px; text-align: center;">Stata</th>
+          <th style="padding: 8px 16px; text-align: center;">R</th>
+          <th style="padding: 8px 16px; text-align: center;">Python</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px 16px; font-weight: 500;">Starter</td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-stata.zip" download class="download-btn">Stata</a></td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-r.zip" download class="download-btn">R</a></td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-python.zip" download class="download-btn">Python</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 16px; font-weight: 500;">Complete</td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-stata-complete.zip" download class="download-btn" style="background: #2c3e50;">Stata</a></td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-r-complete.zip" download class="download-btn" style="background: #2c3e50;">R</a></td>
+          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-python-complete.zip" download class="download-btn" style="background: #2c3e50;">Python</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 0.85em; color: #666; margin-top: 8px;"><strong>Complete</strong> includes all generated output (tables, figures, processed data) so you can check your results.</p>
   </div>{% endcapture %}
   {% include "callout.liquid", type: "info", heading: "Download the Project", content: callout_content %}
 
@@ -38,12 +58,12 @@ current_page: project-walkthrough
 │   │   └── 02_merge_datasets.do
 │   ├── input/                 ← Raw data (NEVER modified by code)
 │   │   ├── crash_data.csv
+│   │   ├── iv_data.csv
+│   │   ├── rd_data.csv
 │   │   ├── state_demographics.dta
 │   │   ├── policy_adoptions.csv
 │   │   └── state_names.csv
-│   └── output/                ← Processed data (created by build scripts)
-│       ├── crashes_state_year.dta
-│       └── analysis_panel.dta
+│   └── output/                ← Empty; created by build scripts
 └── analysis/
     ├── code/
     │   ├── 01_descriptive_table.do
@@ -52,13 +72,8 @@ current_page: project-walkthrough
     │   ├── 04_iv.do
     │   └── 05_rd.do
     └── output/
-        ├── tables/            ← Regression tables (.tex)
-        │   ├── descriptive_table.tex
-        │   ├── dd_results.tex
-        │   ├── iv_results.tex
-        │   └── rd_results.tex
-        └── figures/           ← Plots and graphs (.png, .pdf)
-            └── event_study.png{% endcapture %}
+        ├── tables/            ← Empty; filled by analysis scripts
+        └── figures/{% endcapture %}
   {% include "code-block.liquid", stata: sc, stata_label: "Directory Structure" %}
 
   <h3>Key Principles</h3>

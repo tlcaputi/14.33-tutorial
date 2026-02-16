@@ -904,7 +904,7 @@ plt.show(){% endcapture %}
   </div>
 
   {% capture kp_content %}
-  <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (52 rows). FARS data (~400MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
+  <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (in <code>build/input/</code>, 52 rows). FARS data (~400 MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
   {% endcapture %}
   {% include "key-principle.liquid", heading: "What's Included", content: kp_content %}
 </section>
