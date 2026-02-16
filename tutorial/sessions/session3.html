@@ -212,8 +212,8 @@ current_page: session3
     </div>
   </div>
 
-  {% capture callout_content %}<strong>In plain English:</strong> your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "The TWFE Equation", content: callout_content %}
+  {% capture callout_content %}Your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).{% endcapture %}
+  {% include "callout.liquid", type: "info", heading: "In Plain English", content: callout_content %}
 
   <p>Let's break this down:</p>
 
