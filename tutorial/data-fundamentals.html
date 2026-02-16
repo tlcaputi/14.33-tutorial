@@ -721,6 +721,19 @@ state_year_data = data.groupby(["state", "year"]).agg(
     </ul>{% endcapture %}
   {% include "key-principle.liquid", title: "Know Your Merge Type", content: kp_content %}
 
+  {% capture callout_content %}<p><strong>Stata validates the relationship.</strong> When you write <code>merge m:1</code>, Stata checks that the using dataset actually has unique keys. If it doesn't, Stata throws an error. This is a safety feature.</p>
+    <p><strong>R and Python do not validate.</strong> In R, <code>merge(x, y, by = "id")</code> performs whatever join the data produces—it doesn't verify whether it's 1:1 or m:1. The <code>all.x</code>, <code>all.y</code>, and <code>all</code> arguments only control which unmatched rows to keep (left, right, or outer join)—they say nothing about the merge type:</p>
+    <table style="width: 100%; font-size: 0.9rem; margin: 12px 0;">
+      <thead><tr><th>Type</th><th>Stata</th><th>R</th><th>When to Use</th></tr></thead>
+      <tbody>
+        <tr><td>1:1</td><td><code>merge 1:1</code></td><td><code>merge(...)</code></td><td>Each row matches exactly one row</td></tr>
+        <tr><td>m:1</td><td><code>merge m:1</code></td><td><code>merge(..., all.x = TRUE)</code></td><td>Many rows match one (e.g., people → states)</td></tr>
+        <tr><td>1:m</td><td><code>merge 1:m</code></td><td><code>merge(..., all.y = TRUE)</code></td><td>One row matches many</td></tr>
+      </tbody>
+    </table>
+    <p>In R, you must manually verify uniqueness (e.g., <code>stopifnot(!duplicated(state_data$state))</code>) before merging if you expect a 1:1 or m:1 relationship. Stata does this automatically.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Stata Validates Merge Types; R Does Not", content: callout_content %}
+
   <h3>When Merges Create Duplicates</h3>
 
   <p>Merges can increase your row count. This is <strong>sometimes expected</strong> and <strong>sometimes a bug</strong>.</p>
