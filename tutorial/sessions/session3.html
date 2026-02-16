@@ -78,10 +78,8 @@ current_page: session3
     </p>
   </div>
 
-  <div class="key-principle">
-    <h4>The Research Question</h4>
-    <p>Did no-fault divorce laws reduce female suicide rates? The hypothesis is that women trapped in unhappy or abusive marriages might experience better mental health outcomes when divorce becomes easier to obtain.</p>
-  </div>
+  {% capture kp_content %}Did no-fault divorce laws reduce female suicide rates? The hypothesis is that women trapped in unhappy or abusive marriages might experience better mental health outcomes when divorce becomes easier to obtain.{% endcapture %}
+  {% include "key-principle.liquid", title: "The Research Question", content: kp_content %}
 
   <h3>What is No-Fault Divorce?</h3>
 
@@ -196,13 +194,14 @@ current_page: session3
 
   <p>The basic two-way fixed effects DiD model is:</p>
 
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: monospace; text-align: center; font-size: 1.1em;">
-    Y<sub>it</sub> = β · Post<sub>it</sub> + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+  <div class="equation-box">
+    <div class="equation-content">
+      Y<sub>it</sub> = β · Post<sub>it</sub> + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+    </div>
   </div>
 
-  <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
-    <strong>In plain English:</strong> your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).
-  </div>
+  {% capture callout_content %}<strong>In plain English:</strong> your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).{% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_content %}
 
   <p>Let's break this down:</p>
 
@@ -214,17 +213,17 @@ current_page: session3
     <li><strong>β</strong> — The treatment effect. This is what you care about.</li>
   </ul>
 
-  <div class="callout-info">
-    <h4>What β Captures</h4>
-    <p>The coefficient β tells you: <em>how much did treated units change, relative to control units, relative to the overall time trend?</em> It's the "difference-in-differences"—the difference in how treated and control units evolved over time.</p>
-  </div>
+  {% capture callout_content %}The coefficient β tells you: <em>how much did treated units change, relative to control units, relative to the overall time trend?</em> It's the "difference-in-differences"—the difference in how treated and control units evolved over time.{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "What β Captures", content: callout_content %}
 
   <h3>From DiD to Event Studies</h3>
 
   <p>An event study is DiD with more detail. Instead of a single "post" indicator, we estimate <em>separate effects for each time period relative to treatment</em>:</p>
 
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: monospace; text-align: center; font-size: 1.05em;">
-    Y<sub>it</sub> = Σ<sub>k</sub> β<sub>k</sub> · 1[t - treatment_year<sub>i</sub> = k] + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+  <div class="equation-box">
+    <div class="equation-content">
+      Y<sub>it</sub> = Σ<sub>k</sub> β<sub>k</sub> · 1[t - treatment_year<sub>i</sub> = k] + α<sub>i</sub> + γ<sub>t</sub> + ε<sub>it</sub>
+    </div>
   </div>
 
   <p>Now instead of one β, we get a β for each "time to treatment" period:</p>
@@ -251,9 +250,8 @@ current_page: session3
 
   <p>What about units that never get treated? They don't have a "treatment year," so "time to treatment" is undefined for them.</p>
 
-  <div style="background: #fff9e6; border-left: 4px solid #ffa726; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
-    <strong>Why is this a problem?</strong> Never-treated states (like those that never passed the law) don't have a "year of treatment," so we can't compute <code>event_time = year - treatment_year</code> — the result would be missing. But we still want these states in our regression as the comparison group. The solution: give them a fake event-time value (-1000) that's far outside the real range (-5, -4, ..., 0, 1, 2, ...), so their observations won't be assigned to any event-time coefficient. Then we exclude -1000 from the event study dummies while keeping these states in the regression to help estimate the fixed effects.
-  </div>
+  {% capture callout_content %}<strong>Why is this a problem?</strong> Never-treated states (like those that never passed the law) don't have a "year of treatment," so we can't compute <code>event_time = year - treatment_year</code> — the result would be missing. But we still want these states in our regression as the comparison group. The solution: give them a fake event-time value (-1000) that's far outside the real range (-5, -4, ..., 0, 1, 2, ...), so their observations won't be assigned to any event-time coefficient. Then we exclude -1000 from the event study dummies while keeping these states in the regression to help estimate the fixed effects.{% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 
   <p><strong>If you have never-treated units:</strong> You need to handle them carefully. The key insight is that never-treated units don't have a "time to treatment," so you can't create event-time dummies for them in the usual way. Common approaches:</p>
   <ul>
@@ -265,10 +263,8 @@ current_page: session3
 
   <p><strong>If you have NO never-treated units</strong> (everyone eventually gets treated, just at different times): You need <em>two</em> reference periods—one to avoid collinearity with unit fixed effects, and one to avoid collinearity with time fixed effects. Typically you'd omit both k = -1 and one endpoint (like the last period).</p>
 
-  <div class="callout-warning">
-    <h4>Why Two Reference Periods?</h4>
-    <p>With staggered adoption and no never-treated group, the time-to-treatment dummies span the entire time dimension. Without a second normalization, the year fixed effects become collinear with the event-time dummies. Dropping an endpoint (like the last period in your event window) solves this.</p>
-  </div>
+  {% capture callout_content %}With staggered adoption and no never-treated group, the time-to-treatment dummies span the entire time dimension. Without a second normalization, the year fixed effects become collinear with the event-time dummies. Dropping an endpoint (like the last period in your event window) solves this.{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Why Two Reference Periods?", content: callout_content %}
 
   <h3>Interpreting the Event Study Plot</h3>
 
@@ -296,16 +292,7 @@ current_page: session3
 
   <h3>Load and Explore the Data</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load the data
+  {% capture sc %}* Load the data
 use bacon_example.dta, clear
 
 * Explore the structure
@@ -314,8 +301,8 @@ tab stfips
 
 * Examine the outcome and controls
 desc asmrs        // Female suicide rate (Y)
-desc pcinc asmrh cases  // Controls</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load packages
+desc pcinc asmrh cases  // Controls{% endcapture %}
+  {% capture rc %}# Load packages
 pacman::p_load(haven, tidyverse, fixest, ggfixest)
 
 # Load the data
@@ -326,8 +313,8 @@ table(df$year)
 table(df$stfips)
 
 # Examine the outcome and controls
-summary(df[c("asmrs", "pcinc", "asmrh", "cases")])</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+summary(df[c("asmrs", "pcinc", "asmrh", "cases")]){% endcapture %}
+  {% capture pc %}import pandas as pd
 import pyfixest as pf
 
 # Load the data
@@ -338,23 +325,14 @@ print(df['year'].value_counts().sort_index())
 print(df['stfips'].value_counts().sort_index())
 
 # Examine the outcome and controls
-df[['asmrs', 'pcinc', 'asmrh', 'cases']].describe()</code></pre>
-  </div>
+df[['asmrs', 'pcinc', 'asmrh', 'cases']].describe(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Create the Treatment Timing Variable</h3>
 
   <p>First, we need to identify <strong>when</strong> each state adopted no-fault divorce. States that never adopted act as our control group.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create variable for year state adopted no-fault divorce
+  {% capture sc %}* Create variable for year state adopted no-fault divorce
 * Missing = never adopted (control state)
 gen _nfd = .
 
@@ -396,8 +374,8 @@ replace _nfd = 1973 if stfips == 53  // Washington
 replace _nfd = 1977 if stfips == 55  // Wisconsin
 replace _nfd = 1977 if stfips == 56  // Wyoming
 
-* States with missing _nfd never adopted (control group)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create adoption year variable
+* States with missing _nfd never adopted (control group){% endcapture %}
+  {% capture rc %}# Create adoption year variable
 # NA = never adopted (control state)
 adoption_years <- c(
   `1` = 1971, `4` = 1973, `6` = 1970, `8` = 1971, `9` = 1973,
@@ -413,8 +391,8 @@ adoption_years <- c(
 df <- df %>%
   mutate(nfd = adoption_years[as.character(stfips)])
 
-# States with NA never adopted (control group)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Create adoption year variable
+# States with NA never adopted (control group){% endcapture %}
+  {% capture pc %}# Create adoption year variable
 # NaN = never adopted (control state)
 adoption_years = {
     1: 1971, 4: 1973, 6: 1970, 8: 1971, 9: 1973, 11: 1977,
@@ -427,13 +405,11 @@ adoption_years = {
 
 df['_nfd'] = df['stfips'].map(adoption_years)
 
-# States with NaN never adopted (control group)</code></pre>
-  </div>
+# States with NaN never adopted (control group){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>Key Insight: Staggered Adoption</h4>
-    <p>Notice that treatment is <strong>staggered</strong> - different states adopt at different times. Kansas and South Carolina adopted first (1969), while South Dakota adopted last (1985). This variation is what allows identification.</p>
-  </div>
+  {% capture cm_content %}Notice that treatment is <strong>staggered</strong> - different states adopt at different times. Kansas and South Carolina adopted first (1969), while South Dakota adopted last (1985). This variation is what allows identification.{% endcapture %}
+  {% include "common-mistake.liquid", title: "Key Insight: Staggered Adoption", content: cm_content %}
 </section>
 
 <section id="twfe" class="tutorial-section">
@@ -448,29 +424,20 @@ df['_nfd'] = df['stfips'].map(adoption_years)
     <strong>🤔 Think about this:</strong> California adopted no-fault divorce in 1970. For California in 1972, what should <code>treat_post</code> equal? What about California in 1968?
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create post-treatment indicator
+  {% capture sc %}* Create post-treatment indicator
 * = 1 if year >= year state adopted no-fault divorce
 * = 0 otherwise (including never-adopters)
-gen treat_post = (year >= _nfd)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create post-treatment indicator
+gen treat_post = (year >= _nfd){% endcapture %}
+  {% capture rc %}# Create post-treatment indicator
 # = 1 if year >= year state adopted no-fault divorce
 # = 0 otherwise (including never-adopters)
 df <- df %>%
-  mutate(treat_post = ifelse(!is.na(`_nfd`) & year >= `_nfd`, 1, 0))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Create post-treatment indicator
+  mutate(treat_post = ifelse(!is.na(`_nfd`) & year >= `_nfd`, 1, 0)){% endcapture %}
+  {% capture pc %}# Create post-treatment indicator
 # = 1 if year >= year state adopted no-fault divorce
 # = 0 otherwise (including never-adopters)
-df['treat_post'] = ((df['_nfd'].notna()) & (df['year'] >= df['_nfd'])).astype(int)</code></pre>
-  </div>
+df['treat_post'] = ((df['_nfd'].notna()) & (df['year'] >= df['_nfd'])).astype(int){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <!-- Answer to predict -->
   <details style="margin: 16px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; cursor: pointer;">
@@ -495,38 +462,29 @@ df['treat_post'] = ((df['_nfd'].notna()) & (df['year'] >= df['_nfd'])).astype(in
     </ul>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Two-way fixed effects regression
+  {% capture sc %}* Two-way fixed effects regression
 * Y = female suicide rate
 * X = post-treatment indicator
 * FEs = state and year
 * Controls = income, homicide rate, cases
-reg asmrs treat_post i.stfips i.year pcinc asmrh cases, vce(cluster stfips)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Two-way fixed effects regression using fixest
+reg asmrs treat_post i.stfips i.year pcinc asmrh cases, vce(cluster stfips){% endcapture %}
+  {% capture rc %}# Two-way fixed effects regression using fixest
 # Y = female suicide rate
 # X = post-treatment indicator
 # FEs = state and year
 # Controls = income, homicide rate, cases
 model_twfe <- feols(asmrs ~ treat_post + pcinc + asmrh + cases | stfips + year,
                     cluster = ~stfips, data = df)
-summary(model_twfe)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Two-way fixed effects regression using pyfixest
+summary(model_twfe){% endcapture %}
+  {% capture pc %}# Two-way fixed effects regression using pyfixest
 # Y = female suicide rate
 # X = post-treatment indicator
 # FEs = state and year
 # Controls = income, homicide rate, cases
 model_twfe = pf.feols('asmrs ~ treat_post + pcinc + asmrh + cases | stfips + year',
                       vcov={'CRV1': 'stfips'}, data=df)
-print(model_twfe.summary())</code></pre>
-  </div>
+print(model_twfe.summary()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <!-- Quiz: TWFE -->
   <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -540,10 +498,8 @@ print(model_twfe.summary())</code></pre>
     <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
   </div>
 
-  <div class="key-principle">
-    <h4>Interpreting the Coefficient</h4>
-    <p>The coefficient on <code>treat_post</code> represents the average effect of no-fault divorce on female suicide rates, controlling for state fixed effects, year fixed effects, and time-varying controls. A negative coefficient suggests the reform reduced suicide rates.</p>
-  </div>
+  {% capture kp_content %}The coefficient on <code>treat_post</code> represents the average effect of no-fault divorce on female suicide rates, controlling for state fixed effects, year fixed effects, and time-varying controls. A negative coefficient suggests the reform reduced suicide rates.{% endcapture %}
+  {% include "key-principle.liquid", title: "Interpreting the Coefficient", content: kp_content %}
 </section>
 
 <section id="event-study" class="tutorial-section">
@@ -570,16 +526,7 @@ print(model_twfe.summary())</code></pre>
     </p>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create time relative to treatment
+  {% capture sc %}* Create time relative to treatment
 * Negative = years before treatment
 * 0 = year of treatment
 * Positive = years after treatment
@@ -591,8 +538,8 @@ gen time_to_treat = year - _nfd
 replace time_to_treat = -1000 if missing(_nfd)
 
 * Create ever-treated indicator
-gen ever_treated = !missing(_nfd)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create time relative to treatment
+gen ever_treated = !missing(_nfd){% endcapture %}
+  {% capture rc %}# Create time relative to treatment
 # Negative = years before treatment
 # 0 = year of treatment
 # Positive = years after treatment
@@ -604,8 +551,8 @@ df <- df %>%
   mutate(
     time_to_treat = ifelse(is.na(`_nfd`), -1000, year - `_nfd`),
     ever_treated = !is.na(`_nfd`)
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python"># Create time relative to treatment
+  ){% endcapture %}
+  {% capture pc %}# Create time relative to treatment
 # Negative = years before treatment
 # 0 = year of treatment
 # Positive = years after treatment
@@ -615,21 +562,12 @@ df <- df %>%
 # Then exclude with ref = c(-1, -1000) in pyfixest
 df['time_to_treat'] = df['year'] - df['_nfd']
 df['time_to_treat'] = df['time_to_treat'].fillna(-1000).astype(int)
-df['ever_treated'] = df['_nfd'].notna().astype(int)</code></pre>
-  </div>
+df['ever_treated'] = df['_nfd'].notna().astype(int){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Run the Event Study Regression</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Handle Stata's factor variable limitation (no negatives)
+  {% capture sc %}* Handle Stata's factor variable limitation (no negatives)
 summ time_to_treat
 local min_val = r(min)
 
@@ -642,24 +580,13 @@ local true_neg1 = r(mean)
 
 * Event study regression (manual approach for understanding)
 * ib`true_neg1' sets t=-1 as the reference category
-reg asmrs ib`true_neg1'.shifted_ttt pcinc asmrh cases i.stfips i.year, vce(cluster stfips)</code></pre>
-  </div>
+reg asmrs ib`true_neg1'.shifted_ttt pcinc asmrh cases i.stfips i.year, vce(cluster stfips){% endcapture %}
+  {% include "code-block.liquid", stata: sc %}
 
-  <div class="callout-success">
-    <h4>Easier Package-Based Approach</h4>
-    <p>The manual approach above is good for understanding what's happening. In practice, use these cleaner methods:</p>
-  </div>
+  {% capture callout_content %}The manual approach above is good for understanding what's happening. In practice, use these cleaner methods:{% endcapture %}
+  {% include "callout.liquid", type: "success", title: "Easier Package-Based Approach", content: callout_content %}
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* EASY WAY: Use xtevent package
+  {% capture sc %}* EASY WAY: Use xtevent package
 * Install once: ssc install xtevent
 xtevent asmrs pcinc asmrh cases, ///
     policyvar(treat_post) ///
@@ -675,8 +602,8 @@ xteventplot, ///
 * Alternative: eventdd package (ssc install eventdd)
 * eventdd asmrs pcinc asmrh cases, timevar(time_to_treat) ///
 *     absorb(i.stfips i.year) cluster(stfips) ///
-*     graph_op(ytitle("Effect on Female Suicide Rate"))</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load ggfixest for plotting
+*     graph_op(ytitle("Effect on Female Suicide Rate")){% endcapture %}
+  {% capture rc %}# Load ggfixest for plotting
 pacman::p_load(haven, tidyverse, fixest, ggfixest)
 
 # EASY WAY: fixest with proper handling of never-treated
@@ -694,8 +621,8 @@ model_es <- feols(
 p <- ggiplot(model_es,
         main = "Event Study: No-Fault Divorce and Female Suicide",
         xlab = "Years Relative to Treatment",
-        ylab = "Coefficient")</code></pre>
-    <pre class="code-content python"><code class="language-python"># EASY WAY: pyfixest with proper handling of never-treated
+        ylab = "Coefficient"){% endcapture %}
+  {% capture pc %}# EASY WAY: pyfixest with proper handling of never-treated
 # ref = c(-1, -1000) excludes both the reference period and never-treated
 model_es = pf.feols(
     'asmrs ~ i(time_to_treat, ever_treated, ref=c(-1, -1000)) + pcinc + asmrh + cases | stfips + year',
@@ -703,40 +630,8 @@ model_es = pf.feols(
 )
 
 # One-line plot
-model_es.iplot()</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load ggfixest for plotting
-library(ggfixest)
-
-# Event study using fixest's i() syntax
-# i(time_to_treat, ever_treated, ref = c(-1, -1000)):
-#   - time_to_treat: relative time variable (-1000 for never-treated)
-#   - ever_treated: interaction (1 if ever treated, 0 if never)
-#   - ref = c(-1, -1000): exclude reference period AND never-treated
-model_es <- feols(
-  asmrs ~ i(time_to_treat, ever_treated, ref = c(-1, -1000)) + pcinc + asmrh + cases | stfips + year,
-  cluster = ~stfips, data = df
-)
-summary(model_es)
-
-# Create event study plot using ggfixest
-p <- ggiplot(model_es,
-        main = "Event Study: No-Fault Divorce and Female Suicide",
-        xlab = "Years Relative to Treatment",
-        ylab = "Coefficient")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Event study using pyfixest's i() syntax
-# i(time_to_treat, ever_treated, ref=c(-1, -1000)):
-#   - time_to_treat: relative time (-1000 for never-treated)
-#   - ever_treated: interaction term
-#   - ref=c(-1, -1000): exclude reference AND never-treated
-model_es = pf.feols(
-    'asmrs ~ i(time_to_treat, ever_treated, ref=c(-1, -1000)) + pcinc + asmrh + cases | stfips + year',
-    vcov={'CRV1': 'stfips'}, data=df
-)
-print(model_es.summary())
-
-# Create event study plot
-model_es.iplot()</code></pre>
-  </div>
+model_es.iplot(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <!-- Quiz: Event Study -->
   <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -750,19 +645,15 @@ model_es.iplot()</code></pre>
     <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
   </div>
 
-  <div class="common-mistakes">
-    <h4>Why t = -1 as Reference?</h4>
-    <p>We use t = -1 (one year before treatment) as our reference period because it's the last pre-treatment period. All coefficients are then interpreted relative to this period. This is standard practice in event studies.</p>
-  </div>
+  {% capture cm_content %}We use t = -1 (one year before treatment) as our reference period because it's the last pre-treatment period. All coefficients are then interpreted relative to this period. This is standard practice in event studies.{% endcapture %}
+  {% include "common-mistake.liquid", title: "Why t = -1 as Reference?", content: cm_content %}
 
-  <div class="key-principle">
-    <h4>Reading an Event Study Plot</h4>
-    <ul>
+  {% capture kp_content %}<ul>
       <li><strong>Pre-treatment coefficients</strong> (left of 0): Should be close to zero and statistically insignificant if parallel trends holds</li>
       <li><strong>Post-treatment coefficients</strong> (right of 0): Show how the treatment effect evolves over time</li>
       <li><strong>Reference period</strong> (t = -1): Always zero by construction</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Reading an Event Study Plot", content: kp_content %}
 </section>
 
 <section id="interpretation" class="tutorial-section">
@@ -770,10 +661,8 @@ model_es.iplot()</code></pre>
 
   <h3>What to Look For</h3>
 
-  <div class="key-principle">
-    <h4>Parallel Trends</h4>
-    <p>In the event study plot, pre-treatment coefficients should be statistically indistinguishable from zero. If you see a clear trend before treatment, the parallel trends assumption may be violated.</p>
-  </div>
+  {% capture kp_content %}In the event study plot, pre-treatment coefficients should be statistically indistinguishable from zero. If you see a clear trend before treatment, the parallel trends assumption may be violated.{% endcapture %}
+  {% include "key-principle.liquid", title: "Parallel Trends", content: kp_content %}
 
   <h3>Common Issues</h3>
 
@@ -782,10 +671,8 @@ model_es.iplot()</code></pre>
     <li><strong>Anticipation effects</strong>: If coefficients become significant before t=0, states may have responded before official adoption</li>
   </ul>
 
-  <div class="callout-info">
-    <h4>A Note on Staggered Timing</h4>
-    <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
-  </div>
+  {% capture callout_content %}Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <!-- ==================== PRACTICE ==================== -->

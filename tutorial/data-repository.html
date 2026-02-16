@@ -1,0 +1,43 @@
+---
+layout: layouts/tutorial.html
+title: Data Repository | Intro to Data Analysis for Economics
+current_page: data-repository
+---
+<h1>Data Repository</h1>
+<p class="subtitle">Downloadable datasets for in-class exercises</p>
+
+<p>This page hosts datasets used in 14.33 exercises. To download a dataset programmatically in Stata, right-click the download link, copy the URL, and use:</p>
+
+<pre><code class="language-stata">copy "URL" "local_filename.csv", replace</code></pre>
+
+<section class="tutorial-section">
+  <h2>Available Datasets</h2>
+
+  <table style="width:100%; border-collapse:collapse; margin-top:16px;">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border); text-align:left;">
+        <th style="padding:8px 12px;">Dataset</th>
+        <th style="padding:8px 12px;">Description</th>
+        <th style="padding:8px 12px;">Format</th>
+        <th style="padding:8px 12px;">Download</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 12px;"><strong>Teen Employment by State</strong></td>
+        <td style="padding:8px 12px;">Teen employment rates for 50 US states, 2005&ndash;2019. Wide format (one row per state, columns for each year).</td>
+        <td style="padding:8px 12px;">CSV</td>
+        <td style="padding:8px 12px;"><a href="data/exercises/employment_wide.csv" download>employment_wide.csv</a></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 12px;"><strong>Bacon Decomposition Example</strong></td>
+        <td style="padding:8px 12px;">Example dataset for demonstrating the Bacon decomposition of TWFE estimates.</td>
+        <td style="padding:8px 12px;">CSV / DTA</td>
+        <td style="padding:8px 12px;">
+          <a href="data/bacon_example.csv" download>CSV</a> &middot;
+          <a href="data/bacon_example.dta" download>DTA</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

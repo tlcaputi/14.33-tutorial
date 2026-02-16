@@ -20,5 +20,12 @@ tutorial/worked-examples/*/build/input/*.csv
 tutorial/worked-examples/*/build/output/*.dta
 tutorial/worked-examples/*/build/output/*.csv
 
+# FARS raw data (too large for git)
+tutorial/worked-examples/*/build/input/fars/
+
+# Exercise build artifacts (only zips + CSV needed)
+tutorial/data/exercises/exercise1/
+tutorial/data/exercises/exercise2/
+
 # Logs
 *.log

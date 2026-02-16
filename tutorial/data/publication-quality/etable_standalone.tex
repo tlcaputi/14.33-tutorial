@@ -1,0 +1,29 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{booktabs}
+\usepackage{array}
+\begin{document}
+
+\centering
+\begin{tabular}{lcccc}
+   \toprule \toprule
+   Dep. Var.: & \multicolumn{3}{c}{Fatality Rate} & Injury Rate\\
+              & (1)            & (2)            & (3)            & (4) \\
+   \midrule
+   \emph{Variables}\\
+   Policy Adopted  & -2.990$^{***}$ & -3.070$^{***}$ & -2.990$^{***}$ & -2.022$^{***}$\\
+                    & (0.330)        & (0.330)        & (0.341)        & (0.273)\\
+   Log(Population) &                & 0.298$^{**}$   &                &   \\
+                    &                & (0.132)        &                &   \\
+   \midrule
+   State FE        & Yes            & Yes            & Yes            & Yes\\
+   Year FE         & Yes            & Yes            & Yes            & Yes\\
+   Clustered SEs   &                &                & Yes            & Yes\\
+   \midrule
+   Observations    & 500            & 500            & 500            & 500\\
+   R$^2$           & 0.731          & 0.734          & 0.731          & 0.585\\
+   Within R$^2$    & 0.157          & 0.167          & 0.157          & 0.123\\
+   \bottomrule \bottomrule
+   \multicolumn{5}{l}{\emph{\small Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+\end{tabular}
+
+\end{document}

@@ -21,10 +21,10 @@ current_page: auxiliary-latex
     <li><strong>Vector graphics:</strong> Tables and figures generated in LaTeX are vector-based (infinitely scalable), unlike screenshots or raster images.</li>
   </ul>
 
-  <div class="key-principle">
-    <h4>The Typical Workflow</h4>
+  {% capture kp_content %}
     <p>Run your analysis in R, Stata, or Python → generate individual table PDFs → embed them in a LaTeX document as figures. This gives you the best of both worlds: powerful data analysis tools plus beautiful document presentation.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Typical Workflow", content: kp_content %}
 </section>
 
 <section id="installation" class="tutorial-section">
@@ -32,51 +32,23 @@ current_page: auxiliary-latex
 
   <h3 id="install-mac">Mac</h3>
   <p>Install MacTeX, which includes LaTeX and all necessary tools:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>brew install --cask mactex-no-gui</code></pre>
-  </div>
+  {% capture sc %}brew install --cask mactex-no-gui{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
   <p style="font-size: 0.95rem; color: var(--muted); margin-top: -10px;">This installs a minimal version (~2GB). For the full version with more fonts, use <code>mactex</code> instead.</p>
 
   <h3 id="install-windows">Windows</h3>
   <p>Download and install MiKTeX from <a href="https://miktex.org/" target="_blank">miktex.org</a>, or use:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>choco install miktex</code></pre>
-  </div>
+  {% capture sc %}choco install miktex{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "PowerShell (Admin)" %}
 
   <h3 id="install-linux">Linux</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal (Ubuntu/Debian)</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>sudo apt-get install texlive-full</code></pre>
-  </div>
+  {% capture sc %}sudo apt-get install texlive-full{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal (Ubuntu/Debian)" %}
 
   <h3 id="verify-install">Verify Installation</h3>
   <p>Test that LaTeX is installed by checking the version:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>pdflatex --version</code></pre>
-  </div>
+  {% capture sc %}pdflatex --version{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 </section>
 
 <section id="standalone-package" class="tutorial-section">
@@ -95,14 +67,7 @@ current_page: auxiliary-latex
   <h3 id="basic-example">Basic Example</h3>
   <p>Here's a minimal standalone document that creates a table PDF:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">LaTeX</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>\documentclass[border=10pt]{standalone}
+  {% capture sc %}\documentclass[border=10pt]{standalone}
 \usepackage{booktabs}
 \usepackage{amsmath}
 
@@ -117,19 +82,12 @@ Income & 65000 & 28000 \\
 \bottomrule
 \end{tabular}
 
-\end{document}</code></pre>
-  </div>
+\end{document}{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "LaTeX" %}
 
   <p>Compile this to PDF with:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>pdflatex table.tex</code></pre>
-  </div>
+  {% capture sc %}pdflatex table.tex{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p>You get <code>table.pdf</code>, a tight PDF containing just the table.</p>
 </section>
@@ -151,21 +109,12 @@ Income & 65000 & 28000 \\
 
   <p>Each language has packages for exporting regression results and summary statistics directly to LaTeX format:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Use estout or outreg2 for regression tables
+  {% capture sc %}* Use estout or outreg2 for regression tables
 ssc install estout  // Install if needed
 
 regress y x1 x2
-esttab . using "table.tex", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Use xtable, knitr, or kableExtra
+esttab . using "table.tex", replace{% endcapture %}
+  {% capture rc %}# Use xtable, knitr, or kableExtra
 library(xtable)
 
 summary_table <- data.frame(
@@ -173,8 +122,8 @@ summary_table <- data.frame(
   Mean = c(42.3, 65000),
   SD = c(15.2, 28000)
 )
-print(xtable(summary_table), file = "table.tex")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Use pandas to_latex()
+print(xtable(summary_table), file = "table.tex"){% endcapture %}
+  {% capture pc %}# Use pandas to_latex()
 import pandas as pd
 
 summary_table = pd.DataFrame({
@@ -182,29 +131,22 @@ summary_table = pd.DataFrame({
     'Mean': [42.3, 65000],
     'SD': [15.2, 28000]
 })
-summary_table.to_latex("table.tex", index=False)</code></pre>
-  </div>
+summary_table.to_latex("table.tex", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="including-pdf">Including the PDF in Your Paper</h3>
 
   <p>In your main LaTeX document, include the PDF as a figure:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">LaTeX</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>\begin{figure}[h]
+  {% capture sc %}\begin{figure}[h]
 \centering
 \includegraphics{tables/summary_statistics.pdf}
 \caption{Summary Statistics}
 \label{fig:summary}
-\end{figure}</code></pre>
-  </div>
+\end{figure}{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "LaTeX" %}
 
-  <div class="key-principle">
-    <h4>Organization Tip</h4>
+  {% capture kp_content %}
     <p>Keep your tables in a dedicated folder (e.g., <code>tables/</code>) and compile them separately. This keeps your main paper LaTeX file clean and makes it easy to regenerate any table if your analysis changes.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Organization Tip", content: kp_content %}
 </section>

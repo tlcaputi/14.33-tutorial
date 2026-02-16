@@ -7,12 +7,10 @@ current_page: regression
 <p class="subtitle">OLS, panel data, IV, DiD, and event studies</p>
 
 <!-- Growth Mindset Message -->
-<div class="callout-success">
-  <strong>Regression is just a function</strong>
-  <p style="margin: 8px 0 0;">
+{% capture callout_content %}<p style="margin: 8px 0 0;">
     Every regression command follows the same pattern: <code>reg Y X, options</code>. Fixed effects? Add <code>absorb()</code>. Clustered SEs? Add <code>cluster()</code>. IV? Wrap the endogenous variable. Once you understand the basic syntax, everything else is just variations on a theme.
-  </p>
-</div>
+  </p>{% endcapture %}
+{% include "callout.liquid", type: "success", title: "Regression is just a function", content: callout_content %}
 
 <section id="ols" class="tutorial-section">
   <h2>OLS Basics</h2>
@@ -22,9 +20,9 @@ current_page: regression
   <h3>Simple Linear Regression</h3>
 
   <!-- Anatomy of a regression -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The basic regression equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The basic regression equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">income</span> =
       β₀ + β₁<span style="color: #2e7d32;">education</span> +
       β₂<span style="color: #2e7d32;">age</span> + ε
@@ -34,16 +32,7 @@ current_page: regression
       <span><span style="color: #2e7d32;">■</span> X (predictors)</span>
     </div>
   </div>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Simple regression
+  {% capture sc %}* Simple regression
 reg income education
 
 * Multiple regression
@@ -54,8 +43,8 @@ reg income education i.region i.year
 
 * Interactions
 reg income education##female    // Full interaction
-reg income c.education#c.age    // Continuous interaction</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+reg income c.education#c.age    // Continuous interaction{% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # Simple regression
 model <- feols(income ~ education, data = data)
@@ -70,8 +59,8 @@ model <- feols(income ~ education + factor(region) + factor(year),
 
 # Interactions
 model <- feols(income ~ education * female, data = data)
-model <- feols(income ~ education:age, data = data)</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+model <- feols(income ~ education:age, data = data){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 import pandas as pd
 
 # Simple regression
@@ -86,34 +75,23 @@ model = smf.ols('income ~ education + C(region) + C(year)', data=data).fit()
 
 # Interactions
 model = smf.ols('income ~ education * female', data=data).fit()
-model = smf.ols('income ~ education:age', data=data).fit()</code></pre>
-  </div>
+model = smf.ols('income ~ education:age', data=data).fit(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Interpreting Coefficients</h3>
-  <div class="key-principle">
-    <h4>Coefficient Interpretation</h4>
-    <ul>
+  {% capture kp_content %}<ul>
       <li><strong>Continuous X:</strong> A one-unit increase in X is associated with a beta-unit change in Y, holding other variables constant.</li>
       <li><strong>Binary X:</strong> The difference in Y between X=1 and X=0, holding other variables constant.</li>
       <li><strong>Log Y:</strong> A one-unit increase in X is associated with a (beta*100)% change in Y.</li>
       <li><strong>Log X:</strong> A 1% increase in X is associated with a (beta/100)-unit change in Y.</li>
       <li><strong>Log-Log:</strong> A 1% increase in X is associated with a beta% change in Y (elasticity).</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Coefficient Interpretation", content: kp_content %}
 
   <h3>Post-Estimation</h3>
   <p>After running a regression, you often want to do more than just look at coefficients. <strong>Predicted values</strong> show what your model expects for each observation—useful for identifying outliers or visualizing fit. <strong>Residuals</strong> are the difference between actual and predicted values—patterns in residuals can reveal model problems. <strong>Hypothesis tests</strong> let you ask specific questions: Is this coefficient different from zero? Are two coefficients equal? What's the combined effect of multiple variables?</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">reg income education age female
+  {% capture sc %}reg income education age female
 
 * Predicted values
 predict yhat
@@ -128,8 +106,8 @@ test education = 0
 test education age
 
 * Linear combination of coefficients
-lincom education + 2*age</code></pre>
-    <pre class="code-content r"><code class="language-r">model <- lm(income ~ education + age + female, data = data)
+lincom education + 2*age{% endcapture %}
+  {% capture rc %}model <- lm(income ~ education + age + female, data = data)
 
 # Predicted values
 data$yhat <- predict(model)
@@ -146,8 +124,8 @@ linearHypothesis(model, c("education = 0", "age = 0"))
 
 # Linear combination
 pacman::p_load(multcomp)
-glht(model, linfct = c("education + 2*age = 0"))</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+glht(model, linfct = c("education + 2*age = 0")){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 
 model = smf.ols('income ~ education + age + female', data=data).fit()
 
@@ -164,8 +142,8 @@ print(model.summary())
 print(model.f_test("(education = 0), (age = 0)"))
 
 # Linear combination
-print(model.t_test("education + 2*age = 0"))</code></pre>
-  </div>
+print(model.t_test("education + 2*age = 0")){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="standard-errors" class="tutorial-section">
@@ -175,24 +153,13 @@ print(model.t_test("education + 2*age = 0"))</code></pre>
 
   <p>The challenge is that standard OLS assumes errors are independent across observations. In real data, this is often violated: observations within the same state are correlated, the same person observed over time is correlated, etc. When errors are correlated, standard OLS standard errors are too small, leading to false confidence in your results.</p>
 
-  <div class="key-principle">
-    <h4>Always Cluster When in Doubt</h4>
-    <p>If observations within groups (states, firms, individuals over time) are correlated, standard OLS standard errors are too small. Cluster at the level of treatment variation or the highest level of aggregation that makes sense.</p>
-  </div>
+  {% capture kp_content %}<p>If observations within groups (states, firms, individuals over time) are correlated, standard OLS standard errors are too small. Cluster at the level of treatment variation or the highest level of aggregation that makes sense.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Always Cluster When in Doubt", content: kp_content %}
 
   <h3>Types of Standard Errors</h3>
   <p>Here are the main options for computing standard errors, from simplest to most robust:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Heteroskedasticity-robust (HC1)
+  {% capture sc %}* Heteroskedasticity-robust (HC1)
 reg income education, robust
 
 * Clustered by state
@@ -202,8 +169,8 @@ reg income education, cluster(state)
 reghdfe income education, noabsorb cluster(state year)
 
 * With reghdfe (recommended for fixed effects)
-reghdfe income education, absorb(state) cluster(state)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+reghdfe income education, absorb(state) cluster(state){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # Heteroskedasticity-robust
 model <- feols(income ~ education, data = data, vcov = "hetero")
@@ -215,8 +182,8 @@ model <- feols(income ~ education, data = data, vcov = ~state)
 model <- feols(income ~ education, data = data, vcov = ~state + year)
 
 # With fixed effects
-model <- feols(income ~ education | state, data = data, vcov = ~state)</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+model <- feols(income ~ education | state, data = data, vcov = ~state){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 
 # Heteroskedasticity-robust (HC1)
 model = smf.ols('income ~ education', data=data).fit(cov_type='HC1')
@@ -231,17 +198,15 @@ data = data.set_index(['state', 'year'])
 model = PanelOLS.from_formula(
     'income ~ education + EntityEffects',
     data=data
-).fit(cov_type='clustered', cluster_entity=True)</code></pre>
-  </div>
+).fit(cov_type='clustered', cluster_entity=True){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>Clustering Rules of Thumb</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li>Cluster at the level of treatment assignment (e.g., if policy varies by state, cluster by state)</li>
       <li>With few clusters (<30), consider wild bootstrap or other small-sample corrections</li>
       <li>Never cluster at a finer level than treatment variation</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Clustering Rules of Thumb", content: cm_content %}
 </section>
 
 <section id="panel-data" class="tutorial-section">
@@ -251,9 +216,9 @@ model = PanelOLS.from_formula(
   <p>Fixed effects control for all time-invariant characteristics of each unit (observed and unobserved).</p>
 
   <!-- Fixed Effects Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The fixed effects estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The fixed effects estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>it</sub></span> =
       β₀ + β₁<span style="color: #2e7d32;">X<sub>it</sub></span> +
       <span style="color: #7b1fa2;">α<sub>i</sub></span> + ε<sub>it</sub>
@@ -266,24 +231,14 @@ model = PanelOLS.from_formula(
   </div>
 
   <!-- Why fixed effects work -->
-  <div class="callout-warning">
-    <strong>🤔 Think about this:</strong> You want to know if minimum wage increases affect employment. But states with high minimum wages might differ from states with low minimum wages in many ways (cost of living, industry mix, politics). How do you separate the effect of minimum wage from these other differences?
+  {% capture callout_content %}<p style="margin-top: 12px;">You want to know if minimum wage increases affect employment. But states with high minimum wages might differ from states with low minimum wages in many ways (cost of living, industry mix, politics). How do you separate the effect of minimum wage from these other differences?</p>
     <details style="margin-top: 12px;">
       <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
       <p style="margin: 8px 0 0;"><strong>State fixed effects!</strong> By including a dummy for each state, you're comparing each state to itself over time. California in 2020 is compared to California in 2015, not to Texas. This "differences out" all the permanent differences between states.</p>
-    </details>
-  </div>
+    </details>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "🤔 Think about this:", content: callout_content %}
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Declare panel structure
+  {% capture sc %}* Declare panel structure
 xtset state year
 
 * Entity fixed effects
@@ -297,8 +252,8 @@ reghdfe income policy, absorb(state)
 reghdfe income policy, absorb(state year)
 
 * With clustered standard errors
-reghdfe income policy, absorb(state year) cluster(state)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+reghdfe income policy, absorb(state year) cluster(state){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # Entity fixed effects
 model <- feols(income ~ policy | state, data = data)
@@ -312,8 +267,8 @@ model <- feols(income ~ policy | state + year,
 
 # View results
 summary(model)
-etable(model)</code></pre>
-    <pre class="code-content python"><code class="language-python">from linearmodels.panel import PanelOLS
+etable(model){% endcapture %}
+  {% capture pc %}from linearmodels.panel import PanelOLS
 import pandas as pd
 
 # Set multi-index for panel data
@@ -337,8 +292,8 @@ model = PanelOLS.from_formula(
     data=data
 ).fit(cov_type='clustered', cluster_entity=True)
 
-print(model.summary)</code></pre>
-  </div>
+print(model.summary){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>What Do Fixed Effects Actually Do?</h3>
 
@@ -368,15 +323,11 @@ print(model.summary)</code></pre>
 
   <p>With both unit and time fixed effects (two-way fixed effects), your estimate of β₁ comes purely from <em>within-unit changes over time</em>, after removing any time trends common to all units. This is the workhorse specification for causal inference with panel data.</p>
 
-  <div class="callout-info">
-    <h4>TWFE Powers DiD and Event Studies</h4>
-    <p><strong>Difference-in-differences</strong> and <strong>event studies</strong>—the most common designs in applied microeconomics—are almost always estimated using two-way fixed effects. The unit fixed effects control for permanent differences between treated and control groups. The time fixed effects control for common shocks that hit everyone. What's left is the treatment effect: how treated units changed <em>relative to</em> control units, <em>relative to</em> the time trend. When you see a DiD or event study paper, you're almost certainly looking at a TWFE regression.</p>
-  </div>
+  {% capture callout_content %}<p><strong>Difference-in-differences</strong> and <strong>event studies</strong>—the most common designs in applied microeconomics—are almost always estimated using two-way fixed effects. The unit fixed effects control for permanent differences between treated and control groups. The time fixed effects control for common shocks that hit everyone. What's left is the treatment effect: how treated units changed <em>relative to</em> control units, <em>relative to</em> the time trend. When you see a DiD or event study paper, you're almost certainly looking at a TWFE regression.</p>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "TWFE Powers DiD and Event Studies", content: callout_content %}
 
-  <div class="callout-warning">
-    <h4>The Limitation</h4>
-    <p>Fixed effects only control for time-<em>invariant</em> confounders. If something changes over time and affects both your treatment and outcome (a time-varying confounder), fixed effects won't help. You'd need to control for it directly or find a different identification strategy.</p>
-  </div>
+  {% capture callout_content %}<p>Fixed effects only control for time-<em>invariant</em> confounders. If something changes over time and affects both your treatment and outcome (a time-varying confounder), fixed effects won't help. You'd need to control for it directly or find a different identification strategy.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "The Limitation", content: callout_content %}
 
 </section>
 
@@ -412,8 +363,8 @@ print(model.summary)</code></pre>
   </ol>
 
   <!-- IV Equations -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The two-stage least squares estimating equations:</div>
+  <div class="equation-box">
+    <div class="equation-label">The two-stage least squares estimating equations:</div>
     <div style="margin-bottom: 16px;">
       <div style="color: #666; font-size: 0.85em; margin-bottom: 4px;">First stage (predict endogenous variable):</div>
       <div style="font-size: 1.1em; text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
@@ -435,16 +386,7 @@ print(model.summary)</code></pre>
     </div>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 2SLS: Y = outcome, X = endogenous, Z = instrument
+  {% capture sc %}* 2SLS: Y = outcome, X = endogenous, Z = instrument
 * Syntax: ivregress 2sls Y controls (X = Z)
 
 ivregress 2sls income age female (education = distance_to_college)
@@ -456,8 +398,8 @@ estat firststage
 ivregress 2sls income age (education = distance), robust
 
 * With fixed effects
-ivreghdfe income age (education = distance), absorb(state) cluster(state)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+ivreghdfe income age (education = distance), absorb(state) cluster(state){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # 2SLS with fixest
 # Syntax: Y ~ controls | FE | endogenous ~ instrument
@@ -470,8 +412,8 @@ fitstat(model, "ivf")
 
 # With fixed effects
 model <- feols(income ~ age | state | education ~ distance,
-               data = data, vcov = ~state)</code></pre>
-    <pre class="code-content python"><code class="language-python">from linearmodels.iv import IV2SLS
+               data = data, vcov = ~state){% endcapture %}
+  {% capture pc %}from linearmodels.iv import IV2SLS
 import pandas as pd
 
 # 2SLS: Y = outcome, X = endogenous, Z = instrument
@@ -488,27 +430,16 @@ print(f"First-stage F: {model.first_stage.diagnostics['f.stat'].stat:.2f}")
 model = IV2SLS.from_formula(
     'income ~ 1 + age + [education ~ distance]',
     data=data
-).fit(cov_type='robust')</code></pre>
-  </div>
+).fit(cov_type='robust'){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>First-Stage F-Statistic</h4>
-    <p>The F-statistic tests instrument relevance. Rule of thumb: F > 10 suggests the instrument is strong enough. Weak instruments (F < 10) lead to biased estimates and unreliable inference.</p>
-  </div>
+  {% capture kp_content %}<p>The F-statistic tests instrument relevance. Rule of thumb: F > 10 suggests the instrument is strong enough. Weak instruments (F < 10) lead to biased estimates and unreliable inference.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "First-Stage F-Statistic", content: kp_content %}
 
   <h3>Complete IV Example: Protest Size and Voting</h3>
   <p>Research question: Does protest size affect voting? Problem: larger protests might occur in places that would vote differently anyway. Solution: use weather (rain) as an instrument—rain reduces protest size but shouldn't directly affect voting.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* First stage: Does rain affect protest size?
+  {% capture sc %}* First stage: Does rain affect protest size?
 reg protest rain, robust
 eststo first_stage
 
@@ -524,8 +455,8 @@ eststo reduced_form
 esttab first_stage iv_model reduced_form ///
     using "iv_results.tex", replace ///
     b(3) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
-    stats(N r2 F, fmt(%9.0fc %9.3f %9.2f))</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, modelsummary)
+    stats(N r2 F, fmt(%9.0fc %9.3f %9.2f)){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, modelsummary)
 
 # First stage: Does rain affect protest size?
 first_stage <- feols(protest ~ rain, data = data, vcov = "hetero")
@@ -543,8 +474,8 @@ modelsummary(
        "Reduced Form" = reduced_form),
   stars = c('*' = 0.10, '**' = 0.05, '***' = 0.01),
   output = "iv_results.tex"
-)</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 from linearmodels.iv import IV2SLS
 from stargazer.stargazer import Stargazer
 
@@ -561,18 +492,16 @@ reduced_form = smf.ols('vote ~ rain', data=data).fit(cov_type='HC1')
 
 # Export results
 stargazer = Stargazer([first_stage, reduced_form])
-stargazer.render_latex()  # or .render_html()</code></pre>
-  </div>
+stargazer.render_latex()  # or .render_html(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Common IV Pitfalls</h3>
-  <div class="common-mistakes">
-    <h4>Watch Out For</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li><strong>Weak instruments:</strong> F < 10 means your IV estimates are badly biased toward OLS</li>
       <li><strong>Invalid exclusion:</strong> If the instrument affects Y directly, your estimate is biased</li>
       <li><strong>LATE vs ATE:</strong> IV estimates effects only for "compliers" - this may not generalize</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
 </section>
 
 <section id="did" class="tutorial-section">
@@ -581,9 +510,9 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   <p>Difference-in-differences compares changes over time between a treated group and a control group. The key assumption is that both groups would have followed <strong>parallel trends</strong> in the absence of treatment.</p>
 
   <!-- DiD/TWFE Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The two-way fixed effects (TWFE) estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The two-way fixed effects (TWFE) estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>it</sub></span> =
       β₀ + <span style="color: #c62828;">β₁</span>(<span style="color: #2e7d32;">Treat<sub>i</sub></span> × <span style="color: #2e7d32;">Post<sub>t</sub></span>) +
       <span style="color: #7b1fa2;">α<sub>i</sub></span> + <span style="color: #00695c;">γ<sub>t</sub></span> + ε<sub>it</sub>
@@ -632,10 +561,8 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   </div>
 
   <h3>Real-World Example: No-Fault Divorce and Female Suicide</h3>
-  <div class="key-principle">
-    <h4>Research Question</h4>
-    <p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>
-  </div>
+  {% capture kp_content %}<p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
 
   <p>The analysis requires setting up several key variables:</p>
   <ul>
@@ -645,16 +572,7 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   </ul>
 
   <h3>Basic 2x2 DiD</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Generate treatment indicator
+  {% capture sc %}* Generate treatment indicator
 gen treated = (state == "CA")
 gen post = (year >= 2015)
 gen treat_post = treated * post
@@ -668,8 +586,8 @@ reg outcome treated post treat_post, cluster(state)
 reghdfe outcome treat_post, absorb(state year) cluster(state)
 
 * With controls (like the divorce study)
-reghdfe asmrs treat_post pcinc asmrh cases, absorb(stfips year) cluster(stfips)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+reghdfe asmrs treat_post pcinc asmrh cases, absorb(stfips year) cluster(stfips){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # Generate treatment indicator
 data <- data %>%
@@ -688,8 +606,8 @@ model <- feols(outcome ~ treat_post | state + year,
                data = data, vcov = ~state)
 
 # The treat_post coefficient is the DiD estimate
-summary(model)</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+summary(model){% endcapture %}
+  {% capture pc %}import pandas as pd
 from linearmodels.panel import PanelOLS
 
 # Generate treatment indicator
@@ -709,21 +627,13 @@ model = PanelOLS.from_formula(
     data=data_panel
 ).fit(cov_type='clustered', cluster_entity=True)
 
-print(model.summary)</code></pre>
-  </div>
+print(model.summary){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Testing Parallel Trends</h3>
   <p>The key assumption is that treated and control groups would have followed parallel trends absent treatment. Check pre-treatment trends:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create year dummies interacted with treatment
+  {% capture sc %}* Create year dummies interacted with treatment
 * (Omit the year before treatment as reference)
 reghdfe outcome ib2014.year#treated, ///
     absorb(state year) cluster(state)
@@ -731,8 +641,8 @@ reghdfe outcome ib2014.year#treated, ///
 * Plot coefficients
 coefplot, keep(*#*) vertical ///
     yline(0) xline(4.5, lpattern(dash)) ///
-    title("Event Study: Pre-trends Check")</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggfixest, dplyr)
+    title("Event Study: Pre-trends Check"){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, ggfixest, dplyr)
 
 # Create relative time variable
 # Set never-treated units to -1000 (outside data range)
@@ -756,8 +666,8 @@ p <- ggiplot(model) +
        x = "Years Relative to Treatment",
        y = "Coefficient Estimate") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_minimal()</code></pre>
-  </div>
+  theme_minimal(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc %}
 </section>
 
 <section id="event-studies" class="tutorial-section">
@@ -1005,21 +915,19 @@ p <- ggiplot(model) +
         </div>
       </div>
 
-      <div class="common-mistakes" style="margin-top: 20px;">
-        <h4>What to Do About Anticipation</h4>
-        <ul style="margin-bottom: 0;">
+      {% capture cm_content %}<ul style="margin-bottom: 0;">
           <li><strong>Redefine treatment timing:</strong> If a law was announced 6 months before implementation, use the announcement date as t=0</li>
           <li><strong>Report honestly:</strong> Acknowledging anticipation is better than hiding it—it may be substantively interesting</li>
           <li><strong>Check the mechanism:</strong> Anticipation can help you understand <em>how</em> the policy works (e.g., through expectations vs. direct effects)</li>
-        </ul>
-      </div>
+        </ul>{% endcapture %}
+      {% include "common-mistake.liquid", title: "What to Do About Anticipation", content: cm_content %}
     </div>
   </div>
 
   <!-- Event Study Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The event study estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The event study estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>it</sub></span> =
       <span style="color: #c62828;">Σ<sub>k≠-1</sub> β<sub>k</sub></span> · 𝟙[k = t - E<sub>i</sub>] +
       <span style="color: #7b1fa2;">α<sub>i</sub></span> + <span style="color: #00695c;">γ<sub>t</sub></span> + ε<sub>it</sub>
@@ -1037,15 +945,7 @@ p <- ggiplot(model) +
   <h3>Setting Up the Variables</h3>
   <p>With staggered treatment (different units treated at different times), you need to create a "time to treatment" variable:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create treatment year variable (example: no-fault divorce)
+  {% capture sc %}* Create treatment year variable (example: no-fault divorce)
 gen treatment_year = .
 replace treatment_year = 1970 if state == "CA"
 replace treatment_year = 1971 if state == "FL"
@@ -1061,8 +961,8 @@ replace time_to_treat = 0 if missing(treatment_year)  // Never-treated = 0
 
 * Stata can't handle negative factor values, so shift
 summ time_to_treat
-gen shifted_ttt = time_to_treat - r(min)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create treatment year variable
+gen shifted_ttt = time_to_treat - r(min){% endcapture %}
+  {% capture rc %}# Create treatment year variable
 # Never-treated states have NA for treatment_year
 data <- data %>%
   mutate(
@@ -1080,19 +980,11 @@ data <- data %>%
     # IMPORTANT: Set never-treated to -1000 (outside data range)
     # Then exclude with ref = c(-1, -1000) in fixest
     time_to_treat = if_else(is.na(treatment_year), -1000, year - treatment_year)
-  )</code></pre>
-  </div>
+  ){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc %}
 
   <h3>Basic Event Study</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create relative time to treatment
+  {% capture sc %}* Create relative time to treatment
 gen rel_time = year - treatment_year
 
 * Create dummies for each relative time period
@@ -1110,8 +1002,8 @@ reghdfe outcome rel_m5-rel_m2 rel_0-rel_5, ///
 * Plot
 coefplot, keep(rel_*) vertical yline(0) ///
     xline(3.5, lpattern(dash)) ///
-    title("Event Study")</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggfixest, ggplot2, dplyr)
+    title("Event Study"){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, ggfixest, ggplot2, dplyr)
 
 # Create relative time variable
 # IMPORTANT: Never-treated units don't have a meaningful "time to treatment"
@@ -1148,13 +1040,11 @@ p <- ggiplot(model) +
        y = "Effect on Outcome") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_vline(xintercept = -0.5, linetype = "dashed", color = "red") +
-  theme_minimal()</code></pre>
-  </div>
+  theme_minimal(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc %}
 
-  <div class="callout-info">
-    <h4>A Note on Staggered Timing</h4>
-    <p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
-  </div>
+  {% capture callout_content %}<p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <section id="tables" class="tutorial-section">
@@ -1162,24 +1052,13 @@ p <- ggiplot(model) +
 
   <p>Regression tables present your main results. The standard format in economics shows multiple specifications (columns) with the same outcome variable, progressively adding controls or changing samples. This shows readers how your results change as you adjust the model—stable coefficients across specifications build confidence in your findings.</p>
 
-  <div class="key-principle">
-    <h4>Never Copy Numbers by Hand</h4>
-    <p>Export tables directly from your code to LaTeX or Word. Manual copying introduces errors and makes your work non-reproducible. Use <code>estout</code>/<code>esttab</code> in Stata, <code>etable</code>/<code>modelsummary</code> in R, or <code>stargazer</code> in Python.</p>
-  </div>
+  {% capture kp_content %}<p>Export tables directly from your code to LaTeX or Word. Manual copying introduces errors and makes your work non-reproducible. Use <code>estout</code>/<code>esttab</code> in Stata, <code>etable</code>/<code>modelsummary</code> in R, or <code>stargazer</code> in Python.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Never Copy Numbers by Hand", content: kp_content %}
 
   <h3>Basic Regression Tables</h3>
   <p>Standard elements include: coefficient estimates, standard errors (in parentheses below the coefficient), significance stars, the number of observations, R-squared or other fit statistics, and notes explaining what controls are included.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Run regressions and store results
+  {% capture sc %}* Run regressions and store results
 eststo clear
 eststo: reg income treatment
 eststo: reg income treatment age female
@@ -1200,8 +1079,8 @@ esttab using "regression_table.tex", ///
 *   label        - use variable labels
 *   r2           - show R-squared
 *   b(3) se(3)   - 3 decimal places
-*   drop(...)    - hide certain coefficients</code></pre>
-    <pre class="code-content r"><code class="language-r"># ============================================
+*   drop(...)    - hide certain coefficients{% endcapture %}
+  {% capture rc %}# ============================================
 # Option 1: etable (from fixest) - simplest
 # ============================================
 pacman::p_load(fixest)
@@ -1238,8 +1117,8 @@ modelsummary(
 # Export to LaTeX, Word, or HTML
 modelsummary(list(m1, m2, m3), output = "table.tex")
 modelsummary(list(m1, m2, m3), output = "table.docx")
-modelsummary(list(m1, m2, m3), output = "table.html")</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+modelsummary(list(m1, m2, m3), output = "table.html"){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 from stargazer.stargazer import Stargazer
 
 # Run regressions
@@ -1254,30 +1133,19 @@ print(stargazer.render_latex())
 
 # Or manual approach
 from statsmodels.iolib.summary2 import summary_col
-print(summary_col([m1, m2, m3], stars=True).as_latex())</code></pre>
-  </div>
+print(summary_col([m1, m2, m3], stars=True).as_latex()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>R Table Packages: Which to Use?</h4>
-    <ul style="margin: 8px 0 0;">
+  {% capture kp_content %}<ul style="margin: 8px 0 0;">
       <li><strong>etable</strong> (fixest): Best for quick tables with <code>feols()</code> models. Built into fixest, so no extra dependencies. Great for console output and fast LaTeX export.</li>
       <li><strong>modelsummary</strong>: Most flexible and modern. Works with any model type, exports to LaTeX/Word/HTML/PNG, and has excellent customization. <em>Recommended for publication tables.</em></li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "R Table Packages: Which to Use?", content: kp_content %}
 
   <h3>Customizing Tables</h3>
   <p>Default table output rarely matches what you need for publication. You'll want to: rename variables, add rows showing which controls or fixed effects are included, report the mean of the dependent variable, and drop unimportant coefficients.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Add mean of dependent variable
+  {% capture sc %}* Add mean of dependent variable
 eststo clear
 eststo: reg income treatment age female
     estadd local controls "Yes"
@@ -1291,8 +1159,8 @@ esttab using "table.tex", ///
     label replace
 
 * Rename coefficients in output
-esttab, rename(treatment "Treatment Effect")</code></pre>
-    <pre class="code-content r"><code class="language-r"># ----- etable (fixest) customization -----
+esttab, rename(treatment "Treatment Effect"){% endcapture %}
+  {% capture rc %}# ----- etable (fixest) customization -----
 etable(m1, m2, m3,
   drop = "Constant",           # Hide intercept
   dict = c(treatment = "Treatment Effect"),  # Rename
@@ -1316,24 +1184,22 @@ modelsummary(list(m1, m2, m3),
   add_rows = rows,
   coef_rename = c("treatment" = "Treatment Effect"),
   coef_omit = "Intercept"
-)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Add custom rows with stargazer
+){% endcapture %}
+  {% capture pc %}# Add custom rows with stargazer
 stargazer = Stargazer([m1, m2])
 stargazer.add_line("Controls", ["No", "Yes"])
 stargazer.add_line("Mean of DV", [f"{data['income'].mean():.2f}"] * 2)
 stargazer.rename_covariates({"treatment": "Treatment Effect"})
-print(stargazer.render_latex())</code></pre>
-  </div>
+print(stargazer.render_latex()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>Table Checklist</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li>Do all columns have clear headers?</li>
       <li>Are standard errors in parentheses (not t-stats)?</li>
       <li>Is the dependent variable clearly labeled?</li>
       <li>Are significance levels defined in a note?</li>
       <li>Is sample size reported for each column?</li>
       <li>Are controls indicated (even if not shown)?</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Table Checklist", content: cm_content %}
 </section>

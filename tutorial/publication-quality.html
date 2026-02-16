@@ -1,0 +1,49 @@
+---
+layout: layouts/tutorial.html
+title: Publication-Quality Output | 14.33 Auxiliary Modules
+current_page: publication-quality
+---
+<h1>Publication-Quality Tables and Figures</h1>
+<p class="subtitle">This content has been merged into the Complete Project Walkthrough</p>
+
+{% capture callout_content %}
+  <p>The publication-quality output content has been integrated into the <strong>Complete Project Walkthrough</strong> as Part I. This provides a more comprehensive view of the full research workflow, from data processing through publication-ready output.</p>
+
+  <p style="margin-top: 20px;"><strong>You can find this content at:</strong></p>
+  <ul>
+    <li><a href="project-walkthrough.html#pub-quality-tables"><strong>Part I.A: Publication-Quality Tables</strong></a> — Exporting regression results to LaTeX with esttab, etable, and pyfixest</li>
+    <li><a href="project-walkthrough.html#pub-quality-figures"><strong>Part I.B: Publication-Quality Figures</strong></a> — Step-by-step guide to improving plots from default to publication-ready</li>
+    <li><a href="project-walkthrough.html#formatting-checklists"><strong>Part I.C: Formatting Checklists</strong></a> — Pre-submission checklists for figures and tables</li>
+  </ul>
+{% endcapture %}
+{% include "callout.liquid", type: "info", title: "Content Moved", content: callout_content %}
+
+<div style="text-align: center; margin: 40px 0;">
+  <a href="project-walkthrough.html#pub-quality-output" style="display: inline-block; background: #1976d2; color: white; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1em;">Go to Complete Project Walkthrough →</a>
+</div>
+
+<section class="tutorial-section">
+  <h2>Quick Reference: What's Included</h2>
+
+  <h3>Tables</h3>
+  <ul>
+    <li>Exporting regression results to LaTeX (Stata's <code>esttab</code>, R's <code>fixest::etable()</code>, Python's <code>pyfixest.etable()</code>)</li>
+    <li>Compiling LaTeX tables to PDF using the standalone package</li>
+    <li>Exporting summary statistics tables</li>
+    <li>Standard formatting for economics journals (booktabs, significance stars, fixed effects indicators)</li>
+  </ul>
+
+  <h3>Figures</h3>
+  <ul>
+    <li>Four-step progression from default plot to publication-quality figure</li>
+    <li>Adding confidence intervals and shaded bands</li>
+    <li>Improving styling: colors, fonts, axis labels, removing chart junk</li>
+    <li>Code examples in Stata, R, and Python for each step</li>
+  </ul>
+
+  <h3>Recommended Reading</h3>
+  <ul>
+    <li><strong>Schwabish (2014)</strong>, <a href="https://pubs.aeaweb.org/doi/pdfplus/10.1257/jep.28.1.209" target="_blank">"An Economist's Guide to Visualizing Data"</a> (JEP)</li>
+    <li><strong>Tal Gross's <a href="https://x.com/talgross/status/1128698173399207943" target="_blank">Twitter thread</a></strong> on making Stata figures professional</li>
+  </ul>
+</section>

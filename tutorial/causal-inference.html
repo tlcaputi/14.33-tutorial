@@ -13,10 +13,10 @@ current_page: causal-inference
 
   <p>This seems straightforward. Just compare people who went to MIT to people who didn't, right? Unfortunately, it's much harder than it sounds. Let's work through why.</p>
 
-  <div class="key-principle">
-    <h4>The Goal of Causal Inference</h4>
+  {% capture kp_content %}
     <p>We want to know: if we took a specific person and randomly chose whether they attend MIT or not, how would their wages differ? This is fundamentally different from asking how MIT graduates compare to non-MIT graduates.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Goal of Causal Inference", content: kp_content %}
 </section>
 
 <section id="potential-outcomes" class="tutorial-section">
@@ -41,10 +41,10 @@ current_page: causal-inference
 
   <p>The <strong>causal effect</strong> for Sarah is: Y(1) - Y(0)</p>
 
-  <div class="key-principle">
-    <h4>The Fundamental Problem</h4>
+  {% capture kp_content %}
     <p>We can never observe both Y(1) and Y(0) for the same person. Sarah either goes to MIT or she doesn't. We observe one reality, not both. The unobserved outcome is called the <strong>counterfactual</strong>.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Fundamental Problem", content: kp_content %}
 
   <h3>Example: Sarah's Potential Outcomes</h3>
 
@@ -94,10 +94,10 @@ current_page: causal-inference
     <p style="margin: 0; color: var(--primary);"><strong>"Effect" of MIT:</strong> +$85,000!</p>
   </div>
 
-  <div class="common-mistakes">
-    <h4>Why This Fails</h4>
+  {% capture cm_content %}
     <p>This comparison conflates the effect of MIT with the effect of <em>time</em> (aging, gaining experience, entering the labor market). Anyone's wages would increase from college to post-graduation, regardless of where they went to school.</p>
-  </div>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Why This Fails", content: cm_content %}
 
   <h3>Approach 2: MIT Grads vs. Non-MIT Grads</h3>
 
@@ -109,10 +109,10 @@ current_page: causal-inference
     <p style="margin: 0; color: var(--primary);"><strong>"Effect" of MIT:</strong> +$60,000!</p>
   </div>
 
-  <div class="common-mistakes">
-    <h4>Why This Fails: Selection Bias</h4>
+  {% capture cm_content %}
     <p>MIT students aren't a random sample. They're selected based on high test scores, strong work ethic, ambitious personalities, wealthy family backgrounds, etc. These same traits would lead to higher wages <em>even without MIT</em>. We can't tell how much of the $60,000 gap is MIT vs. pre-existing differences.</p>
-  </div>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Why This Fails: Selection Bias", content: cm_content %}
 
   <!-- Visual: Selection Bias Diagram -->
   <div style="margin: 30px 0; text-align: center;">
@@ -161,33 +161,24 @@ current_page: causal-inference
 
   <p>A natural response: "What if we compare people with the <em>same</em> SAT scores? Then we're holding ability constant."</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* "Controlling for" SAT score
-reg wages attended_mit sat_score</code></pre>
-    <pre class="code-content r"><code class="language-r"># "Controlling for" SAT score
-lm(wages ~ attended_mit + sat_score, data = df)</code></pre>
-    <pre class="code-content python"><code class="language-python"># "Controlling for" SAT score
+  {% capture sc %}* "Controlling for" SAT score
+reg wages attended_mit sat_score{% endcapture %}
+  {% capture rc %}# "Controlling for" SAT score
+lm(wages ~ attended_mit + sat_score, data = df){% endcapture %}
+  {% capture pc %}# "Controlling for" SAT score
 import statsmodels.formula.api as smf
-model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
-  </div>
+model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>Why This Still Fails</h4>
+  {% capture cm_content %}
     <p>Even among people with identical SAT scores, MIT students are <em>systematically different</em> from non-MIT students:</p>
     <ul>
       <li><strong>Who applies:</strong> A student with a 1550 SAT who applies to MIT has different ambitions than someone with a 1550 who doesn't apply</li>
       <li><strong>Who gets in:</strong> MIT admits students based on essays, recommendations, extracurriculars—all things correlated with future success</li>
       <li><strong>Who attends:</strong> Among admits, those who choose MIT over Harvard or Stanford may be different in unobservable ways</li>
     </ul>
-  </div>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Why This Still Fails", content: cm_content %}
 
   <p>Consider two students who both scored 1520 on the SAT:</p>
 
@@ -214,10 +205,10 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <p>Same SAT score, but Alice would likely earn more than Bob <em>regardless of where they went to college</em>. The things that made Alice apply to and attend MIT are the same things that will make her successful in her career.</p>
 
-  <div class="key-principle">
-    <h4>Selection on Unobservables</h4>
+  {% capture kp_content %}
     <p>You can only control for things you can measure. But the decision to attend MIT is driven by motivation, ambition, family expectations, risk tolerance, career goals—most of which we can't observe. Adding more controls helps, but can never fully solve the problem.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Selection on Unobservables", content: kp_content %}
 </section>
 
 <section id="random-assignment" class="tutorial-section">
@@ -225,9 +216,10 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <p>What if we could randomly assign students to MIT vs. other schools?</p>
 
-  <div class="callout-success">
+  {% capture callout_content %}
     <strong>Why randomization works:</strong> If treatment is randomly assigned, then on average, the treated and control groups are identical in all characteristics (observed and unobserved). Any difference in outcomes must be due to treatment.
-  </div>
+  {% endcapture %}
+  {% include "callout.liquid", type: "success", content: callout_content %}
 
   <h3>Why We Can't Randomize MIT Attendance</h3>
 
@@ -239,7 +231,7 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <p>DiD is the workhorse of applied microeconomics. The idea: compare <em>changes over time</em> between treated and control groups.</p>
 
-  <div class="callout-success">
+  {% capture callout_content %}
     <h4 style="margin-top: 0; color: #27ae60;">Recommendation for 14.33</h4>
     <p style="margin-bottom: 0;"><strong>For your research project, I recommend a difference-in-differences approach.</strong> Here's why:</p>
     <ul style="margin-bottom: 0;">
@@ -248,7 +240,8 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
       <li><strong>Flexible data requirements:</strong> Many different kinds of panel data can support a DiD design</li>
       <li><strong>This is real economics:</strong> DiD is the bread and butter of applied micro—professors at top schools publish DiD papers in top journals all the time</li>
     </ul>
-  </div>
+  {% endcapture %}
+  {% include "callout.liquid", type: "success", content: callout_content %}
 
   <h3>The Setup</h3>
 
@@ -263,7 +256,7 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <h3>The DiD Estimator</h3>
 
-  <div style="background: var(--bg-subtle); padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'Latin Modern Roman', serif;">
+  <div class="equation-box">
     <p style="margin: 0; font-size: 1.1em;">
       DiD = [Y<sub>treatment,after</sub> - Y<sub>treatment,before</sub>] - [Y<sub>control,after</sub> - Y<sub>control,before</sub>]
     </p>
@@ -330,10 +323,10 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <h3>The Parallel Trends Assumption</h3>
 
-  <div class="key-principle">
-    <h4>Critical Assumption</h4>
+  {% capture kp_content %}
     <p>DiD requires that absent treatment, the treatment group would have followed the same trend as the control group. This is <strong>untestable</strong> because we can't observe the counterfactual.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Critical Assumption", content: kp_content %}
 
   <p>In the minimum wage example, we're assuming that if treated states had <em>not</em> raised their minimum wage, their employment would have evolved the same way as the control states' employment.</p>
 
@@ -343,24 +336,16 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit()</code></pre>
 
   <p><strong>Balance on observables:</strong> It can also be useful to check whether the treatment and control groups are similar on observable characteristics before treatment. If they look similar on things we can measure (demographics, industry mix, prior employment trends), it's more plausible they'd follow similar trajectories.</p>
 
-  <div class="callout-info">
+  {% capture callout_content %}
     <strong>The fundamental limitation:</strong> We can never <em>prove</em> that the groups would not have diverged absent the treatment. But if they had been following parallel trajectories for many time periods before treatment, a reasonable person could assume they would have continued on parallel trajectories afterward.
-  </div>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_content %}
 
   <h4>What We Can Check</h4>
 
   <p>While we can't prove parallel trends, we can check if trends were parallel <em>before</em> treatment:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Check pre-trends with an event study
+  {% capture sc %}* Check pre-trends with an event study
 gen time_to_treat = year - treatment_year
 forvalues k = -5/-1 {
     gen pre`=abs(`k')' = (time_to_treat == `k') * treated_group
@@ -371,8 +356,8 @@ forvalues k = 0/5 {
 
 reghdfe wages pre5-pre2 post0-post5, absorb(school year) cluster(school)
 
-* If pre-period coefficients are near zero, parallel trends is plausible</code></pre>
-    <pre class="code-content r"><code class="language-r"># Check pre-trends with an event study
+* If pre-period coefficients are near zero, parallel trends is plausible{% endcapture %}
+  {% capture rc %}# Check pre-trends with an event study
 pacman::p_load(fixest, ggfixest)
 
 # IMPORTANT: Never-treated units don't have a "time to treatment"
@@ -391,8 +376,8 @@ es <- feols(wages ~ i(time_to_treat, ever_treated, ref = c(-1, -1000)) |
 # Plot coefficients
 p <- ggiplot(es)
 
-# If pre-period coefficients are near zero, parallel trends is plausible</code></pre>
-    <pre class="code-content python"><code class="language-python"># Check pre-trends with an event study
+# If pre-period coefficients are near zero, parallel trends is plausible{% endcapture %}
+  {% capture pc %}# Check pre-trends with an event study
 import pandas as pd
 import linearmodels as lm
 
@@ -411,8 +396,8 @@ model = lm.PanelOLS.from_formula(
     data=df.set_index(['school', 'year'])
 ).fit(cov_type='clustered', cluster_entity=True)
 
-# If pre-period coefficients are near zero, parallel trends is plausible</code></pre>
-  </div>
+# If pre-period coefficients are near zero, parallel trends is plausible{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Other Key Assumptions</h3>
 
@@ -508,16 +493,7 @@ model = lm.PanelOLS.from_formula(
 
   <h3>Testing the Assumptions</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Check for manipulation: McCrary density test
+  {% capture sc %}* Check for manipulation: McCrary density test
 rddensity sat_score, c(1500) plot
 
 * Check for jumps in covariates (should be smooth)
@@ -525,8 +501,8 @@ rdrobust family_income sat_score, c(1500)
 rdrobust parental_education sat_score, c(1500)
 
 * Main RD estimate
-rdrobust wages sat_score, c(1500)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Check for manipulation: density test
+rdrobust wages sat_score, c(1500){% endcapture %}
+  {% capture rc %}# Check for manipulation: density test
 pacman::p_load(rddensity)
 density_test <- rddensity(X = df$sat_score, c = 1500)
 summary(density_test)
@@ -537,8 +513,8 @@ pacman::p_load(rdrobust)
 rdrobust(y = df$family_income, x = df$sat_score, c = 1500)
 
 # Main RD estimate
-rdrobust(y = df$wages, x = df$sat_score, c = 1500)</code></pre>
-    <pre class="code-content python"><code class="language-python"># RD analysis in Python
+rdrobust(y = df$wages, x = df$sat_score, c = 1500){% endcapture %}
+  {% capture pc %}# RD analysis in Python
 from rdrobust import rdrobust, rdbwselect
 from rddensity import rddensity
 
@@ -552,12 +528,13 @@ print(rd_covariate)
 
 # Main RD estimate
 rd_result = rdrobust(y=df['wages'], x=df['sat_score'], c=1500)
-print(rd_result)</code></pre>
-  </div>
+print(rd_result){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-warning">
+  {% capture callout_content %}
     <strong>Limitation:</strong> RD estimates a <em>local</em> effect—the effect for students right at the cutoff. This might not generalize to students with much higher or lower scores.
-  </div>
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 </section>
 
 <section id="iv" class="tutorial-section">
@@ -569,48 +546,38 @@ print(rd_result)</code></pre>
 
   <p>Consider using "having a parent who went to MIT" as an instrument for attending MIT yourself.</p>
 
-  <div class="key-principle">
-    <h4>Requirements for a Valid Instrument</h4>
+  {% capture kp_content %}
     <ol style="margin-bottom: 0;">
       <li><strong>Relevance:</strong> The instrument must affect treatment (testable)</li>
       <li><strong>Exclusion:</strong> The instrument must only affect the outcome <em>through</em> treatment (not testable)</li>
       <li><strong>Independence:</strong> The instrument must be as-if randomly assigned</li>
     </ol>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Requirements for a Valid Instrument", content: kp_content %}
 
   <h3>Checking Relevance (First Stage)</h3>
 
   <p>Does having an MIT parent increase the probability of attending MIT? Almost certainly yes:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* First stage: parent_mit → attended_mit
+  {% capture sc %}* First stage: parent_mit → attended_mit
 reg attended_mit parent_mit controls
-* Look for F-statistic > 10 (rule of thumb)</code></pre>
-    <pre class="code-content r"><code class="language-r"># First stage: parent_mit → attended_mit
+* Look for F-statistic > 10 (rule of thumb){% endcapture %}
+  {% capture rc %}# First stage: parent_mit → attended_mit
 first_stage <- lm(attended_mit ~ parent_mit + controls, data = df)
 summary(first_stage)
-# Look for F-statistic > 10 (rule of thumb)</code></pre>
-    <pre class="code-content python"><code class="language-python"># First stage: parent_mit → attended_mit
+# Look for F-statistic > 10 (rule of thumb){% endcapture %}
+  {% capture pc %}# First stage: parent_mit → attended_mit
 import statsmodels.formula.api as smf
 first_stage = smf.ols('attended_mit ~ parent_mit + controls', data=df).fit()
 print(first_stage.summary())
-# Look for F-statistic > 10 (rule of thumb)</code></pre>
-  </div>
+# Look for F-statistic > 10 (rule of thumb){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <p>Legacy admissions are common at elite schools, so this first stage would likely be strong.</p>
 
   <h3>The Exclusion Restriction Problem</h3>
 
-  <div class="common-mistakes">
-    <h4>Why This Instrument FAILS</h4>
+  {% capture cm_content %}
     <p>Having an MIT parent affects your wages through many channels besides your own MIT attendance:</p>
     <ul>
       <li><strong>Genetics:</strong> MIT parents may pass on high-ability genes</li>
@@ -619,7 +586,8 @@ print(first_stage.summary())
       <li><strong>Wealth:</strong> MIT parents tend to be wealthy, providing financial advantages</li>
     </ul>
     <p>The instrument affects wages <em>directly</em>, not just through MIT attendance. The exclusion restriction is violated.</p>
-  </div>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Why This Instrument FAILS", content: cm_content %}
 
   <!-- IV Diagram -->
   <div style="margin: 30px 0; text-align: center;">
@@ -679,9 +647,10 @@ print(first_stage.summary())
 
   <p style="font-size: 0.9em; color: var(--muted);"><strong>Caveat:</strong> Good instruments are hard to find. Most proposed instruments have plausible exclusion restriction violations. This is why IV is less common in student projects than DiD.</p>
 
-  <div class="callout-success">
+  {% capture callout_content %}
     <strong>Key insight:</strong> A good instrument is rare because you need something that affects college choice but has no other connection to labor market success. Most things that affect whether you go to MIT also affect your wages directly.
-  </div>
+  {% endcapture %}
+  {% include "callout.liquid", type: "success", content: callout_content %}
 </section>
 
 <section id="summary" class="tutorial-section">
@@ -726,8 +695,8 @@ print(first_stage.summary())
     </table>
   </div>
 
-  <div class="key-principle">
-    <h4>The Bottom Line</h4>
+  {% capture kp_content %}
     <p>There is no perfect method. Every causal inference strategy requires assumptions that cannot be fully tested. The goal is to find <strong>plausible</strong> sources of variation and be transparent about what could go wrong. The best research combines multiple approaches and tests robustness.</p>
-  </div>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Bottom Line", content: kp_content %}
 </section>

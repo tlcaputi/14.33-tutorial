@@ -1,0 +1,1758 @@
+---
+layout: layouts/session.html
+title: Introduction to Stata | 14.33
+current_page: intro-stata
+---
+<h1>Introduction to Stata</h1>
+<p class="subtitle">From setup to regression — a comprehensive introduction</p>
+
+<div class="learning-objectives">
+  <h4>What You'll Learn</h4>
+  <ul>
+    <li>How to set up a research project with proper folder structure</li>
+    <li>How to explore a dataset you've never seen before</li>
+    <li>How to select the observations and variables you need</li>
+    <li>How to create new variables from existing ones</li>
+    <li>How to import data from CSV files</li>
+    <li>How to reshape data between "wide" and "long" formats</li>
+    <li>How to merge multiple datasets together</li>
+    <li>Using loops to avoid repetitive code</li>
+    <li>Working with locals and temporary files</li>
+    <li>Running OLS, fixed effects, and IV regressions</li>
+  </ul>
+</div>
+
+<div style="background: #f8f9fa; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+  <h4 style="margin: 0 0 12px; font-size: 0.95rem;">Download Complete Scripts</h4>
+  <p style="margin: 0 0 12px; font-size: 0.9rem; color: #666;">Run the full session code in your preferred language:</p>
+
+  <p style="margin: 0 0 8px; font-size: 0.85rem; font-weight: 600;">Part 1: Setup, Exploration, Data Import</p>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+    <a href="../scripts/session1/session1.do" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #1a5f8a; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Stata</span> <span style="opacity: 0.7;">.do</span>
+    </a>
+    <a href="../scripts/session1/session1.R" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #276dc3; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>R</span> <span style="opacity: 0.7;">.R</span>
+    </a>
+    <a href="../scripts/session1/session1.py" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3776ab; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Python</span> <span style="opacity: 0.7;">.py</span>
+    </a>
+  </div>
+
+  <p style="margin: 0 0 8px; font-size: 0.85rem; font-weight: 600;">Part 2: Reshaping, Merging, Loops, Regression</p>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <a href="../scripts/session2/session2.do" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #1a5f8a; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Stata</span> <span style="opacity: 0.7;">.do</span>
+    </a>
+    <a href="../scripts/session2/session2.R" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #276dc3; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>R</span> <span style="opacity: 0.7;">.R</span>
+    </a>
+    <a href="../scripts/session2/session2.py" download style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3776ab; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+      <span>Python</span> <span style="opacity: 0.7;">.py</span>
+    </a>
+  </div>
+</div>
+
+{% capture callout_1 %}
+<strong>A note before we start:</strong> Learning to code is like learning a new language—it takes practice, and everyone makes mistakes. If something doesn't work, that's normal! Read error messages carefully, check for typos, and remember that debugging is a core skill, not a sign you're doing something wrong.
+{% endcapture %}
+{% include "callout.liquid", type: "success", content: callout_1 %}
+
+<!-- ============================================================== -->
+<section id="module1" class="tutorial-section">
+  <h2>Module 1: Introduction to Stata</h2>
+
+  <p>Imagine you just got a new dataset. Before doing any analysis, you need to <strong>understand what you have</strong>. How many observations? What variables? What do they look like? This module teaches you how to answer these questions.</p>
+
+  <h3 id="setup">Step 1: Setting Up Your Script</h3>
+
+  <p>Every Stata do-file should start the same way. Think of this as "clearing the stage" before your performance:</p>
+
+  {% capture callout_2 %}
+<strong>Before running this code, predict:</strong> What does <code>clear all</code> do? Why might we want to close any open log file before starting?
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_2 %}
+
+  {% capture sc %}* ========================================
+* SETUP - Run this at the start of every script
+* ========================================
+
+* Step 1: Clear everything from memory
+* (This ensures you're starting fresh, not using old data)
+clear all
+
+* Step 2: Close any open log file
+* (capture means "try this, but don't error if it fails")
+capture log close
+
+* Step 3: Don't pause after each screenful of output
+set more off
+
+* Step 4: Set your working directory
+* IMPORTANT: Change this path to YOUR project folder!
+* To find your path: On Mac, right-click your project folder in Finder
+* → 'Get Info' → copy the path next to 'Where'.
+* On Windows, open the folder in Explorer → click the address bar → copy.
+* Use forward slashes (/) in Stata even on Windows.
+cd "/Users/yourname/Dropbox/my_project"
+
+* Step 5: Start a log file (records everything you do)
+* "replace" overwrites the old log if it exists
+log using my_analysis.log, replace{% endcapture %}
+  {% capture rc %}# ========================================
+# SETUP - Run this at the start of every script
+# ========================================
+
+# Step 1: Clear environment (remove all objects)
+rm(list = ls())
+
+# Step 2: Set working directory
+# IMPORTANT: Change this path to YOUR project folder!
+setwd("/Users/yourname/Dropbox/my_project")
+
+# Step 3: Load required packages
+pacman::p_load(tidyverse, haven){% endcapture %}
+  {% capture pc %}# ========================================
+# SETUP - Run this at the start of every script
+# ========================================
+
+# Step 1: Import required packages
+import pandas as pd
+import numpy as np
+import os
+
+# Step 2: Set working directory
+# IMPORTANT: Change this path to YOUR project folder!
+os.chdir("/Users/yourname/Dropbox/my_project"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture kp_1 %}
+<p>Starting fresh (<code>clear all</code>) prevents a common bug: accidentally using variables from a previous session. The log file creates a record of everything you did—invaluable when you need to remember your steps months later or when something goes wrong.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Why This Matters", content: kp_1 %}
+
+  <h3 id="browsing">Step 2: First Look at Your Data</h3>
+
+  <p>You've downloaded a dataset. Now what? Let's say it's Census data with information about people. Before diving into analysis, answer these questions:</p>
+
+  <ul>
+    <li><strong>How many observations?</strong> (Are there 100 people? 1 million?)</li>
+    <li><strong>What variables exist?</strong> (Income? Age? Education?)</li>
+    <li><strong>What do the values look like?</strong> (Is age in years? Months? Categories?)</li>
+  </ul>
+
+  {% capture callout_3 %}
+<strong>Predict:</strong> If you have a variable called <code>sex</code> with values 1 and 2, what might those numbers mean? How would you find out?
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_3 %}
+
+  {% capture sc %}* Load the data
+use mydata.dta, clear
+
+* ----- EXPLORATION COMMANDS -----
+
+* browse: Opens a spreadsheet view
+* USE THIS FIRST to see what your data looks like
+browse
+
+* describe: Shows variable names, types, and labels
+* This tells you WHAT variables you have
+describe
+
+* summarize: Shows mean, sd, min, max for numeric variables
+* This tells you the RANGE of your data
+summarize
+
+* summarize specific variables
+summarize age income
+
+* summarize with detail: adds percentiles
+* Useful for seeing the full distribution
+summarize income, detail
+
+* tabulate: Counts observations by category
+* ESSENTIAL for categorical variables
+tabulate sex
+
+* See the numeric codes behind the labels
+tabulate sex, nolabel{% endcapture %}
+  {% capture rc %}# Load the data
+df <- read_dta("mydata.dta")
+
+# ----- EXPLORATION COMMANDS -----
+
+# View(): Opens a spreadsheet view
+# USE THIS FIRST to see what your data looks like
+View(df)
+
+# glimpse(): Shows variable names and types
+# This tells you WHAT variables you have
+glimpse(df)
+
+# summary(): Shows summary stats for all variables
+summary(df)
+
+# Summary for specific variables
+summary(df$age)
+summary(df$income)
+
+# Detailed summary with percentiles
+pacman::p_load(psych)
+describe(df$income)
+
+# table(): Counts observations by category
+# ESSENTIAL for categorical variables
+table(df$sex)
+
+# With percentages
+prop.table(table(df$sex)){% endcapture %}
+  {% capture pc %}# Load the data
+df = pd.read_stata("mydata.dta")
+
+# ----- EXPLORATION COMMANDS -----
+
+# head(): Shows first few rows
+# USE THIS FIRST to see what your data looks like
+df.head(10)
+
+# info(): Shows variable names and types
+# This tells you WHAT variables you have
+df.info()
+
+# describe(): Shows summary stats for numeric variables
+df.describe()
+
+# Summary for specific variables
+df[['age', 'income']].describe()
+
+# Detailed summary with percentiles
+df['income'].describe(percentiles=[.1, .25, .5, .75, .9])
+
+# value_counts(): Counts observations by category
+# ESSENTIAL for categorical variables
+df['sex'].value_counts()
+
+# With percentages
+df['sex'].value_counts(normalize=True){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture callout_4 %}
+<strong>What the output tells you:</strong>
+<ul style="margin: 8px 0 0 0;">
+  <li><code>describe</code> output shows variable <strong>names</strong>, <strong>types</strong> (string vs numeric), and <strong>labels</strong> (human-readable descriptions)</li>
+  <li><code>summarize</code> output shows <strong>Obs</strong> (count of non-missing), <strong>Mean</strong>, <strong>Std. Dev.</strong>, <strong>Min</strong>, and <strong>Max</strong></li>
+  <li><code>tabulate</code> output shows how many observations fall into each <strong>category</strong></li>
+</ul>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_4 %}
+
+  {% capture cm_1 %}
+<p>Stata's Data Editor lets you click on cells and change values. <strong>Never do this.</strong> Why? Because there's no record of what you changed. If you need to make changes, do it in code so your work is reproducible.</p>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Never Manually Edit Data", content: cm_1 %}
+
+  <h3 id="sample-selection">Step 3: Selecting Your Sample</h3>
+
+  <p>Your dataset might have millions of observations, but your research question might focus on a specific group. For example, if you're studying women's labor force participation, you might want to:</p>
+
+  <ul>
+    <li>Keep only women (drop men)</li>
+    <li>Keep only working-age adults (ages 25-54)</li>
+    <li>Drop observations with missing income</li>
+  </ul>
+
+  {% capture callout_5 %}
+<strong>Predict:</strong> What's the difference between <code>keep if age >= 30</code> and <code>drop if age < 30</code>? Do they give the same result?
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_5 %}
+
+  {% capture sc %}* ----- SELECTING OBSERVATIONS -----
+
+* Keep only women (where sex == 2)
+* "==" means "is equal to" (double equals for comparison)
+keep if sex == 2
+
+* Check how many observations remain
+count
+
+* Keep only ages 25-54
+* "&" means AND - both conditions must be true
+keep if age >= 25 & age <= 54
+
+* Alternative: drop observations you don't want
+* "|" means OR - either condition triggers the drop
+drop if age < 25 | age > 54
+
+* ----- SELECTING VARIABLES -----
+
+* Drop variables you don't need
+* This makes your dataset smaller and easier to work with
+drop year serial pernum
+
+* Keep only specific variables
+keep id age income sex education{% endcapture %}
+  {% capture rc %}# ----- SELECTING OBSERVATIONS -----
+
+# Keep only women (where sex == 2)
+df <- df %>% filter(sex == 2)
+
+# Check how many observations remain
+nrow(df)
+
+# Keep only ages 25-54
+df <- df %>% filter(age >= 25 & age <= 54)
+
+# Alternative: drop observations you don't want
+df <- df %>% filter(!(age < 25 | age > 54))
+
+# ----- SELECTING VARIABLES -----
+
+# Drop variables you don't need
+df <- df %>% select(-year, -serial, -pernum)
+
+# Keep only specific variables
+df <- df %>% select(id, age, income, sex, education){% endcapture %}
+  {% capture pc %}# ----- SELECTING OBSERVATIONS -----
+
+# Keep only women (where sex == 2)
+df = df[df['sex'] == 2]
+
+# Check how many observations remain
+len(df)
+
+# Keep only ages 25-54
+df = df[(df['age'] >= 25) & (df['age'] <= 54)]
+
+# Alternative: drop observations you don't want
+df = df[~((df['age'] < 25) | (df['age'] > 54))]
+
+# ----- SELECTING VARIABLES -----
+
+# Drop variables you don't need
+df = df.drop(columns=['year', 'serial', 'pernum'])
+
+# Keep only specific variables
+df = df[['id', 'age', 'income', 'sex', 'education']]{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture kp_2 %}
+<p>After every <code>keep</code> or <code>drop</code>, run <code>count</code> (Stata) or <code>nrow(df)</code> (R) or <code>len(df)</code> (Python) to verify you have the expected number of observations. A common mistake is accidentally dropping everything!</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Check Your Work!", content: kp_2 %}
+
+  <h3 id="creating-variables">Step 4: Creating New Variables</h3>
+
+  <p>Raw data rarely has exactly the variables you need. You'll often need to create:</p>
+
+  <ul>
+    <li><strong>Indicator variables</strong> (0/1): Is this person married? Employed? Over 65?</li>
+    <li><strong>Categorical variables</strong>: Group ages into bins (18-24, 25-34, 35-44, etc.)</li>
+    <li><strong>Transformed variables</strong>: Log of income, income in thousands, etc.</li>
+  </ul>
+
+  {% capture callout_6 %}
+<strong>Predict:</strong> In Stata, what's the difference between <code>gen married = 1 if marst == 1</code> and <code>gen married = (marst == 1)</code>? What happens to observations where <code>marst != 1</code> in each case?
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_6 %}
+
+  {% capture callout_7 %}
+<strong>Critical Warning About Indicator Variables:</strong> If you write <code>gen married = 1 if marst == 1</code>, Stata creates <code>married = 1</code> for married people, but <code>married = missing</code> (not 0!) for everyone else. This silently breaks your regressions because observations with missing values get dropped. Always use the two-step method with <code>replace</code>, or the safer one-step method shown below.
+  {% endcapture %}
+  {% include "callout.liquid", type: "danger", content: callout_7 %}
+
+  {% capture sc %}* ----- INDICATOR VARIABLES (0/1) -----
+
+* Method 1: Two steps (WRONG - creates missing values!)
+gen married = 1 if marst == 1
+* Problem: married is MISSING (not 0) when marst != 1
+tab married, missing  // You'll see missing values
+
+* Method 2: Two steps (CORRECT)
+gen married = 1 if marst == 1
+replace married = 0 if marst != 1
+* Now married is 0 or 1 for everyone
+
+* Method 3: One step (BEST - cleaner code)
+gen married = (marst == 1)
+* The expression (marst == 1) evaluates to 1 if true, 0 if false
+
+* ----- CATEGORICAL VARIABLES -----
+
+* Group number of children: 0, 1, 2, 3, 4+
+gen kids_cat = nchild if nchild <= 4
+replace kids_cat = 4 if nchild > 4
+
+* Create dummy variables from categorical
+* This creates Kids_1, Kids_2, Kids_3, Kids_4, Kids_5
+tab kids_cat, gen(Kids_)
+
+* ----- TRANSFORMED VARIABLES -----
+
+* Log of income (useful for skewed distributions)
+* Add 1 to handle zeros (ln(0) is undefined)
+gen ln_income = ln(income + 1)
+
+* Income in thousands
+gen income_k = income / 1000{% endcapture %}
+  {% capture rc %}# ----- INDICATOR VARIABLES (0/1) -----
+
+# Method 1: Using ifelse (explicit)
+df <- df %>% mutate(married = ifelse(marst == 1, 1, 0))
+
+# Method 2: Using as.integer (cleaner)
+df <- df %>% mutate(married = as.integer(marst == 1))
+
+# ----- CATEGORICAL VARIABLES -----
+
+# Group number of children: 0, 1, 2, 3, 4+
+df <- df %>% mutate(
+  kids_cat = case_when(
+    nchild <= 4 ~ nchild,
+    nchild > 4 ~ 4
+  )
+)
+
+# Create dummy variables from categorical
+df <- df %>% mutate(
+  Kids_0 = as.integer(kids_cat == 0),
+  Kids_1 = as.integer(kids_cat == 1),
+  Kids_2 = as.integer(kids_cat == 2),
+  Kids_3 = as.integer(kids_cat == 3),
+  Kids_4 = as.integer(kids_cat == 4)
+)
+
+# ----- TRANSFORMED VARIABLES -----
+
+# Log of income
+df <- df %>% mutate(ln_income = log(income + 1))
+
+# Income in thousands
+df <- df %>% mutate(income_k = income / 1000){% endcapture %}
+  {% capture pc %}# ----- INDICATOR VARIABLES (0/1) -----
+
+# Simple boolean comparison (returns True/False, converted to 1/0)
+df['married'] = (df['marst'] == 1).astype(int)
+
+# ----- CATEGORICAL VARIABLES -----
+
+# Group number of children: 0, 1, 2, 3, 4+
+df['kids_cat'] = df['nchild'].clip(upper=4)
+
+# Create dummy variables from categorical
+dummies = pd.get_dummies(df['kids_cat'], prefix='Kids')
+df = pd.concat([df, dummies], axis=1)
+
+# ----- TRANSFORMED VARIABLES -----
+
+# Log of income
+df['ln_income'] = np.log(df['income'] + 1)
+
+# Income in thousands
+df['income_k'] = df['income'] / 1000{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+
+  {% capture kp_3 %}
+<h4>Language Comparison</h4>
+<table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+  <tr style="background: #e9ecef;">
+    <th style="padding: 8px; border: 1px solid #dee2e6;">Task</th>
+    <th style="padding: 8px; border: 1px solid #dee2e6;">Stata</th>
+    <th style="padding: 8px; border: 1px solid #dee2e6;">R (tidyverse)</th>
+    <th style="padding: 8px; border: 1px solid #dee2e6;">Python (pandas)</th>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #dee2e6;">Create variable</td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>gen x = ...</code></td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>mutate(x = ...)</code></td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>df['x'] = ...</code></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #dee2e6;">Modify variable</td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>replace x = ...</code></td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>mutate(x = ...)</code></td>
+    <td style="padding: 8px; border: 1px solid #dee2e6;"><code>df['x'] = ...</code></td>
+  </tr>
+</table>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Language Comparison", content: kp_3 %}
+</section>
+
+<!-- ============================================================== -->
+<section id="organization" class="tutorial-section">
+  <h2>Module 2: Project Organization</h2>
+
+  <p>Before we dive into loading data, let's set up a proper project structure. A well-organized project saves hours of confusion later and makes your work reproducible.</p>
+
+  {% capture callout_8 %}
+<strong>Why organization matters NOW:</strong> It's much easier to start with good habits than to reorganize a messy project later. The 15 minutes you spend setting this up will save you hours of debugging and searching for files.
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_8 %}
+
+  <h3 id="folder-structure">The Standard Structure</h3>
+
+  <pre style="background: var(--code-bg); padding: 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6;">
+my_project/
+├── master.do              # Runs everything (or master.R / main.py)
+├── README.md
+│
+├── build/                 # Data preparation
+│   ├── input/             # Raw data (NEVER edit these!)
+│   ├── code/              # Scripts to clean data
+│   └── output/            # Cleaned data
+│
+├── analysis/              # Your analysis
+│   ├── code/              # Regression scripts, etc.
+│   └── output/
+│       ├── tables/
+│       └── figures/
+│
+└── paper/                 # Your writeup
+    └── draft.tex</pre>
+
+  {% capture kp_4 %}
+<p>Never modify files in your <code>input/</code> folder. If you need to make changes, write code that reads the raw data and saves a cleaned version to <code>output/</code>. This way you can always reproduce your work from scratch.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Golden Rule: Raw Data is READ-ONLY", content: kp_4 %}
+
+  <h3 id="master-script">The Master Script</h3>
+
+  <p>Your <code>master.do</code> file should run your entire project from start to finish. Anyone should be able to run it and reproduce all your results.</p>
+
+  {% capture sc %}/*==============================================================================
+    Master Do-File: My Research Project
+    Author: Your Name
+    Date: February 2026
+==============================================================================*/
+
+clear all
+set more off
+
+* Set the project root (CHANGE THIS!)
+global root "/Users/yourname/Dropbox/my_project"
+
+* Define paths
+global build    "$root/build"
+global analysis "$root/analysis"
+
+* Run the build scripts
+do "$build/code/01_clean_census.do"
+do "$build/code/02_clean_policy.do"
+do "$build/code/03_merge.do"
+
+* Run the analysis
+do "$analysis/code/01_summary_stats.do"
+do "$analysis/code/02_main_regression.do"
+do "$analysis/code/03_robustness.do"{% endcapture %}
+  {% capture rc %}#==============================================================================
+#    Master Script: My Research Project
+#    Author: Your Name
+#    Date: February 2026
+#==============================================================================
+
+rm(list = ls())
+
+# Set the project root (CHANGE THIS!)
+root <- "/Users/yourname/Dropbox/my_project"
+
+# Define paths
+build <- file.path(root, "build")
+analysis <- file.path(root, "analysis")
+
+# Run the build scripts
+source(file.path(build, "code", "01_clean_census.R"))
+source(file.path(build, "code", "02_clean_policy.R"))
+source(file.path(build, "code", "03_merge.R"))
+
+# Run the analysis
+source(file.path(analysis, "code", "01_summary_stats.R"))
+source(file.path(analysis, "code", "02_main_regression.R"))
+source(file.path(analysis, "code", "03_robustness.R")){% endcapture %}
+  {% capture pc %}"""
+Master Script: My Research Project
+Author: Your Name
+Date: February 2026
+"""
+
+import os
+import subprocess
+
+# Set the project root (CHANGE THIS!)
+ROOT = "/Users/yourname/Dropbox/my_project"
+
+# Define paths
+BUILD = os.path.join(ROOT, "build")
+ANALYSIS = os.path.join(ROOT, "analysis")
+
+# Run the build scripts
+exec(open(os.path.join(BUILD, "code", "01_clean_census.py")).read())
+exec(open(os.path.join(BUILD, "code", "02_clean_policy.py")).read())
+exec(open(os.path.join(BUILD, "code", "03_merge.py")).read())
+
+# Run the analysis
+exec(open(os.path.join(ANALYSIS, "code", "01_summary_stats.py")).read())
+exec(open(os.path.join(ANALYSIS, "code", "02_main_regression.py")).read())
+exec(open(os.path.join(ANALYSIS, "code", "03_robustness.py")).read()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture kp_5 %}
+<p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so it's clear what order they run in. This also keeps them sorted correctly in your file browser.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Number Your Scripts", content: kp_5 %}
+
+  <!-- Quiz: Project Organization -->
+  <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h4 style="color: var(--primary); margin-top: 0;">Quick Check: Project Organization</h4>
+    <p><strong>Question:</strong> You download census data from the web. Where should you save it?</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+      <button onclick="checkAnswer(this, true)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">build/input/</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">build/output/</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">analysis/code/</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">paper/</button>
+    </div>
+    <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<section id="module3" class="tutorial-section">
+  <h2>Module 3: Reading in Data</h2>
+
+  <p>Real-world data comes in many formats: CSV files from websites, Excel spreadsheets from collaborators, Stata files from data archives. This module teaches you how to get data into your software.</p>
+
+  <h3 id="importing-csv">Importing CSV Files</h3>
+
+  <p>CSV (Comma-Separated Values) is the most common format for sharing data. It's just a text file where values are separated by commas.</p>
+
+  {% capture callout_9 %}
+<strong>What's in a CSV file?</strong> Open one in a text editor (not Excel) and you'll see something like:
+<pre style="background: #f5f5f5; padding: 12px; margin: 8px 0; font-size: 0.85rem;">name,age,income
+Alice,32,50000
+Bob,45,75000
+Carol,28,42000</pre>
+The first row is usually variable names. Each subsequent row is one observation.
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_9 %}
+
+  {% capture sc %}* Import CSV with first row as variable names
+import delimited "mydata.csv", varnames(1) clear
+
+* Immediately check what you got
+browse       // Look at the data
+describe     // Check variable types
+summarize    // Check value ranges
+
+* Common issue: numbers imported as strings
+* WHY? If your CSV has a comma in any number (like '1,234'), Stata reads
+* the entire column as text. Same if there's any non-numeric character
+* ('$50', 'N/A'). You'll know this happened if `summarize income` says
+* 'no observations' or shows nothing.
+* Fix by destringing (converting to numeric)
+destring income, replace{% endcapture %}
+  {% capture rc %}# Import CSV (read_csv from tidyverse is best)
+df <- read_csv("mydata.csv")
+
+# Immediately check what you got
+glimpse(df)    # Check variable types
+summary(df)    # Check value ranges
+
+# Note: read_csv automatically detects types
+# It's smarter than base R's read.csv(){% endcapture %}
+  {% capture pc %}# Import CSV
+df = pd.read_csv("mydata.csv")
+
+# Immediately check what you got
+df.head()     # Look at first rows
+df.info()     # Check variable types
+df.describe() # Check value ranges
+
+# Note: pandas usually detects types correctly
+# You can specify types if needed:
+# df = pd.read_csv("mydata.csv", dtype={'id': str}){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <h3 id="importing-stata">Importing Stata Files</h3>
+
+  <p>Many economics datasets are distributed as Stata .dta files. These are convenient because they preserve variable labels and value labels.</p>
+
+  {% capture sc %}* Open Stata file
+use "mydata.dta", clear
+
+* Open specific variables only (saves memory for large files)
+use age income education using "mydata.dta", clear
+
+* Open only observations meeting a condition
+use if age >= 25 using "mydata.dta", clear{% endcapture %}
+  {% capture rc %}# Need the haven package
+pacman::p_load(haven)
+
+# Read Stata file
+df <- read_dta("mydata.dta")
+
+# Note: haven preserves variable labels
+# Access them with:
+attr(df$income, "label"){% endcapture %}
+  {% capture pc %}# pandas can read Stata files directly
+df = pd.read_stata("mydata.dta")
+
+# Note: pandas preserves variable labels
+# Access them with:
+df.columns.to_list()  # Variable names{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <h3 id="saving">Saving Your Data</h3>
+
+  <p>After cleaning and creating variables, save your work so you don't have to redo it.</p>
+
+  {% capture sc %}* Save as Stata file
+save "mydata_clean.dta", replace
+
+* Export as CSV
+export delimited "mydata_clean.csv", replace{% endcapture %}
+  {% capture rc %}# Save as RDS (R's native format)
+saveRDS(df, "mydata_clean.rds")
+
+# Save as Stata file
+write_dta(df, "mydata_clean.dta")
+
+# Save as CSV
+write_csv(df, "mydata_clean.csv"){% endcapture %}
+  {% capture pc %}# Save as pickle (Python's native format)
+df.to_pickle("mydata_clean.pkl")
+
+# Save as Stata file
+df.to_stata("mydata_clean.dta")
+
+# Save as CSV
+df.to_csv("mydata_clean.csv", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+</section>
+
+<!-- ============================================================== -->
+<section id="quiz-basics" class="tutorial-section">
+  <h2>Practice Quiz: Basics</h2>
+
+  <p>Test your understanding of the basics before moving on:</p>
+
+  <div class="quiz-question" style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0;">
+    <p><strong>Q1:</strong> In Stata, what's wrong with this code?</p>
+    <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px;">gen employed = 1 if empstat == 1</pre>
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary); font-weight: 500;">Show Answer</summary>
+      <p style="margin-top: 8px;">This creates <code>employed = 1</code> for employed people, but <code>employed = missing</code> for everyone else (not 0!). You need either:<br>
+      <code>gen employed = 1 if empstat == 1</code><br>
+      <code>replace employed = 0 if empstat != 1</code><br>
+      Or: <code>gen employed = (empstat == 1)</code></p>
+    </details>
+  </div>
+
+  <div class="quiz-question" style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0;">
+    <p><strong>Q2:</strong> You download census data from the web. Where should you save it in your project folder?</p>
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary); font-weight: 500;">Show Answer</summary>
+      <p style="margin-top: 8px;"><strong>build/input/</strong>. Raw data goes in the input folder. Never modify files in this folder—if you need to make changes, write code that reads the raw data and saves a cleaned version to <code>build/output/</code>.</p>
+    </details>
+  </div>
+
+  <div class="quiz-question" style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0;">
+    <p><strong>Q3:</strong> You import a CSV and the <code>income</code> variable shows up as a string instead of a number. How do you fix this in Stata?</p>
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary); font-weight: 500;">Show Answer</summary>
+      <p style="margin-top: 8px;">Use <code>destring income, replace</code> to convert the string to a numeric variable. This is a common issue when CSVs have numbers formatted with commas or other text characters.</p>
+    </details>
+  </div>
+
+  <div class="quiz-question" style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0;">
+    <p><strong>Q4:</strong> You run <code>keep if age >= 18</code> but then <code>count</code> shows 0 observations. What probably happened?</p>
+    <details style="margin-top: 12px;">
+      <summary style="cursor: pointer; color: var(--primary); font-weight: 500;">Show Answer</summary>
+      <p style="margin-top: 8px;">Most likely, <code>age</code> is stored as a string (text), not a number. The comparison <code>age >= 18</code> doesn't work as expected on strings. Use <code>destring age, replace</code> first to convert it to numeric.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- PART 2: Reshaping, Merging, Loops, and Regression               -->
+<!-- ============================================================== -->
+
+<div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 40px 0 20px;">
+  <strong style="color: #2e7d32;">Building on what you know</strong>
+  <p style="margin: 8px 0 0; color: #1b5e20;">
+    The topics below build directly on the basics above. Reshaping and merging are how you transform data into the format you need. Loops are just a way to avoid copy-paste. Regression commands might look intimidating, but they're just functions that take variables as inputs. If you understood <code>summarize</code> above, you can understand <code>regress</code> below.
+  </p>
+</div>
+
+<div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 20px 24px; border-radius: 12px; margin: 24px 0;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <strong>Live Quiz</strong> — Test your understanding during class
+    </div>
+    <a href="../../poll/student.html" target="_blank" style="background: #4ade80; color: #0f0f0f; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">Take Quiz</a>
+  </div>
+</div>
+
+<!-- ==================== RESHAPING DATA ==================== -->
+<section id="reshaping" class="tutorial-section">
+  <h2>Reshaping Data</h2>
+
+  <p>Data comes in two basic shapes: <strong>wide</strong> and <strong>long</strong>. Understanding the difference—and knowing how to convert between them—is essential for data analysis.</p>
+
+  <h3>Wide vs. Long Format</h3>
+
+  <p>Consider GDP data for three countries over three years:</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+    <div>
+      <p style="font-weight: 600; margin-bottom: 8px; color: #1976d2;">Wide Format</p>
+      <p style="font-size: 0.9rem; margin-bottom: 8px;">Each row is a country. Years are <em>columns</em>.</p>
+      <table style="font-size: 0.85rem; border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background: #e9ecef;">
+            <th style="padding: 6px; border: 1px solid #dee2e6;">country</th>
+            <th style="padding: 6px; border: 1px solid #dee2e6;">gdp2018</th>
+            <th style="padding: 6px; border: 1px solid #dee2e6;">gdp2019</th>
+            <th style="padding: 6px; border: 1px solid #dee2e6;">gdp2020</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">USA</td><td style="padding: 6px; border: 1px solid #dee2e6;">20.5</td><td style="padding: 6px; border: 1px solid #dee2e6;">21.4</td><td style="padding: 6px; border: 1px solid #dee2e6;">20.9</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">China</td><td style="padding: 6px; border: 1px solid #dee2e6;">13.9</td><td style="padding: 6px; border: 1px solid #dee2e6;">14.3</td><td style="padding: 6px; border: 1px solid #dee2e6;">14.7</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">Japan</td><td style="padding: 6px; border: 1px solid #dee2e6;">5.0</td><td style="padding: 6px; border: 1px solid #dee2e6;">5.1</td><td style="padding: 6px; border: 1px solid #dee2e6;">5.0</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.85rem; margin-top: 8px;"><strong>3 rows</strong> (one per country)</p>
+    </div>
+    <div>
+      <p style="font-weight: 600; margin-bottom: 8px; color: #388e3c;">Long Format</p>
+      <p style="font-size: 0.9rem; margin-bottom: 8px;">Each row is a country-year. Year is a <em>variable</em>.</p>
+      <table style="font-size: 0.85rem; border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background: #e9ecef;">
+            <th style="padding: 6px; border: 1px solid #dee2e6;">country</th>
+            <th style="padding: 6px; border: 1px solid #dee2e6;">year</th>
+            <th style="padding: 6px; border: 1px solid #dee2e6;">gdp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">USA</td><td style="padding: 6px; border: 1px solid #dee2e6;">2018</td><td style="padding: 6px; border: 1px solid #dee2e6;">20.5</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">USA</td><td style="padding: 6px; border: 1px solid #dee2e6;">2019</td><td style="padding: 6px; border: 1px solid #dee2e6;">21.4</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">USA</td><td style="padding: 6px; border: 1px solid #dee2e6;">2020</td><td style="padding: 6px; border: 1px solid #dee2e6;">20.9</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">China</td><td style="padding: 6px; border: 1px solid #dee2e6;">2018</td><td style="padding: 6px; border: 1px solid #dee2e6;">13.9</td></tr>
+          <tr><td style="padding: 6px; border: 1px solid #dee2e6;">...</td><td style="padding: 6px; border: 1px solid #dee2e6;">...</td><td style="padding: 6px; border: 1px solid #dee2e6;">...</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.85rem; margin-top: 8px;"><strong>9 rows</strong> (one per country-year)</p>
+    </div>
+  </div>
+
+  {% capture kp_content %}
+    <ul>
+      <li><strong>Long format:</strong> Usually needed for regression, plotting, and most analysis. This is the "tidy" format.</li>
+      <li><strong>Wide format:</strong> Sometimes easier for data entry or viewing, but rarely what you want for analysis.</li>
+    </ul>
+    <p><strong>Rule of thumb:</strong> If you're unsure, you probably want long format.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "When to Use Each Format", content: kp_content %}
+
+  <h3 id="reshape-wide-to-long">Reshaping: Wide to Long</h3>
+
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+    <strong>Predict:</strong> If you have wide data with 3 countries and columns <code>gdp2018, gdp2019, gdp2020</code>, how many rows will you have after reshaping to long?
+  </div>
+
+  {% capture sc %}* Start with wide data: country, gdp2018, gdp2019, gdp2020
+
+* Reshape wide to long
+* Syntax: reshape long [stub], i([id var]) j([new time var])
+reshape long gdp, i(country) j(year)
+
+* What this does:
+*   - i(country): country is the ID variable (stays as is)
+*   - j(year): creates a new variable "year" from the suffixes
+*   - gdp: the stub - looks for gdp2018, gdp2019, etc.
+
+* Check the result
+list, clean{% endcapture %}
+  {% capture rc %}# Start with wide data: country, gdp2018, gdp2019, gdp2020
+
+# Reshape wide to long using pivot_longer
+df_long <- df %>%
+  pivot_longer(
+    cols = starts_with("gdp"),     # Columns to reshape
+    names_to = "year",             # New column for the names
+    names_prefix = "gdp",          # Remove "gdp" prefix
+    values_to = "gdp"              # New column for the values
+  ) %>%
+  mutate(year = as.integer(year))  # Convert year to integer
+
+# Check the result
+print(df_long){% endcapture %}
+  {% capture pc %}# Start with wide data: country, gdp2018, gdp2019, gdp2020
+
+# Reshape wide to long using melt
+df_long = df.melt(
+    id_vars=['country'],           # Keep these as is
+    var_name='year',               # Name for the variable column
+    value_name='gdp'               # Name for the value column
+)
+
+# Clean up: extract year from "gdp2018" -> 2018
+df_long['year'] = df_long['year'].str.replace('gdp', '').astype(int)
+
+# Check the result
+print(df_long){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <h3 id="reshape-long-to-wide">Reshaping: Long to Wide</h3>
+
+  {% capture sc %}* Start with long data: country, year, gdp
+
+* Reshape long to wide
+reshape wide gdp, i(country) j(year)
+
+* This creates: country, gdp2018, gdp2019, gdp2020{% endcapture %}
+  {% capture rc %}# Start with long data: country, year, gdp
+
+# Reshape long to wide using pivot_wider
+df_wide <- df_long %>%
+  pivot_wider(
+    names_from = year,
+    values_from = gdp,
+    names_prefix = "gdp"
+  )
+
+# This creates: country, gdp2018, gdp2019, gdp2020{% endcapture %}
+  {% capture pc %}# Start with long data: country, year, gdp
+
+# Reshape long to wide using pivot
+df_wide = df_long.pivot(
+    index='country',
+    columns='year',
+    values='gdp'
+).reset_index()
+
+# This creates: country, 2018, 2019, 2020
+# Rename columns if you want the "gdp" prefix
+df_wide.columns = ['country'] + [f'gdp{y}' for y in df_wide.columns[1:]]{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+</section>
+
+<!-- ==================== MERGING DATA ==================== -->
+<section id="merging" class="tutorial-section">
+  <h2>Merging Data</h2>
+
+  <p>Real research almost always requires combining data from multiple sources. This is called <strong>merging</strong> (Stata) or <strong>joining</strong> (R/Python).</p>
+
+  <h3>The Concept</h3>
+
+  <p>Imagine you have:</p>
+  <ul>
+    <li><strong>Dataset A:</strong> People's ages (id, age)</li>
+    <li><strong>Dataset B:</strong> People's incomes (id, income)</li>
+  </ul>
+
+  <p>You want to combine them into one dataset with id, age, AND income. The <strong>key</strong> (the variable that links them) is <code>id</code>.</p>
+
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+    <strong>Predict:</strong> What happens if person 5 is in Dataset A but not in Dataset B? What should their income be in the merged data?
+  </div>
+
+  <h3>Merge Types</h3>
+
+  {% capture callout_content %}
+    <p style="margin: 10px 0 0;">In Stata, the <strong>master</strong> dataset is the one already in memory (the one you're working with), and the <strong>using</strong> dataset is the one you're bringing in with the <code>merge</code> command. The notation <code>m:1</code> means "many-to-one": many rows in the master match one row in the using dataset. For example, if your master has 10,000 individual people and your using has 50 state-level rows, that's m:1—many people per state, one state row each. In R, the first argument to <code>merge()</code> plays the role of the master, and the second is the using.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Understanding Merge Notation:", content: callout_content %}
+
+  <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+    <thead>
+      <tr style="background: #e9ecef;">
+        <th style="padding: 10px; border: 1px solid #dee2e6;">Type</th>
+        <th style="padding: 10px; border: 1px solid #dee2e6;">Stata</th>
+        <th style="padding: 10px; border: 1px solid #dee2e6;">R</th>
+        <th style="padding: 10px; border: 1px solid #dee2e6;">When to Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>1:1</strong></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge 1:1</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge(...)</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Each row in A matches exactly one row in B</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>m:1</strong></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge m:1</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge(..., all.x = TRUE)</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">Many rows in A match one row in B (e.g., people to states)</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>1:m</strong></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge 1:m</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge(..., all.y = TRUE)</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">One row in A matches many rows in B</td>
+      </tr>
+      <tr style="background: #ffebee;">
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>m:m</strong></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><code>merge m:m</code></td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;">—</td>
+        <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>Almost never correct!</strong> Usually indicates a problem.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="merge-example">Merging: Step by Step</h3>
+
+  {% capture sc %}* Example: Merge person data with state-level unemployment
+
+* Step 1: Load the "master" dataset (person-level)
+use person_data.dta, clear
+count  // Check: 10,000 people
+
+* Step 2: Merge with "using" dataset (state-level)
+* m:1 because many people live in each state
+merge m:1 state using state_unemployment.dta
+
+* Step 3: CHECK THE MERGE RESULTS
+tab _merge
+
+* _merge values:
+*   1 = in master only (person with no matching state)
+*   2 = in using only (state with no people)
+*   3 = matched (what you want)
+
+* Step 4: Decide what to do with unmatched
+* Usually keep only matched:
+keep if _merge == 3
+drop _merge{% endcapture %}
+  {% capture rc %}# Example: Merge person data with state-level unemployment
+
+# Step 1: Load datasets
+person_data <- read_csv("person_data.csv")
+state_data <- read_csv("state_unemployment.csv")
+
+# Check dimensions
+nrow(person_data)  # 10,000 people
+nrow(state_data)   # 50 states
+
+# Step 2: Merge
+# all.x = TRUE keeps all people, adds state data where matched
+merged <- merge(person_data, state_data, by = "state", all.x = TRUE)
+
+# Step 3: Check for unmatched
+sum(is.na(merged$unemployment))  # How many have missing state data?
+
+# Step 4: Remove unmatched if needed
+merged <- merged %>% filter(!is.na(unemployment)){% endcapture %}
+  {% capture pc %}# Example: Merge person data with state-level unemployment
+
+# Step 1: Load datasets
+person_data = pd.read_csv("person_data.csv")
+state_data = pd.read_csv("state_unemployment.csv")
+
+# Check dimensions
+len(person_data)  # 10,000 people
+len(state_data)   # 50 states
+
+# Step 2: Merge
+# merge with indicator to check matching
+merged = person_data.merge(
+    state_data,
+    on='state',
+    how='left',
+    indicator=True
+)
+
+# Step 3: Check for unmatched
+print(merged['_merge'].value_counts())
+
+# Step 4: Remove unmatched if needed
+merged = merged[merged['_merge'] == 'both']
+merged = merged.drop(columns=['_merge']){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture callout_content %}
+    <ul style="margin: 8px 0 0 0;">
+      <li>Did the number of observations change unexpectedly?</li>
+      <li>How many observations matched vs. didn't match?</li>
+      <li>Do unmatched observations make sense (e.g., states with no people)?</li>
+    </ul>
+    <p style="margin-top: 8px;">Most merge bugs are silent—your code runs but gives wrong answers. Checking <code>_merge</code> is how you catch them.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Always Check Your Merge!", content: callout_content %}
+</section>
+
+<!-- ==================== LOOPS AND LOCALS ==================== -->
+<section id="loops" class="tutorial-section">
+  <h2>Loops and Locals</h2>
+
+  <p>Loops let you write code once and run it many times. If you ever find yourself copy-pasting code and just changing one number, you should use a loop instead.</p>
+
+  <h3 id="forvalues">The <code>forvalues</code> Loop</h3>
+
+  <!-- Real-world motivation -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>Real scenario:</strong> You're creating a categorical variable for number of children (0, 1, 2, 3+). You could write 4 separate lines... or use a loop.
+  </div>
+
+  <p><strong>Without a loop (bad):</strong></p>
+  {% capture sc %}* This is repetitive and error-prone
+replace kids_cat = 0 if nchild == 0
+replace kids_cat = 1 if nchild == 1
+replace kids_cat = 2 if nchild == 2
+replace kids_cat = 3 if nchild == 3{% endcapture %}
+  {% capture rc %}# This is repetitive and error-prone
+df$kids_cat[df$nchild == 0] <- 0
+df$kids_cat[df$nchild == 1] <- 1
+df$kids_cat[df$nchild == 2] <- 2
+df$kids_cat[df$nchild == 3] <- 3{% endcapture %}
+  {% capture pc %}# This is repetitive and error-prone
+df.loc[df['nchild'] == 0, 'kids_cat'] = 0
+df.loc[df['nchild'] == 1, 'kids_cat'] = 1
+df.loc[df['nchild'] == 2, 'kids_cat'] = 2
+df.loc[df['nchild'] == 3, 'kids_cat'] = 3{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <p><strong>With a loop (good):</strong></p>
+  {% capture sc %}* Much cleaner!
+forvalues i = 0/3 {
+    replace kids_cat = `i' if nchild == `i'
+}{% endcapture %}
+  {% capture rc %}# Much cleaner!
+for (i in 0:3) {
+    df$kids_cat[df$nchild == i] <- i
+}{% endcapture %}
+  {% capture pc %}# Much cleaner!
+for i in range(4):
+    df.loc[df['nchild'] == i, 'kids_cat'] = i{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <!-- Step-by-step explanation -->
+  {% capture callout_content %}
+    <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+      <li>First iteration: <code>i</code> = 0 → runs <code>replace kids_cat = 0 if nchild == 0</code></li>
+      <li>Second iteration: <code>i</code> = 1 → runs <code>replace kids_cat = 1 if nchild == 1</code></li>
+      <li>Third iteration: <code>i</code> = 2 → runs <code>replace kids_cat = 2 if nchild == 2</code></li>
+      <li>Fourth iteration: <code>i</code> = 3 → runs <code>replace kids_cat = 3 if nchild == 3</code></li>
+    </ol>
+    <p style="margin: 10px 0 0;">The backticks <code>`i'</code> get replaced with the current value of the loop variable.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "What happens when this runs (Stata):", content: callout_content %}
+
+  {% capture kp_content %}
+    <ol>
+      <li>Write the code for one value first (e.g., the <code>i = 0</code> case)</li>
+      <li>Make sure it works</li>
+      <li>Then wrap it in a loop, replacing the number with the loop variable</li>
+    </ol>
+    <p>This way, if something breaks, you know whether it's the code or the loop.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "How to Build a Loop", content: kp_content %}
+
+  <h3 id="foreach">Loop Variations</h3>
+
+  <!-- Predict box -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>Before running this code, predict:</strong> What will <code>forvalues i = 5(5)100</code> print? (Hint: the middle number is the step size.)
+  </div>
+
+  {% capture sc %}* Count from 0 to 3
+forvalues i = 0/3 {
+    display `i'
+}
+
+* Count by 5s from 5 to 100
+forvalues i = 5(5)100 {
+    display `i'
+}
+
+* Loop over a list of values (not just numbers)
+foreach v in income age education {
+    summarize `v'
+}{% endcapture %}
+  {% capture rc %}# Count from 0 to 3
+for (i in 0:3) {
+    print(i)
+}
+
+# Count by 5s from 5 to 100
+for (i in seq(5, 100, by = 5)) {
+    print(i)
+}
+
+# Loop over a list of values (not just numbers)
+for (v in c("income", "age", "education")) {
+    print(summary(df[[v]]))
+}{% endcapture %}
+  {% capture pc %}# Count from 0 to 3
+for i in range(4):
+    print(i)
+
+# Count by 5s from 5 to 100
+for i in range(5, 101, 5):
+    print(i)
+
+# Loop over a list of values (not just numbers)
+for v in ['income', 'age', 'education']:
+    print(df[v].describe()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <!-- Answer to predict -->
+  <details style="margin: 16px 0; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: var(--primary);">Click to reveal answer: What does <code>5(5)100</code> print?</summary>
+    <p style="margin: 12px 0 0;">It prints: 5, 10, 15, 20, 25, ... 95, 100. The syntax is <code>start(step)end</code>, so this starts at 5, goes up by 5 each time, and stops at 100.</p>
+  </details>
+
+  <!-- foreach explanation -->
+  {% capture callout_content %}
+    <ul style="margin: 10px 0 0;">
+      <li><code>forvalues</code> = loop over numbers (0, 1, 2, 3 or 5, 10, 15...)</li>
+      <li><code>foreach</code> = loop over a list of anything (variable names, file names, strings)</li>
+    </ul>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "<code>foreach</code> vs <code>forvalues</code>:", content: callout_content %}
+
+  <!-- Quiz: Loops -->
+  <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h4 style="color: var(--primary); margin-top: 0;">Quick Check: Loops</h4>
+    <p><strong>Question:</strong> In Stata, what values will <code>forvalues i = 0/3</code> iterate through?</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+      <button onclick="checkAnswer(this, true)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">0, 1, 2, 3</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">1, 2, 3</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">0, 1, 2</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">0, 3</button>
+    </div>
+    <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
+  </div>
+
+  <h3 id="locals">Understanding Locals</h3>
+
+  <p>A <strong>local</strong> (in Stata) or <strong>variable</strong> (in R/Python) stores a value temporarily. Think of it as giving a nickname to something you'll use repeatedly.</p>
+
+  <!-- Why locals matter -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>Why use locals?</strong>
+    <ul style="margin: 10px 0 0;">
+      <li><strong>Change once, update everywhere:</strong> If you store your control variables in a local, you only need to change one line to add/remove a control</li>
+      <li><strong>Store results:</strong> Save a coefficient from one regression to use in another calculation</li>
+      <li><strong>Make code readable:</strong> <code>`controls'</code> is clearer than a long list of variables</li>
+    </ul>
+  </div>
+
+  <p>In Stata, you create a local without quotes but use it wrapped in backtick and apostrophe: <code>`name'</code></p>
+
+  {% capture sc %}* Create a local
+local myvar = 7
+
+* Use the local
+display `myvar'
+
+* Locals are useful for storing lists
+local controls "age education income"
+reg wage `controls'
+
+* Or for storing results
+reg wage education
+local coef = _b[education]
+display "The coefficient was `coef'"{% endcapture %}
+  {% capture rc %}# Create a variable
+myvar <- 7
+
+# Use the variable
+print(myvar)
+
+# Variables are useful for storing lists
+controls <- c("age", "education", "income")
+model <- lm(wage ~ age + education + income, data = df)
+
+# Or for storing results
+model <- lm(wage ~ education, data = df)
+coef_val <- coef(model)["education"]
+print(paste("The coefficient was", coef_val)){% endcapture %}
+  {% capture pc %}# Create a variable
+myvar = 7
+
+# Use the variable
+print(myvar)
+
+# Variables are useful for storing lists
+controls = ['age', 'education', 'income']
+import statsmodels.formula.api as smf
+model = smf.ols('wage ~ age + education + income', data=df).fit()
+
+# Or for storing results
+model = smf.ols('wage ~ education', data=df).fit()
+coef_val = model.params['education']
+print(f"The coefficient was {coef_val}"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture cm_content %}
+    <p style="margin: 8px 0 0;">If you highlight <code>local x = 5</code> and run it, then separately highlight <code>display `x'</code> and run it, Stata says "x not found". Why? Locals disappear at the end of each "run". <strong>Solution:</strong> Highlight BOTH lines and run them together, or put them in a do-file. (R and Python don't have this issue.)</p>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "CRITICAL STATA QUIRK: Locals Only Last One \"Run\"", content: cm_content %}
+
+  <h3 id="preserve">Preserve and Restore</h3>
+
+  <p>Sometimes you want to temporarily modify data, do something, then go back to the original:</p>
+
+  {% capture sc %}* Save the current state
+preserve
+
+* Do something that changes the data
+keep if state == "CA"
+save california_only.dta, replace
+
+* Go back to the full dataset
+restore
+
+* The full dataset is back!{% endcapture %}
+  {% capture rc %}# Make a copy before modifying
+df_backup <- df
+
+# Do something that changes the data
+df_ca <- df[df$state == "CA", ]
+saveRDS(df_ca, "california_only.rds")
+
+# The original is still in df_backup
+# (or just use df_ca and keep df unchanged){% endcapture %}
+  {% capture pc %}# Make a copy before modifying
+df_backup = df.copy()
+
+# Do something that changes the data
+df_ca = df[df['state'] == 'CA']
+df_ca.to_csv('california_only.csv', index=False)
+
+# The original is still in df_backup
+# (or just filter without reassigning to keep df unchanged){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+</section>
+
+<!-- ==================== REGRESSION ==================== -->
+<section id="regression" class="tutorial-section">
+  <h2>Regression</h2>
+
+  <p>This section covers the main regression commands you'll use in applied economics research. The syntax is similar across languages: you specify a dependent variable (Y), independent variables (X), and options like standard error types.</p>
+
+  <h3 id="ols">Basic OLS Regression</h3>
+
+  <!-- Anatomy of a regression command -->
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
+    <div style="color: #666; margin-bottom: 8px;">Stata syntax:</div>
+    <div style="font-size: 1.1em;">
+      <span style="color: #750014; font-weight: bold;">reg</span>
+      <span style="color: #1565c0;">wage</span>
+      <span style="color: #2e7d32;">education age experience</span>,
+      <span style="color: #7b1fa2;">robust</span>
+    </div>
+    <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 0.85em; flex-wrap: wrap;">
+      <span><span style="color: #750014;">■</span> command</span>
+      <span><span style="color: #1565c0;">■</span> Y (dependent)</span>
+      <span><span style="color: #2e7d32;">■</span> X (independent)</span>
+      <span><span style="color: #7b1fa2;">■</span> options</span>
+    </div>
+  </div>
+
+  {% capture sc %}* Simple regression
+reg wage education
+
+* Add control variables
+reg wage education age experience
+
+* Heteroskedasticity-robust standard errors
+reg wage education age experience, robust
+
+* Cluster standard errors by state
+reg wage education age experience, cluster(state){% endcapture %}
+  {% capture rc %}# Simple regression
+model <- lm(wage ~ education, data = df)
+summary(model)
+
+# Add control variables
+model <- lm(wage ~ education + age + experience, data = df)
+
+# Heteroskedasticity-robust standard errors
+pacman::p_load(sandwich, lmtest)
+coeftest(model, vcov = vcovHC(model, type = "HC1"))
+
+# Cluster standard errors by state
+pacman::p_load(clubSandwich)
+coef_test(model, vcov = vcovCR(model, cluster = df$state, type = "CR0")){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
+
+# Simple regression
+model = smf.ols('wage ~ education', data=df).fit()
+print(model.summary())
+
+# Add control variables
+model = smf.ols('wage ~ education + age + experience', data=df).fit()
+
+# Heteroskedasticity-robust standard errors
+model_robust = smf.ols('wage ~ education + age + experience', data=df).fit(
+    cov_type='HC1'
+)
+
+# Cluster standard errors by state
+model_cluster = smf.ols('wage ~ education + age + experience', data=df).fit(
+    cov_type='cluster', cov_kwds={'groups': df['state']}
+){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <!-- Standard errors explanation -->
+  {% capture callout_content %}
+    <table style="width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 0.9em;">
+      <tr style="background: #bbdefb;">
+        <th style="padding: 8px; text-align: left; border: 1px solid #90caf9;">Situation</th>
+        <th style="padding: 8px; text-align: left; border: 1px solid #90caf9;">Standard Errors</th>
+        <th style="padding: 8px; text-align: left; border: 1px solid #90caf9;">Stata Option</th>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Cross-sectional data, simple models</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Robust (HC1)*</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;"><code>, robust</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Panel data (observations grouped by unit)</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Clustered by unit</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;"><code>, cluster(state)</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Workers grouped by firm</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Clustered by firm</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;"><code>, cluster(firm)</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">DiD with state-level treatment</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;">Clustered by state</td>
+        <td style="padding: 8px; border: 1px solid #e3f2fd;"><code>, cluster(state)</code></td>
+      </tr>
+    </table>
+    <p style="margin: 12px 0 0; font-size: 0.9em;"><strong>Rule of thumb:</strong> Cluster at the level of treatment assignment or the level where errors might be correlated.</p>
+    <p style="margin: 10px 0 0; font-size: 0.9em;"><strong>*What is HC1?</strong> HC1 stands for "Heteroskedasticity-Consistent type 1." Stata's <code>, robust</code> option uses HC1 by default. R and Python require you to specify it explicitly. For most economics papers, HC1 is standard.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Which standard errors should I use?", content: callout_content %}
+
+  <h3 id="interactions">Interactions</h3>
+
+  <!-- Why interactions -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>When to use interactions:</strong> When you think the effect of X on Y <em>depends on</em> another variable.
+    <p style="margin: 10px 0 0;"><em>Example:</em> Does the return to education differ by gender? Add <code>education##gender</code> to test whether the education coefficient is different for men vs. women.</p>
+  </div>
+
+  {% capture sc %}* # adds just the interaction
+reg wage education gender#married
+
+* ## adds the interaction AND main effects
+reg wage education gender##married
+
+* For continuous variables, use c. prefix
+reg wage c.education##c.experience{% endcapture %}
+  {% capture rc %}# : adds just the interaction
+model <- lm(wage ~ education + gender:married, data = df)
+
+# * adds the interaction AND main effects
+model <- lm(wage ~ education + gender*married, data = df)
+
+# For continuous variables
+model <- lm(wage ~ education * experience, data = df){% endcapture %}
+  {% capture pc %}# : adds just the interaction
+model = smf.ols('wage ~ education + gender:married', data=df).fit()
+
+# * adds the interaction AND main effects
+model = smf.ols('wage ~ education + gender*married', data=df).fit()
+
+# For continuous variables
+model = smf.ols('wage ~ education * experience', data=df).fit(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <!-- Interpreting interactions -->
+  {% capture callout_content %}
+    <ul style="margin: 10px 0 0;">
+      <li><code>education</code> = effect of education for males (the reference group)</li>
+      <li><code>1.female</code> = wage gap between females and males (at 0 years of education)</li>
+      <li><code>1.female#c.education</code> = how much more/less females gain from each year of education compared to males</li>
+    </ul>
+    <p style="margin: 10px 0 0;"><strong>Total effect of education for females</strong> = <code>education</code> + <code>1.female#c.education</code></p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Interpreting <code>education##female</code> coefficients:", content: callout_content %}
+
+  <!-- Quiz: Regression -->
+  <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
+    <h4 style="color: var(--primary); margin-top: 0;">Quick Check: Standard Errors</h4>
+    <p><strong>Question:</strong> You're analyzing wage data where workers are grouped by firm. What type of standard errors should you use?</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Default (homoskedastic)</button>
+      <button onclick="checkAnswer(this, false)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Robust (HC1)</button>
+      <button onclick="checkAnswer(this, true)" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer;">Clustered by firm</button>
+    </div>
+    <p class="quiz-feedback" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px;"></p>
+  </div>
+
+  <h3 id="fixed-effects">Fixed Effects</h3>
+
+  <!-- Why fixed effects -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>What fixed effects do:</strong> Control for all time-invariant characteristics of a group.
+    <p style="margin: 10px 0 0;">
+      <em>State fixed effects</em> control for everything about a state that doesn't change over time (geography, culture, history).<br>
+      <em>Year fixed effects</em> control for everything that affects all states equally in a given year (recessions, federal policy).
+    </p>
+    <p style="margin: 10px 0 0;"><strong>Two-way fixed effects (TWFE)</strong> = state FE + year FE. This is the workhorse of diff-in-diff.</p>
+  </div>
+
+  {% capture sc %}* Using absorb() to add fixed effects
+* (doesn't show the FE coefficients, which is usually what you want)
+reg wage education age, absorb(state)
+
+* For MANY fixed effects, use reghdfe (faster)
+ssc install reghdfe  // run once to install
+ssc install ftools   // dependency
+
+reghdfe wage education age, absorb(state year)
+
+* Two-way fixed effects with clustering
+reghdfe wage education, absorb(state year) cluster(state){% endcapture %}
+  {% capture rc %}# Using fixest package (fastest option)
+pacman::p_load(fixest)
+
+# One-way fixed effects
+model <- feols(wage ~ education + age | state, data = df)
+
+# Two-way fixed effects
+model <- feols(wage ~ education + age | state + year, data = df)
+
+# With clustered standard errors
+model <- feols(wage ~ education | state + year,
+               cluster = ~state, data = df){% endcapture %}
+  {% capture pc %}# Using pyfixest (similar to R's fixest)
+import pyfixest as pf
+
+# One-way fixed effects
+model = pf.feols('wage ~ education + age | state', data=df)
+
+# Two-way fixed effects
+model = pf.feols('wage ~ education + age | state + year', data=df)
+
+# With clustered standard errors
+model = pf.feols('wage ~ education | state + year',
+                 vcov={'CRV1': 'state'}, data=df){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture kp_content %}
+    <p>Use <code>reghdfe</code> (Stata), <code>fixest</code> (R), or <code>pyfixest</code> (Python) whenever you have many fixed effects (hundreds or thousands of groups). They're much faster than including dummy variables, and they handle multiple sets of fixed effects efficiently.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "When to Use High-Dimensional Fixed Effects", content: kp_content %}
+
+  <h3 id="iv">Instrumental Variables</h3>
+
+  <!-- Why IV -->
+  <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;">
+    <strong>When to use IV:</strong> When your key independent variable is <em>endogenous</em> (correlated with the error term).
+    <p style="margin: 10px 0 0;">
+      <em>Classic example:</em> Does education increase wages? Problem: unobserved ability affects both education AND wages.<br>
+      <em>Solution:</em> Find an instrument (like quarter of birth) that affects education but has no direct effect on wages.
+    </p>
+  </div>
+
+  <!-- IV requirements -->
+  {% capture callout_content %}
+    <ol style="margin: 10px 0 0;">
+      <li><strong>Relevance:</strong> The instrument affects the endogenous variable (check the first-stage F-statistic)</li>
+      <li><strong>Exclusion:</strong> The instrument affects Y <em>only through</em> the endogenous variable (not directly)</li>
+    </ol>
+    <p style="margin: 10px 0 0;">Condition 1 is testable. Condition 2 is not—you must argue it's plausible.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "A valid instrument must satisfy two conditions:", content: callout_content %}
+
+  {% capture sc %}* Install ivreghdfe
+ssc install ivreghdfe  // run once
+
+* IV regression syntax: (endogenous = instruments)
+* Example: education is endogenous, quarter_of_birth is the instrument
+ivreghdfe wage (education = quarter_of_birth) age experience
+
+* With fixed effects
+ivreghdfe wage (education = quarter_of_birth) age, absorb(state year){% endcapture %}
+  {% capture rc %}# Using fixest for IV
+pacman::p_load(fixest)
+
+# IV regression: education instrumented by quarter_of_birth
+model <- feols(wage ~ age + experience |
+               education ~ quarter_of_birth, data = df)
+
+# With fixed effects
+model <- feols(wage ~ age | state + year |
+               education ~ quarter_of_birth, data = df){% endcapture %}
+  {% capture pc %}# Using pyfixest for IV
+import pyfixest as pf
+
+# IV regression: education instrumented by quarter_of_birth
+model = pf.feols('wage ~ age + experience | education ~ quarter_of_birth',
+                 data=df)
+
+# With fixed effects
+model = pf.feols('wage ~ age | state + year | education ~ quarter_of_birth',
+                 data=df){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  <h3 id="exporting">Exporting Results</h3>
+
+  {% capture sc %}* Install estout for publication tables
+ssc install estout
+
+* Store results
+eststo clear
+eststo m1: reg wage education, robust
+eststo m2: reg wage education age, robust
+eststo m3: reg wage education age experience, robust
+
+* Create a nice table
+esttab m1 m2 m3, se r2 label ///
+    title("Wage Regressions") ///
+    mtitles("(1)" "(2)" "(3)")
+
+* Export to LaTeX
+esttab m1 m2 m3 using "tables/wage_regs.tex", replace ///
+    se r2 label booktabs{% endcapture %}
+  {% capture rc %}# Using modelsummary
+pacman::p_load(modelsummary)
+
+# Run regressions
+m1 <- lm(wage ~ education, data = df)
+m2 <- lm(wage ~ education + age, data = df)
+m3 <- lm(wage ~ education + age + experience, data = df)
+
+# Create table
+modelsummary(list("(1)" = m1, "(2)" = m2, "(3)" = m3),
+             stars = TRUE,
+             gof_omit = "IC|Log")
+
+# Export to LaTeX
+modelsummary(list(m1, m2, m3),
+             output = "tables/wage_regs.tex"){% endcapture %}
+  {% capture pc %}# Using stargazer-style output with pyfixest
+import pyfixest as pf
+
+# Run regressions
+m1 = pf.feols('wage ~ education', data=df, vcov='HC1')
+m2 = pf.feols('wage ~ education + age', data=df, vcov='HC1')
+m3 = pf.feols('wage ~ education + age + experience', data=df, vcov='HC1')
+
+# Create table
+pf.etable([m1, m2, m3])
+
+# Export to LaTeX
+pf.etable([m1, m2, m3], type='tex', file='tables/wage_regs.tex'){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+</section>
+
+<!-- ==================== PRACTICE ==================== -->
+<section id="practice" class="tutorial-section">
+  <h2>Practice Exercise</h2>
+
+  <p>Try this exercise to cement what you've learned. Work through it step by step—don't just read the answer.</p>
+
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 12px; margin: 16px 0;">
+    <h4 style="margin-top: 0;">Exercise: Wage Regression with Loops</h4>
+    <p>You have wage data with variables <code>wage</code>, <code>education</code>, <code>age</code>, <code>experience</code>, and <code>state</code>. Write code to:</p>
+    <ol>
+      <li>Create a local/variable called <code>controls</code> containing <code>age experience</code></li>
+      <li>Run a regression of <code>wage</code> on <code>education</code> plus the controls, with robust standard errors</li>
+      <li>Run the same regression with state fixed effects and clustered standard errors</li>
+      <li>Use a loop to summarize all three independent variables (<code>education</code>, <code>age</code>, <code>experience</code>)</li>
+    </ol>
+  </div>
+
+  <details style="margin: 16px 0; padding: 12px 16px; background: #e8f5e9; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: #2e7d32;">Click to see solution (Stata)</summary>
+    <pre style="margin: 12px 0 0; background: #1b5e20; color: #c8e6c9; padding: 16px; border-radius: 6px; overflow-x: auto;"><code>* 1. Create local with controls
+local controls "age experience"
+
+* 2. OLS with robust SEs
+reg wage education `controls', robust
+
+* 3. With state FE and clustered SEs
+reghdfe wage education `controls', absorb(state) cluster(state)
+
+* 4. Summarize each variable in a loop
+foreach v in education age experience {
+    summarize `v'
+}</code></pre>
+  </details>
+
+  <details style="margin: 16px 0; padding: 12px 16px; background: #e8f5e9; border-radius: 8px; cursor: pointer;">
+    <summary style="font-weight: 600; color: #2e7d32;">Click to see solution (R)</summary>
+    <pre style="margin: 12px 0 0; background: #1b5e20; color: #c8e6c9; padding: 16px; border-radius: 6px; overflow-x: auto;"><code>pacman::p_load(fixest, lmtest, sandwich)
+
+# 1. Vector of controls
+controls <- c("age", "experience")
+
+# 2. OLS with robust SEs
+m1 <- lm(wage ~ education + age + experience, data = df)
+coeftest(m1, vcov = vcovHC(m1, type = "HC1"))
+
+# 3. With state FE and clustered SEs
+m2 <- feols(wage ~ education + age + experience | state,
+            cluster = ~state, data = df)
+
+# 4. Summarize each variable in a loop
+for (v in c("education", "age", "experience")) {
+    print(summary(df[[v]]))
+}</code></pre>
+  </details>
+</section>
+
+<section id="quiz" class="tutorial-section">
+  <h2>Tutorial Complete!</h2>
+
+  <p>You've learned the essentials of Stata, from setup to regression. The key takeaways:</p>
+
+  <div style="background: #e8f5e9; padding: 16px 20px; border-radius: 8px; margin: 16px 0;">
+    <ul style="margin: 0; padding-left: 20px;">
+      <li><strong>Setup &amp; exploration</strong>: Always start with <code>clear all</code>, then <code>describe</code>, <code>summarize</code>, and <code>tabulate</code>.</li>
+      <li><strong>Project organization</strong> separates raw data → cleaned data → analysis → output.</li>
+      <li><strong>Data import</strong>: Use <code>import delimited</code> for CSV, <code>use</code> for Stata files.</li>
+      <li><strong>Reshaping &amp; merging</strong> transform data into the format your analysis needs.</li>
+      <li><strong>Loops</strong> eliminate copy-paste code. Write it once, run it many times.</li>
+      <li><strong>Locals</strong> store values you'll reuse. Change once, update everywhere.</li>
+      <li><strong>Standard errors</strong> should be clustered at the level of treatment or correlation.</li>
+      <li><strong>Fixed effects</strong> control for time-invariant unobservables.</li>
+    </ul>
+  </div>
+
+  <div style="background: linear-gradient(135deg, var(--primary) 0%, #c42942 100%); border-radius: 12px; padding: 24px; color: white; text-align: center;">
+    <h3 style="margin: 0 0 8px;">Ready to Test Your Knowledge?</h3>
+    <p style="margin: 0 0 16px; opacity: 0.9;">Answer questions about everything covered in this tutorial</p>
+    <a href="../../poll/student.html" target="_blank" style="display: inline-block; background: white; color: var(--primary); padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">Take the Quiz</a>
+  </div>
+
+  <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);">
+    <a href="../index.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500;">
+      &larr; Back to Tutorials
+    </a>
+  </div>
+</section>
+
+<script>
+function checkAnswer(btn, isCorrect) {
+  const buttons = btn.parentElement.querySelectorAll('button');
+  const feedback = btn.parentElement.nextElementSibling;
+  buttons.forEach(b => { b.disabled = true; b.style.opacity = '0.7'; });
+  if (isCorrect) {
+    btn.style.background = '#d4edda';
+    btn.style.borderColor = '#28a745';
+    btn.style.opacity = '1';
+    feedback.textContent = 'Correct!';
+    feedback.style.background = '#d4edda';
+    feedback.style.color = '#155724';
+  } else {
+    btn.style.background = '#f8d7da';
+    btn.style.borderColor = '#dc3545';
+    btn.style.opacity = '1';
+    feedback.textContent = 'Not quite. Try reviewing the section above.';
+    feedback.style.background = '#f8d7da';
+    feedback.style.color = '#721c24';
+  }
+  feedback.style.display = 'block';
+}
+</script>

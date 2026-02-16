@@ -11,24 +11,13 @@ current_page: advanced
 <section id="loops" class="tutorial-section">
   <h2>Loops and Iteration</h2>
 
-  <div class="key-principle">
-    <h4>Why Use Loops?</h4>
-    <p>Imagine you have 20 outcome variables (income, hours, wages, savings, ...) and need to run the same regression for each one. You could copy-paste the regression command 20 times, changing the outcome variable each time. But if you later decide to add a control variable, you'd have to edit all 20 copies. With a loop, you write the regression once, wrap it in a loop, and let the computer run all 20 versions. Change the control? Edit one line.</p>
-  </div>
+  {% capture kp_content %}<p>Imagine you have 20 outcome variables (income, hours, wages, savings, ...) and need to run the same regression for each one. You could copy-paste the regression command 20 times, changing the outcome variable each time. But if you later decide to add a control variable, you'd have to edit all 20 copies. With a loop, you write the regression once, wrap it in a loop, and let the computer run all 20 versions. Change the control? Edit one line.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Why Use Loops?", content: kp_content %}
 
   <p>A loop executes the same code multiple times, each time with different values. Instead of writing <code>summarize income</code>, <code>summarize age</code>, <code>summarize education</code> separately, you write one loop that summarizes each variable in a list. This is more concise, easier to modify, and less error-prone.</p>
 
   <h3>Basic Loops</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Loop over numbers
+  {% capture sc %}* Loop over numbers
 forvalues i = 1/10 {
     di "Iteration `i'"
 }
@@ -49,8 +38,8 @@ foreach f of local files {
     di "Processing `f'"
     import delimited "data/`f'", clear
     * ... do something ...
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># Loop over numbers
+}{% endcapture %}
+  {% capture rc %}# Loop over numbers
 for (i in 1:10) {
   print(paste("Iteration", i))
 }
@@ -73,8 +62,8 @@ data_list <- list()
 for (f in files) {
   data_list[[f]] <- read_csv(f)
 }
-all_data <- bind_rows(data_list)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Loop over numbers
+all_data <- bind_rows(data_list){% endcapture %}
+  {% capture pc %}# Loop over numbers
 for i in range(1, 11):
     print(f"Iteration {i}")
 
@@ -96,22 +85,13 @@ for f in files:
     # ... do something ...
 
 # Better: use list comprehension and concat
-all_data = pd.concat([pd.read_csv(f) for f in files])</code></pre>
-  </div>
+all_data = pd.concat([pd.read_csv(f) for f in files]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Running Multiple Regressions</h3>
   <p>A common task: run the same specification with different outcome variables, or run the same regression for different subsamples. Loops let you do this systematically, ensuring you apply exactly the same controls and standard errors to each model. This is especially useful for robustness checks—showing your result holds across different outcomes or subgroups.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Run same regression for different outcomes
+  {% capture sc %}* Run same regression for different outcomes
 eststo clear
 foreach outcome in income hours wages {
     eststo `outcome': reg `outcome' treatment age female, robust
@@ -124,8 +104,8 @@ levelsof state, local(states)
 foreach s of local states {
     eststo `s': reg income treatment if state == "`s'", robust
 }
-esttab</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, purrr)
+esttab{% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, purrr)
 
 # Run same regression for different outcomes
 outcomes <- c("income", "hours", "wages")
@@ -145,8 +125,8 @@ models <- map(states, ~ feols(
   vcov = "hetero"
 ))
 names(models) <- states
-etable(models)</code></pre>
-    <pre class="code-content python"><code class="language-python">import pyfixest as pf
+etable(models){% endcapture %}
+  {% capture pc %}import pyfixest as pf
 
 # Run same regression for different outcomes
 outcomes = ['income', 'hours', 'wages']
@@ -162,20 +142,11 @@ models = {}
 for s in states:
     models[s] = pf.feols('income ~ treatment',
                          data=df[df['state'] == s], vcov='HC1')
-pf.etable(list(models.values()))</code></pre>
-  </div>
+pf.etable(list(models.values())){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Storing Results</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create empty dataset to store results
+  {% capture sc %}* Create empty dataset to store results
 clear
 set obs 50
 gen state = ""
@@ -198,8 +169,8 @@ foreach s of local states {
     save "results.dta", replace
 
     local row = `row' + 1
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># Store results in a data frame
+}{% endcapture %}
+  {% capture rc %}# Store results in a data frame
 results_list <- list()
 for (s in unique(data$state)) {
   model <- lm(income ~ treatment, data = filter(data, state == s))
@@ -224,8 +195,8 @@ models <- data %>%
 
 results <- models %>%
   mutate(tidied = map(model, tidy)) %>%
-  unnest(tidied)</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+  unnest(tidied){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 
 # Store results in a list, then convert to DataFrame
 results = []
@@ -248,29 +219,18 @@ results_df = pd.DataFrame([
      'beta': smf.ols('income ~ treatment', data=df[df['state'] == s])
              .fit(cov_type='HC1').params['treatment']}
     for s in df['state'].unique()
-])</code></pre>
-  </div>
+]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="functions" class="tutorial-section">
   <h2>Functions and Programs</h2>
 
-  <div class="key-principle">
-    <h4>Don't Repeat Yourself (DRY)</h4>
-    <p>If you're copy-pasting code and changing small things, write a function instead. This reduces errors and makes your code easier to maintain.</p>
-  </div>
+  {% capture kp_content %}<p>If you're copy-pasting code and changing small things, write a function instead. This reduces errors and makes your code easier to maintain.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Don't Repeat Yourself (DRY)", content: kp_content %}
 
   <h3>Writing Functions</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Define a program (Stata's version of functions)
+  {% capture sc %}* Define a program (Stata's version of functions)
 capture program drop my_regression
 program define my_regression
     * The syntax line defines what inputs your program expects:
@@ -296,8 +256,8 @@ program define my_regression
 end
 
 * Use the program
-my_regression treatment, outcome(income) controls(age female)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Define a function
+my_regression treatment, outcome(income) controls(age female){% endcapture %}
+  {% capture rc %}# Define a function
 run_regression <- function(data, outcome, treatment, controls = NULL) {
 
   # Build formula
@@ -324,8 +284,8 @@ results_list <- list()
 for (outcome in outcomes) {
   results_list[[outcome]] <- run_regression(data, outcome, "treatment")
 }
-results <- bind_rows(results_list, .id = "outcome")</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+results <- bind_rows(results_list, .id = "outcome"){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 
 # Define a function
 def run_regression(data, outcome, treatment, controls=None):
@@ -356,20 +316,11 @@ result = run_regression(df, 'income', 'treatment', ['age', 'female'])
 outcomes = ['income', 'hours', 'wages']
 results_df = pd.DataFrame([
     run_regression(df, outcome, 'treatment') for outcome in outcomes
-])</code></pre>
-  </div>
+]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Modular Code Structure</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* master.do - runs everything
+  {% capture sc %}* master.do - runs everything
 clear all
 set more off
 
@@ -384,8 +335,8 @@ do "$build/code/02_clean.do"
 do "$analysis/code/01_summary_stats.do"
 do "$analysis/code/02_regressions.do"
 
-di "Master script complete!"</code></pre>
-    <pre class="code-content r"><code class="language-r"># master.R - runs everything
+di "Master script complete!"{% endcapture %}
+  {% capture rc %}# master.R - runs everything
 rm(list = ls())
 
 # Set paths
@@ -402,8 +353,8 @@ source(file.path(build, "code", "02_clean.R"))
 source(file.path(analysis, "code", "01_summary_stats.R"))
 source(file.path(analysis, "code", "02_regressions.R"))
 
-cat("Master script complete!\n")</code></pre>
-    <pre class="code-content python"><code class="language-python"># main.py - runs everything
+cat("Master script complete!\n"){% endcapture %}
+  {% capture pc %}# main.py - runs everything
 import os
 from pathlib import Path
 
@@ -422,24 +373,15 @@ exec(open(ANALYSIS / "code" / "02_regressions.py").read())
 # from build.code import import_data, clean_data
 # from analysis.code import summary_stats, regressions
 
-print("Master script complete!")</code></pre>
-  </div>
+print("Master script complete!"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="large-data" class="tutorial-section">
   <h2>Working with Large Datasets</h2>
 
   <h3>Memory Management</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Check current memory usage
+  {% capture sc %}* Check current memory usage
 memory
 
 * Increase memory limit (Stata/MP)
@@ -452,8 +394,8 @@ compress
 keep id year treatment outcome
 
 * Drop unnecessary observations early
-drop if year < 2000</code></pre>
-    <pre class="code-content r"><code class="language-r"># Check object sizes
+drop if year < 2000{% endcapture %}
+  {% capture rc %}# Check object sizes
 object.size(data)
 pryr::mem_used()
 
@@ -465,8 +407,8 @@ gc()  # Force garbage collection
 data <- data %>% select(id, year, treatment, outcome)
 
 # Filter rows early
-data <- data %>% filter(year >= 2000)</code></pre>
-    <pre class="code-content python"><code class="language-python">import sys
+data <- data %>% filter(year >= 2000){% endcapture %}
+  {% capture pc %}import sys
 
 # Check object sizes
 print(f"DataFrame size: {sys.getsizeof(df) / 1e6:.1f} MB")
@@ -485,20 +427,11 @@ df = df[df['year'] >= 2000]
 
 # Optimize dtypes to reduce memory
 df['year'] = df['year'].astype('int16')
-df['treatment'] = df['treatment'].astype('int8')</code></pre>
-  </div>
+df['treatment'] = df['treatment'].astype('int8'){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Efficient Data Formats</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Stata's native .dta format is usually fine
+  {% capture sc %}* Stata's native .dta format is usually fine
 * For very large data, consider:
 
 * 1. Use compress to shrink variable storage
@@ -514,8 +447,8 @@ keep if year <= 2010
 save "data_pre2010.dta", replace
 restore
 keep if year > 2010
-save "data_post2010.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Use efficient file formats
+save "data_post2010.dta", replace{% endcapture %}
+  {% capture rc %}# Use efficient file formats
 
 # Parquet: columnar format, very fast, good compression
 pacman::p_load(arrow)
@@ -530,8 +463,8 @@ data <- read_fst("data.fst")
 # data.table: faster than dplyr for large data
 pacman::p_load(data.table)
 dt <- fread("data.csv")  # Much faster than read_csv
-dt[year >= 2000, .(mean_income = mean(income)), by = state]</code></pre>
-    <pre class="code-content python"><code class="language-python"># Use efficient file formats
+dt[year >= 2000, .(mean_income = mean(income)), by = state]{% endcapture %}
+  {% capture pc %}# Use efficient file formats
 
 # Parquet: columnar format, very fast, good compression
 df.to_parquet("data.parquet")
@@ -552,20 +485,11 @@ table = pq.read_table("data.parquet")
 # Dask for out-of-memory data
 import dask.dataframe as dd
 ddf = dd.read_csv("big_data.csv")
-result = ddf[ddf['year'] >= 2000].groupby('state')['income'].mean().compute()</code></pre>
-  </div>
+result = ddf[ddf['year'] >= 2000].groupby('state')['income'].mean().compute(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Processing in Chunks</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Process data year by year
+  {% capture sc %}* Process data year by year
 forvalues y = 2000/2020 {
     use "big_data.dta" if year == `y', clear
 
@@ -581,8 +505,8 @@ forvalues y = 2000/2020 {
         append using "results.dta"
         save "results.dta", replace
     }
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># Read and process in chunks
+}{% endcapture %}
+  {% capture rc %}# Read and process in chunks
 pacman::p_load(readr)
 
 # Define processing function
@@ -606,8 +530,8 @@ ds %>%
   filter(year >= 2000) %>%
   group_by(state) %>%
   summarize(mean_income = mean(income)) %>%
-  collect()  # Only materializes the result</code></pre>
-    <pre class="code-content python"><code class="language-python"># Read and process in chunks
+  collect()  # Only materializes the result{% endcapture %}
+  {% capture pc %}# Read and process in chunks
 results = []
 for chunk in pd.read_csv("big_data.csv", chunksize=100000):
     # Process this chunk
@@ -630,18 +554,16 @@ result = (ddf[ddf['year'] >= 2000]
 import pyarrow.dataset as ds
 dataset = ds.dataset("data_folder/", format="parquet")
 table = dataset.to_table(filter=ds.field('year') >= 2000)
-df = table.to_pandas()</code></pre>
-  </div>
+df = table.to_pandas(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Speed Tips</h4>
-    <ul>
+  {% capture kp_content %}<ul>
       <li><strong>Filter early:</strong> Remove unneeded rows/columns before processing</li>
       <li><strong>Use indexes:</strong> In Stata, <code>xtset</code> or <code>sort</code> before merging</li>
       <li><strong>Avoid loops when possible:</strong> Vectorized operations are much faster</li>
       <li><strong>Use specialized packages:</strong> <code>reghdfe</code> in Stata, <code>fixest</code> in R are optimized for large data</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Speed Tips", content: kp_content %}
 </section>
 
 <section id="acknowledgements" class="tutorial-section">

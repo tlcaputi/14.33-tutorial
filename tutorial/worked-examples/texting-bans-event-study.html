@@ -14,10 +14,10 @@ current_page: texting-bans
 
   <p>This worked example walks through a complete event study analysis examining whether state texting-while-driving bans reduced traffic fatalities. We'll use data from the Fatality Analysis Reporting System (FARS), which records all fatal motor vehicle crashes in the United States.</p>
 
-  <div class="key-principle">
-    <h4>Research Question</h4>
-    <p>Did state laws banning texting while driving reduce traffic fatalities? States adopted these bans at different times between 2007 and 2020, providing staggered variation for a difference-in-differences/event study design.</p>
-  </div>
+  {% capture kp_content %}
+  <p>Did state laws banning texting while driving reduce traffic fatalities? States adopted these bans at different times between 2007 and 2020, providing staggered variation for a difference-in-differences/event study design.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
 
   <h3>What We'll Do</h3>
   <ol>
@@ -31,35 +31,26 @@ current_page: texting-bans
   <h3>Project Setup</h3>
   <p>Create a directory structure for this project:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create project directories
+  {% capture sc %}* Create project directories
 mkdir "texting-bans"
 cd "texting-bans"
 mkdir "data/raw"
 mkdir "data/clean"
-mkdir "output"</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create project directories
+mkdir "output"{% endcapture %}
+  {% capture rc %}# Create project directories
 dir.create("texting-bans/data/raw", recursive = TRUE)
 dir.create("texting-bans/data/clean", recursive = TRUE)
 dir.create("texting-bans/output", recursive = TRUE)
-setwd("texting-bans")</code></pre>
-    <pre class="code-content python"><code class="language-python">import os
+setwd("texting-bans"){% endcapture %}
+  {% capture pc %}import os
 from pathlib import Path
 
 # Create project directories
 for d in ["data/raw", "data/clean", "output"]:
     Path(f"texting-bans/{d}").mkdir(parents=True, exist_ok=True)
 
-os.chdir("texting-bans")</code></pre>
-  </div>
+os.chdir("texting-bans"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="download-data" class="tutorial-section">
@@ -67,24 +58,15 @@ os.chdir("texting-bans")</code></pre>
 
   <p>NHTSA provides FARS data as downloadable CSV files for each year. We'll download data from 2007-2022 to have adequate pre- and post-periods for most states.</p>
 
-  <div class="key-principle">
-    <h4>Data Source</h4>
-    <p>The Fatality Analysis Reporting System (FARS) is a nationwide census of fatal motor vehicle crashes. Each row in the <code>accident.csv</code> file represents one fatal crash, with variables for state, date, number of fatalities, and crash characteristics.</p>
-  </div>
+  {% capture kp_content %}
+  <p>The Fatality Analysis Reporting System (FARS) is a nationwide census of fatal motor vehicle crashes. Each row in the <code>accident.csv</code> file represents one fatal crash, with variables for state, date, number of fatalities, and crash characteristics.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Data Source", content: kp_content %}
 
   <h3>Download FARS Files</h3>
   <p>Download the accident files for each year. These are large files (~20-30MB each), so this may take a few minutes.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Download FARS data for each year
+  {% capture sc %}* Download FARS data for each year
 * Note: Stata doesn't have built-in URL downloading, so we use shell commands
 
 local years 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022
@@ -99,8 +81,8 @@ foreach year of local years {
         -d "data/raw/" && mv "data/raw/accident.csv" "data/raw/accident_`year'.csv"
 
     display "Downloaded `year'"
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># Download FARS data for each year
+}{% endcapture %}
+  {% capture rc %}# Download FARS data for each year
 pacman::p_load(tidyverse)
 
 years <- 2007:2022
@@ -125,8 +107,8 @@ for (year in years) {
   unlink("data/raw/temp", recursive = TRUE)
 
   message("Downloaded ", year)
-}</code></pre>
-    <pre class="code-content python"><code class="language-python">import requests
+}{% endcapture %}
+  {% capture pc %}import requests
 import zipfile
 import io
 import glob
@@ -151,22 +133,13 @@ for year in years:
              open(f"data/raw/accident_{year}.csv", "wb") as dst:
             dst.write(src.read())
 
-    print(f"Downloaded {year}")</code></pre>
-  </div>
+    print(f"Downloaded {year}"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Load and Combine Years</h3>
   <p>Now load and append all years into a single dataset:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load and append all years
+  {% capture sc %}* Load and append all years
 clear
 tempfile combined
 save `combined', emptyok
@@ -187,8 +160,8 @@ save "data/clean/fars_all_years.dta", replace
 
 * Check the data
 tab year
-summarize fatals</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load and combine all years
+summarize fatals{% endcapture %}
+  {% capture rc %}# Load and combine all years
 pacman::p_load(tidyverse)
 
 fars_list <- list()
@@ -208,8 +181,8 @@ write_csv(fars_data, "data/clean/fars_all_years.csv")
 # Check the data
 fars_data %>% count(year)
 fars_data %>% summarize(mean_fatals = mean(fatals),
-                        total_fatals = sum(fatals))</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+                        total_fatals = sum(fatals)){% endcapture %}
+  {% capture pc %}import pandas as pd
 
 # Load and combine all years
 frames = []
@@ -226,8 +199,8 @@ fars_data.to_csv("data/clean/fars_all_years.csv", index=False)
 
 # Check the data
 print(fars_data.groupby("year").size())
-print(fars_data["fatals"].describe())</code></pre>
-  </div>
+print(fars_data["fatals"].describe()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="clean-aggregate" class="tutorial-section">
@@ -237,16 +210,7 @@ print(fars_data["fatals"].describe())</code></pre>
 
   <h3>Aggregate to State-Year</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">use "data/clean/fars_all_years.dta", clear
+  {% capture sc %}use "data/clean/fars_all_years.dta", clear
 
 * Collapse to state-year totals
 collapse (sum) fatalities = fatals (count) n_crashes = fatals, by(state statename year)
@@ -263,8 +227,8 @@ tsfill, full
 * Summary statistics
 summarize fatalities n_crashes
 
-save "data/clean/state_year_fatalities.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Aggregate to state-year totals
+save "data/clean/state_year_fatalities.dta", replace{% endcapture %}
+  {% capture rc %}# Aggregate to state-year totals
 state_year <- fars_data |>
   group_by(state, statename, year) |>
   summarize(
@@ -281,8 +245,8 @@ state_year |>
 # Summary statistics
 summary(state_year$fatalities)
 
-write_csv(state_year, "data/clean/state_year_fatalities.csv")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Aggregate to state-year totals
+write_csv(state_year, "data/clean/state_year_fatalities.csv"){% endcapture %}
+  {% capture pc %}# Aggregate to state-year totals
 state_year = (fars_data
     .groupby(["state", "statename", "year"])
     .agg(fatalities=("fatals", "sum"),
@@ -301,16 +265,16 @@ print("Missing state-years:", missing["fatalities"].isna().sum())
 # Summary statistics
 print(state_year["fatalities"].describe())
 
-state_year.to_csv("data/clean/state_year_fatalities.csv", index=False)</code></pre>
-  </div>
+state_year.to_csv("data/clean/state_year_fatalities.csv", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Add Population Data (Optional)</h3>
   <p>For a more rigorous analysis, you'd want to calculate fatality <em>rates</em> per 100,000 population. You can get state population data from the Census Bureau's API or from FRED.</p>
 
-  <div class="common-mistakes">
-    <h4>Why Rates Matter (Even with State Fixed Effects)</h4>
-    <p>State fixed effects already absorb time-invariant differences in population levels (Texas is always bigger than Vermont). The concern is <em>differential population growth</em> over the study period. If fast-growing states adopted texting bans at different times than slow-growing states, raw fatality counts could confound population trends with policy effects. Per-capita rates address this by removing variation due to changing population size.</p>
-  </div>
+  {% capture cm_content %}
+  <p>State fixed effects already absorb time-invariant differences in population levels (Texas is always bigger than Vermont). The concern is <em>differential population growth</em> over the study period. If fast-growing states adopted texting bans at different times than slow-growing states, raw fatality counts could confound population trends with policy effects. Per-capita rates address this by removing variation due to changing population size.</p>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Why Rates Matter (Even with State Fixed Effects)", content: cm_content %}
 </section>
 
 <section id="merge-policy" class="tutorial-section">
@@ -321,16 +285,7 @@ state_year.to_csv("data/clean/state_year_fatalities.csv", index=False)</code></p
   <h3>Policy Data</h3>
   <p>First, download the policy dates file (compiled from GHSA and IIHS sources):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load policy dates
+  {% capture sc %}* Load policy dates
 * Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
 import delimited "data/raw/texting_ban_dates.csv", clear
 
@@ -341,48 +296,39 @@ destring texting_ban_year, replace force
 save "data/clean/texting_ban_dates.dta", replace
 
 * Preview the data
-list state state_name texting_ban_year primary_enforcement in 1/10</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load policy dates
+list state state_name texting_ban_year primary_enforcement in 1/10{% endcapture %}
+  {% capture rc %}# Load policy dates
 # Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
 policy <- read_csv("data/raw/texting_ban_dates.csv",
                    na = c("", "NA", "."),
                    show_col_types = FALSE)
 
 # Preview
-head(policy, 10)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Load policy dates
+head(policy, 10){% endcapture %}
+  {% capture pc %}# Load policy dates
 # Download from: theodorecaputi.com/teaching/14.33/tutorial/worked-examples/texting_ban_dates.csv
 policy = pd.read_csv("data/raw/texting_ban_dates.csv",
                      na_values=["", "NA", "."])
 
 # Preview
-print(policy.head(10))</code></pre>
-  </div>
+print(policy.head(10)){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Policy Data Format</h4>
-    <p>The <code>texting_ban_dates.csv</code> file contains the following columns:</p>
-    <ul>
-      <li><strong>state</strong>: Numeric FIPS code (1-56) matching the FARS <code>state</code> column</li>
-      <li><strong>state_name</strong>: Full state name (e.g., "Alabama", "Montana")</li>
-      <li><strong>texting_ban_year</strong>: Year the texting ban took effect (NA for states without a ban)</li>
-      <li><strong>primary_enforcement</strong>: 1 if the ban has primary enforcement (police can stop drivers solely for texting), 0 if secondary enforcement only</li>
-    </ul>
-    <p>Montana and Missouri (which only banned texting for drivers under 21, not a statewide comprehensive ban) have <code>texting_ban_year</code> set to NA. The <code>state</code> column uses numeric FIPS codes that match the FARS data, making the merge straightforward.</p>
-  </div>
+  {% capture kp_content %}
+  <p>The <code>texting_ban_dates.csv</code> file contains the following columns:</p>
+  <ul>
+    <li><strong>state</strong>: Numeric FIPS code (1-56) matching the FARS <code>state</code> column</li>
+    <li><strong>state_name</strong>: Full state name (e.g., "Alabama", "Montana")</li>
+    <li><strong>texting_ban_year</strong>: Year the texting ban took effect (NA for states without a ban)</li>
+    <li><strong>primary_enforcement</strong>: 1 if the ban has primary enforcement (police can stop drivers solely for texting), 0 if secondary enforcement only</li>
+  </ul>
+  <p>Montana and Missouri (which only banned texting for drivers under 21, not a statewide comprehensive ban) have <code>texting_ban_year</code> set to NA. The <code>state</code> column uses numeric FIPS codes that match the FARS data, making the merge straightforward.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Policy Data Format", content: kp_content %}
 
   <h3>Merge and Create Treatment Variables</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Merge fatality data with policy dates
+  {% capture sc %}* Merge fatality data with policy dates
 use "data/clean/state_year_fatalities.dta", clear
 merge m:1 state using "data/clean/texting_ban_dates.dta"
 
@@ -403,8 +349,8 @@ replace event_time = -999 if missing(texting_ban_year)
 tab texting_ban_year, missing
 tab event_time if event_time != -999
 
-save "data/clean/analysis_data.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Merge fatality data with policy dates
+save "data/clean/analysis_data.dta", replace{% endcapture %}
+  {% capture rc %}# Merge fatality data with policy dates
 analysis_data <- state_year %>%
   merge(policy, by = "state", all.x = TRUE) %>%
   mutate(
@@ -429,8 +375,8 @@ analysis_data <- state_year %>%
 analysis_data %>% count(texting_ban_year)
 analysis_data %>% filter(event_time != -1000) %>% count(event_time)
 
-write_csv(analysis_data, "data/clean/analysis_data.csv")</code></pre>
-    <pre class="code-content python"><code class="language-python">import numpy as np
+write_csv(analysis_data, "data/clean/analysis_data.csv"){% endcapture %}
+  {% capture pc %}import numpy as np
 
 # Merge fatality data with policy dates
 analysis_data = state_year.merge(policy, on="state", how="left")
@@ -455,27 +401,18 @@ print(analysis_data.groupby("texting_ban_year", dropna=False).size())
 print(analysis_data.query("event_time != -1000")
       .groupby("event_time").size())
 
-analysis_data.to_csv("data/clean/analysis_data.csv", index=False)</code></pre>
-  </div>
+analysis_data.to_csv("data/clean/analysis_data.csv", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Event Time</h4>
-    <p><code>event_time = year - texting_ban_year</code> measures years relative to treatment. Negative values are pre-treatment, zero is the treatment year, and positive values are post-treatment. This is the key variable for our event study.</p>
-  </div>
+  {% capture kp_content %}
+  <p><code>event_time = year - texting_ban_year</code> measures years relative to treatment. Negative values are pre-treatment, zero is the treatment year, and positive values are post-treatment. This is the key variable for our event study.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Event Time", content: kp_content %}
 
   <h3>Merge Economic Controls</h3>
   <p>State and year fixed effects control for time-invariant state characteristics and common year shocks, but they don't control for things that vary <em>both</em> across states <em>and</em> over time. If economic conditions differ across states and correlate with when states adopt texting bans, we could have a problem. We'll add state-level unemployment and per capita income from <a href="https://fred.stlouisfed.org/" target="_blank">FRED</a>.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Download state unemployment and income from FRED
+  {% capture sc %}* Download state unemployment and income from FRED
 * Each state has a series like "ALUR" (Alabama), "AKUR" (Alaska), etc.
 * We download each, extract the annual average, and merge.
 
@@ -539,8 +476,8 @@ use "data/clean/analysis_data.dta", clear
 merge 1:1 state year using `unemp_all', nogen keep(master match)
 merge 1:1 state year using `income_all', nogen keep(master match)
 
-save "data/clean/analysis_data.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Download state unemployment and income from FRED
+save "data/clean/analysis_data.dta", replace{% endcapture %}
+  {% capture rc %}# Download state unemployment and income from FRED
 # Each state has a FRED series: e.g., "ALUR" for Alabama unemployment
 pacman::p_load(tidyverse)
 
@@ -590,8 +527,8 @@ analysis_data <- analysis_data %>%
   merge(all_unemp, by = c("state", "year"), all.x = TRUE) %>%
   merge(all_income, by = c("state", "year"), all.x = TRUE)
 
-write_csv(analysis_data, "data/clean/analysis_data.csv")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Download state unemployment and income from FRED
+write_csv(analysis_data, "data/clean/analysis_data.csv"){% endcapture %}
+  {% capture pc %}# Download state unemployment and income from FRED
 # Each state has a FRED series: e.g., "ALUR" for Alabama unemployment
 
 state_codes = [
@@ -650,8 +587,8 @@ analysis_data = (analysis_data
     .merge(all_unemp, on=["state", "year"], how="left")
     .merge(all_income, on=["state", "year"], how="left"))
 
-analysis_data.to_csv("data/clean/analysis_data.csv", index=False)</code></pre>
-  </div>
+analysis_data.to_csv("data/clean/analysis_data.csv", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="event-study" class="tutorial-section">
@@ -676,16 +613,7 @@ analysis_data.to_csv("data/clean/analysis_data.csv", index=False)</code></pre>
 
   <h3>Create Event Time Dummies</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">use "data/clean/analysis_data.dta", clear
+  {% capture sc %}use "data/clean/analysis_data.dta", clear
 
 * Bin endpoints (combine -6 and earlier, +6 and later)
 gen event_time_binned = event_time
@@ -702,8 +630,8 @@ forvalues k = -6/6 {
 }
 
 * Verify: never-treated states should have all zeros
-summarize et_* if missing(texting_ban_year)</code></pre>
-    <pre class="code-content r"><code class="language-r"># In fixest, we use the bin argument inside i() to bin endpoints
+summarize et_* if missing(texting_ban_year){% endcapture %}
+  {% capture rc %}# In fixest, we use the bin argument inside i() to bin endpoints
 # instead of manually creating a binned variable with case_when.
 # This is cleaner and less error-prone.
 #
@@ -712,8 +640,8 @@ summarize et_* if missing(texting_ban_year)</code></pre>
 # is undefined. We can't just drop them (we need them as controls).
 # By coding them as -1000 and including -1000 in ref, fixest:
 #   1. Keeps them in the regression (they contribute to fixed effects)
-#   2. Doesn't create a dummy for them (no event_time = -1000 coefficient)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Bin endpoints (but keep never-treated at -1000)
+#   2. Doesn't create a dummy for them (no event_time = -1000 coefficient){% endcapture %}
+  {% capture pc %}# Bin endpoints (but keep never-treated at -1000)
 analysis_data["event_time_binned"] = np.where(
     analysis_data["event_time"] == -1000, -1000,
     np.clip(analysis_data["event_time"], -6, 6)
@@ -730,21 +658,12 @@ for k in range(-6, 7):
 
 # Verify: never-treated states should have all zeros
 et_cols = [c for c in analysis_data.columns if c.startswith("et_")]
-print(analysis_data.loc[analysis_data["event_time"] == -1000, et_cols].sum())</code></pre>
-  </div>
+print(analysis_data.loc[analysis_data["event_time"] == -1000, et_cols].sum()){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Run the Event Study</h3>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Install reghdfe if needed
+  {% capture sc %}* Install reghdfe if needed
 * ssc install reghdfe
 * ssc install ftools
 
@@ -769,8 +688,8 @@ esttab event_study, se keep(et_*) ///
 * xtevent ln_fatalities unemployment income, ///
 *     policyvar(treated) panelvar(state) timevar(year) ///
 *     window(6) cluster(state)
-* xteventplot, title("Event Study: Texting Bans (xtevent)")</code></pre>
-    <pre class="code-content r"><code class="language-r"># Install fixest if needed
+* xteventplot, title("Event Study: Texting Bans (xtevent)"){% endcapture %}
+  {% capture rc %}# Install fixest if needed
 # install.packages("fixest")
 pacman::p_load(fixest, ggfixest)
 
@@ -793,8 +712,8 @@ event_study <- feols(
 )
 
 # Display results
-summary(event_study)</code></pre>
-    <pre class="code-content python"><code class="language-python"># pip install linearmodels
+summary(event_study){% endcapture %}
+  {% capture pc %}# pip install linearmodels
 from linearmodels.panel import PanelOLS
 
 # Log transform outcome
@@ -811,13 +730,13 @@ formula = "ln_fatalities ~ " + " + ".join(et_cols) + " + unemployment + income +
 model = PanelOLS.from_formula(formula, data=panel)
 event_study = model.fit(cov_type="clustered", cluster_entity=True)
 
-print(event_study.summary)</code></pre>
-  </div>
+print(event_study.summary){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>Standard Errors</h4>
-    <p>We cluster standard errors at the state level because (1) treatment varies at the state level, and (2) fatalities within a state are likely correlated over time. This is essential for correct inference in DiD designs.</p>
-  </div>
+  {% capture cm_content %}
+  <p>We cluster standard errors at the state level because (1) treatment varies at the state level, and (2) fatalities within a state are likely correlated over time. This is essential for correct inference in DiD designs.</p>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Standard Errors", content: cm_content %}
 
   <h3>Results</h3>
   <p>The event study coefficients (relative to t = &minus;1) with 95% confidence intervals:</p>
@@ -857,16 +776,7 @@ print(event_study.summary)</code></pre>
 
   <p>The classic event study plot shows coefficients and confidence intervals for each event time, with the reference period (t = -1) normalized to zero.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Install coefplot if needed
+  {% capture sc %}* Install coefplot if needed
 * ssc install coefplot
 
 * Create event study plot
@@ -886,8 +796,8 @@ coefplot event_study, ///
     msymbol(D) mcolor(navy) ///
     graphregion(color(white)) bgcolor(white)
 
-graph export "output/event_study.png", replace width(1200)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Quick event study plot with ggiplot (one line!)
+graph export "output/event_study.png", replace width(1200){% endcapture %}
+  {% capture rc %}# Quick event study plot with ggiplot (one line!)
 pacman::p_load(ggfixest)
 p <- ggiplot(event_study,
         xlab = "Years Relative to Texting Ban",
@@ -925,8 +835,8 @@ p <- ggplot(coef_df, aes(x = event_time, y = estimate)) +
     plot.title = element_text(hjust = 0.5)
   )
 
-ggsave("output/event_study.png", p, width = 10, height = 6, dpi = 300)</code></pre>
-    <pre class="code-content python"><code class="language-python">import matplotlib.pyplot as plt
+ggsave("output/event_study.png", p, width = 10, height = 6, dpi = 300){% endcapture %}
+  {% capture pc %}import matplotlib.pyplot as plt
 
 # Extract coefficients and confidence intervals
 et_order = ["et_m6", "et_m5", "et_m4", "et_m3", "et_m2",
@@ -966,8 +876,8 @@ ax.annotate("Coefficients relative to t=-1. 95% CIs shown.\n"
 
 plt.tight_layout()
 plt.savefig("output/event_study.png", dpi=300)
-plt.show()</code></pre>
-  </div>
+plt.show(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Output</h3>
   <div style="margin: 20px 0; text-align: center;">
@@ -993,10 +903,10 @@ plt.show()</code></pre>
     </a>
   </div>
 
-  <div class="key-principle">
-    <h4>What's Included</h4>
-    <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (52 rows). FARS data (~400MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
-  </div>
+  {% capture kp_content %}
+  <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (52 rows). FARS data (~400MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "What's Included", content: kp_content %}
 </section>
 
 <section id="interpretation" class="tutorial-section">
@@ -1020,10 +930,10 @@ plt.show()</code></pre>
     </div>
   </div>
 
-  <div class="common-mistakes">
-    <h4>Null Results Are Results</h4>
-    <p>If you find no effect of texting bans on fatalities, that's a finding. It could mean bans are ineffective, or that enforcement is weak, or that texting wasn't a major cause of fatal crashes. Don't bury null results.</p>
-  </div>
+  {% capture cm_content %}
+  <p>If you find no effect of texting bans on fatalities, that's a finding. It could mean bans are ineffective, or that enforcement is weak, or that texting wasn't a major cause of fatal crashes. Don't bury null results.</p>
+  {% endcapture %}
+  {% include "common-mistake.liquid", title: "Null Results Are Results", content: cm_content %}
 
   <h3>Caveats and Extensions</h3>
   <ul style="line-height: 2;">
@@ -1032,8 +942,8 @@ plt.show()</code></pre>
     <li><strong>Other policies:</strong> Handheld bans, distracted driving laws, and other traffic safety policies may confound results.</li>
   </ul>
 
-  <div class="callout-info">
-    <h4>A Note on Staggered Timing</h4>
-    <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
-  </div>
+  {% capture callout_content %}
+  <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
 </section>

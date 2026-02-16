@@ -7,12 +7,10 @@ current_page: causal-methods
 <p class="subtitle">Instrumental variables, difference-in-differences, event studies, regression discontinuity</p>
 
 <!-- Growth Mindset Message -->
-<div class="callout-success">
-  <strong>Three Identification Strategies</strong>
-  <p style="margin: 8px 0 0;">
-    You have three main tools in your toolkit for this class: DiD/Event Studies compare treated and control groups before and after treatment; IV uses an "experiment-like" random shock to your treatment; and RD exploits a threshold or cutoff. Understanding when to use each is key.
-  </p>
-</div>
+{% capture callout_content %}<p style="margin: 8px 0 0;">
+    You have four main tools in your toolbox: IV uses an "experiment-like" random shock to your treatment; DiD/Event Studies compare treated and control groups before and after treatment; RD exploits a threshold or cutoff; and sometimes you find a real random experiment (RCT). Understanding when to use each is key.
+  </p>{% endcapture %}
+{% include "callout.liquid", type: "success", title: "Four Identification Strategies", content: callout_content %}
 
 <section id="iv" class="tutorial-section">
   <h2>Instrumental Variables</h2>
@@ -27,15 +25,6 @@ current_page: causal-methods
   </ul>
 
   <p>OLS mixes these together. Your coefficient captures both the true effect of education and the fact that "education" is partly a proxy for ability. This is called <strong>omitted variable bias</strong>—ability affects both X and Y, but you can't measure it.</p>
-
-  <div class="callout-info">
-    <h4>IV in Practice</h4>
-    <ul style="margin: 8px 0 0; padding-left: 18px;">
-      <li><strong>Angrist (1990), "Lifetime Earnings and the Vietnam Era Draft Lottery"</strong> <em>AER.</em> Uses the draft lottery number as an instrument for military service. The lottery randomly assigned draft eligibility, creating exogenous variation in who served in Vietnam. <a href="https://doi.org/10.3386/w3514" target="_blank">[Link]</a></li>
-      <li><strong>Angrist &amp; Krueger (1991), "Does Compulsory School Attendance Affect Schooling and Earnings?"</strong> <em>QJE.</em> Uses quarter of birth as an instrument for years of schooling. People born earlier in the year can drop out sooner due to compulsory attendance laws, generating exogenous variation in education. <a href="https://doi.org/10.2307/2937954" target="_blank">[Link]</a></li>
-      <li><strong>Gruber, Howard, Leder-Luis &amp; Caputi (2025), "Dying or Lying? For-Profit Hospices and End-of-Life Care"</strong> <em>AER.</em> Uses entry of for-profit hospices as an instrument to estimate the causal effect of hospice care on Medicare spending among Alzheimer's and dementia patients, finding that hospice enrollment reduces costs by offsetting more expensive treatments. <a href="https://doi.org/10.1257/aer.20230328" target="_blank">[Link]</a></li>
-    </ul>
-  </div>
 
   <h3>The IV Solution</h3>
 
@@ -55,18 +44,18 @@ current_page: causal-methods
   </ol>
 
   <!-- IV Equations -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The two-stage least squares estimating equations:</div>
+  <div class="equation-box">
+    <div class="equation-label">The two-stage least squares estimating equations:</div>
     <div style="margin-bottom: 16px;">
       <div style="color: #666; font-size: 0.85em; margin-bottom: 4px;">First stage (predict endogenous variable):</div>
-      <div style="font-size: 1.1em; text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+      <div class="equation-content" style="background: #fff; border-radius: 4px;">
         <span style="color: #e65100;">X<sub>i</sub></span> =
         π₀ + π₁<span style="color: #1565c0;">Z<sub>i</sub></span> + ν<sub>i</sub>
       </div>
     </div>
     <div>
       <div style="color: #666; font-size: 0.85em; margin-bottom: 4px;">Second stage (use predicted values):</div>
-      <div style="font-size: 1.1em; text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+      <div class="equation-content" style="background: #fff; border-radius: 4px;">
         <span style="color: #2e7d32;">Y<sub>i</sub></span> =
         β₀ + β₁<span style="color: #e65100;">X̂<sub>i</sub></span> + ε<sub>i</sub>
       </div>
@@ -78,16 +67,7 @@ current_page: causal-methods
     </div>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 2SLS: Y = outcome, X = endogenous, Z = instrument
+  {% capture sc %}* 2SLS: Y = outcome, X = endogenous, Z = instrument
 * Syntax: ivregress 2sls Y controls (X = Z)
 
 ivregress 2sls income age female (education = distance_to_college)
@@ -99,8 +79,8 @@ estat firststage
 ivregress 2sls income age (education = distance), robust
 
 * With fixed effects
-ivreghdfe income age (education = distance), absorb(state) cluster(state)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+ivreghdfe income age (education = distance), absorb(state) cluster(state){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # 2SLS with fixest
 # Syntax: Y ~ controls | FE | endogenous ~ instrument
@@ -113,8 +93,8 @@ fitstat(model, "ivf")
 
 # With fixed effects
 model <- feols(income ~ age | state | education ~ distance,
-               data = data, vcov = ~state)</code></pre>
-    <pre class="code-content python"><code class="language-python">from linearmodels.iv import IV2SLS
+               data = data, vcov = ~state){% endcapture %}
+  {% capture pc %}from linearmodels.iv import IV2SLS
 import pandas as pd
 
 # 2SLS: Y = outcome, X = endogenous, Z = instrument
@@ -131,30 +111,19 @@ print(f"First-stage F: {model.first_stage.diagnostics['f.stat'].stat:.2f}")
 model = IV2SLS.from_formula(
     'income ~ 1 + age + [education ~ distance]',
     data=data
-).fit(cov_type='robust')</code></pre>
-  </div>
+).fit(cov_type='robust'){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="first-stage">Checking Instrument Strength: First-Stage F-Statistic</h3>
   <p>The first-stage F-statistic tests whether your instrument actually predicts the endogenous variable. Rule of thumb: F > 10 suggests the instrument is strong enough. Weak instruments (F < 10) lead to biased estimates and unreliable inference.</p>
 
-  <div class="key-principle">
-    <h4>Instrument Strength Matters</h4>
-    <p>Even if your instrument is valid (doesn't affect Y directly), it only helps if it's relevant (actually predicts X). Always report the first-stage F-statistic—readers need to know if your instrument is strong.</p>
-  </div>
+  {% capture kp_content %}<p>Even if your instrument is valid (doesn't affect Y directly), it only helps if it's relevant (actually predicts X). Always report the first-stage F-statistic—readers need to know if your instrument is strong.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Instrument Strength Matters", content: kp_content %}
 
   <h3>Complete IV Example: Protest Size and Voting</h3>
   <p>Research question: Does protest size affect voting? Problem: larger protests might occur in places that would vote differently anyway. Solution: use weather (rain) as an instrument—rain reduces protest size but shouldn't directly affect voting.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* First stage: Does rain affect protest size?
+  {% capture sc %}* First stage: Does rain affect protest size?
 reg protest rain, robust
 eststo first_stage
 
@@ -170,8 +139,8 @@ eststo reduced_form
 esttab first_stage iv_model reduced_form ///
     using "iv_results.tex", replace ///
     b(3) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
-    stats(N r2 F, fmt(%9.0fc %9.3f %9.2f))</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, modelsummary)
+    stats(N r2 F, fmt(%9.0fc %9.3f %9.2f)){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, modelsummary)
 
 # First stage: Does rain affect protest size?
 first_stage <- feols(protest ~ rain, data = data, vcov = "hetero")
@@ -189,8 +158,8 @@ modelsummary(
        "Reduced Form" = reduced_form),
   stars = c('*' = 0.10, '**' = 0.05, '***' = 0.01),
   output = "iv_results.tex"
-)</code></pre>
-    <pre class="code-content python"><code class="language-python">import statsmodels.formula.api as smf
+){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
 from linearmodels.iv import IV2SLS
 from stargazer.stargazer import Stargazer
 
@@ -207,42 +176,27 @@ reduced_form = smf.ols('vote ~ rain', data=data).fit(cov_type='HC1')
 
 # Export results
 stargazer = Stargazer([first_stage, reduced_form])
-stargazer.render_latex()  # or .render_html()</code></pre>
-  </div>
+stargazer.render_latex()  # or .render_html(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Common IV Pitfalls</h3>
-  <div class="common-mistakes">
-    <h4>Watch Out For</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li><strong>Weak instruments:</strong> F < 10 means your IV estimates are badly biased toward OLS</li>
       <li><strong>Invalid exclusion:</strong> If the instrument affects Y directly, your estimate is biased</li>
       <li><strong>LATE vs ATE:</strong> IV estimates effects only for "compliers" - this may not generalize</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
 </section>
 
 <section id="did" class="tutorial-section">
   <h2>Difference-in-Differences</h2>
 
-  <div class="callout-success">
-    <strong>Most students will use DiD/Event Studies for this class.</strong>
-  </div>
-
   <p>Difference-in-differences compares changes over time between a treated group and a control group. The key assumption is that both groups would have followed <strong>parallel trends</strong> in the absence of treatment.</p>
 
-  <div class="callout-info">
-    <h4>DiD in Practice</h4>
-    <ul style="margin: 8px 0 0; padding-left: 18px;">
-      <li><strong>Card &amp; Krueger (1994), "Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania"</strong> <em>AER.</em> Compares employment at fast-food restaurants in NJ (which raised its minimum wage) vs. PA (which didn't). Found no evidence that the minimum wage increase reduced employment—a result that reshaped the policy debate. <a href="https://doi.org/10.3386/w4509" target="_blank">[Link]</a></li>
-      <li><strong>Meinhofer, Witman, Hinde &amp; Simon (2021), "Marijuana Liberalization Policies and Perinatal Health"</strong> <em>Journal of Health Economics.</em> Uses a DiD design to study how state-level marijuana legalization policies affect pregnancy and birth outcomes. <a href="https://doi.org/10.1016/j.jhealeco.2021.102537" target="_blank">[Link]</a></li>
-      <li><strong>Braghieri, Levy &amp; Makarin (2022), "Social Media and Mental Health"</strong> <em>AER.</em> Exploits the staggered rollout of Facebook across U.S. college campuses. Compares mental health outcomes at colleges that gained Facebook access to those that hadn't yet, finding that Facebook introduction worsened student mental health. <a href="https://doi.org/10.1257/aer.20211218" target="_blank">[Link]</a></li>
-    </ul>
-  </div>
-
   <!-- DiD/TWFE Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The two-way fixed effects (TWFE) estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The two-way fixed effects (TWFE) estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>it</sub></span> =
       β₀ + <span style="color: #c62828;">β₁</span>(<span style="color: #2e7d32;">Treat<sub>i</sub></span> × <span style="color: #2e7d32;">Post<sub>t</sub></span>) +
       <span style="color: #7b1fa2;">α<sub>i</sub></span> + <span style="color: #00695c;">γ<sub>t</sub></span> + ε<sub>it</sub>
@@ -291,10 +245,8 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   </div>
 
   <h3>Real-World Example: No-Fault Divorce and Female Suicide</h3>
-  <div class="key-principle">
-    <h4>Research Question</h4>
-    <p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>
-  </div>
+  {% capture kp_content %}<p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
 
   <p>The analysis requires setting up several key variables:</p>
   <ul>
@@ -304,16 +256,7 @@ stargazer.render_latex()  # or .render_html()</code></pre>
   </ul>
 
   <h3>Basic 2x2 DiD</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Generate treatment indicator
+  {% capture sc %}* Generate treatment indicator
 gen treated = (state == "CA")
 gen post = (year >= 2015)
 gen treat_post = treated * post
@@ -327,8 +270,8 @@ reg outcome treated post treat_post, cluster(state)
 reghdfe outcome treat_post, absorb(state year) cluster(state)
 
 * With controls (like the divorce study)
-reghdfe asmrs treat_post pcinc asmrh cases, absorb(stfips year) cluster(stfips)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest)
+reghdfe asmrs treat_post pcinc asmrh cases, absorb(stfips year) cluster(stfips){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest)
 
 # Generate treatment indicator
 data <- data %>%
@@ -347,8 +290,8 @@ model <- feols(outcome ~ treat_post | state + year,
                data = data, vcov = ~state)
 
 # The treat_post coefficient is the DiD estimate
-summary(model)</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+summary(model){% endcapture %}
+  {% capture pc %}import pandas as pd
 from linearmodels.panel import PanelOLS
 
 # Generate treatment indicator
@@ -368,21 +311,13 @@ model = PanelOLS.from_formula(
     data=data_panel
 ).fit(cov_type='clustered', cluster_entity=True)
 
-print(model.summary)</code></pre>
-  </div>
+print(model.summary){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Testing Parallel Trends</h3>
   <p>The key assumption is that treated and control groups would have followed parallel trends absent treatment. Check pre-treatment trends:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create year dummies interacted with treatment
+  {% capture sc %}* Create year dummies interacted with treatment
 * (Omit the year before treatment as reference)
 reghdfe outcome ib2014.year#treated, ///
     absorb(state year) cluster(state)
@@ -390,8 +325,8 @@ reghdfe outcome ib2014.year#treated, ///
 * Plot coefficients
 coefplot, keep(*#*) vertical ///
     yline(0) xline(4.5, lpattern(dash)) ///
-    title("Event Study: Pre-trends Check")</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggfixest, dplyr)
+    title("Event Study: Pre-trends Check"){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, ggfixest, dplyr)
 
 # Create relative time variable
 # Set never-treated units to -1000 (outside data range)
@@ -410,13 +345,31 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-p <- ggiplot(model) +
+ggiplot(model) +
   labs(title = "Event Study: Pre-trends Check",
        x = "Years Relative to Treatment",
        y = "Coefficient Estimate") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_minimal()</code></pre>
-  </div>
+  theme_minimal(){% endcapture %}
+  {% capture pc %}import pyfixest as pf
+import pandas as pd
+
+# Create relative time variable
+# Never-treated units: set to -1000 (outside data range)
+data['rel_time'] = data['year'] - data['treatment_year']
+data['rel_time'] = data['rel_time'].fillna(-1000).astype(int)
+data['treated'] = data['treatment_year'].notna().astype(int)
+
+# Event study regression
+# ref=c(-1, -1000) excludes both t=-1 and never-treated
+model = pf.feols(
+    'outcome ~ i(rel_time, treated, ref=c(-1, -1000)) | state + year',
+    vcov={'CRV1': 'state'}, data=data
+)
+
+# Plot
+model.iplot(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="event-studies" class="tutorial-section">
@@ -664,21 +617,19 @@ p <- ggiplot(model) +
         </div>
       </div>
 
-      <div class="common-mistakes" style="margin-top: 20px;">
-        <h4>What to Do About Anticipation</h4>
-        <ul style="margin-bottom: 0;">
+      {% capture cm_content %}<ul style="margin-bottom: 0;">
           <li><strong>Redefine treatment timing:</strong> If a law was announced 6 months before implementation, use the announcement date as t=0</li>
           <li><strong>Report honestly:</strong> Acknowledging anticipation is better than hiding it—it may be substantively interesting</li>
           <li><strong>Check the mechanism:</strong> Anticipation can help you understand <em>how</em> the policy works (e.g., through expectations vs. direct effects)</li>
-        </ul>
-      </div>
+        </ul>{% endcapture %}
+      {% include "common-mistake.liquid", title: "What to Do About Anticipation", content: cm_content %}
     </div>
   </div>
 
   <!-- Event Study Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The event study estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The event study estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>it</sub></span> =
       <span style="color: #c62828;">Σ<sub>k≠-1</sub> β<sub>k</sub></span> · 𝟙[k = t - E<sub>i</sub>] +
       <span style="color: #7b1fa2;">α<sub>i</sub></span> + <span style="color: #00695c;">γ<sub>t</sub></span> + ε<sub>it</sub>
@@ -696,15 +647,7 @@ p <- ggiplot(model) +
   <h3>Setting Up the Variables</h3>
   <p>With staggered treatment (different units treated at different times), you need to create a "time to treatment" variable:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create treatment year variable (example: no-fault divorce)
+  {% capture sc %}* Create treatment year variable (example: no-fault divorce)
 gen treatment_year = .
 replace treatment_year = 1970 if state == "CA"
 replace treatment_year = 1971 if state == "FL"
@@ -720,8 +663,8 @@ replace time_to_treat = 0 if missing(treatment_year)  // Never-treated = 0
 
 * Stata can't handle negative factor values, so shift
 summ time_to_treat
-gen shifted_ttt = time_to_treat - r(min)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create treatment year variable
+gen shifted_ttt = time_to_treat - r(min){% endcapture %}
+  {% capture rc %}# Create treatment year variable
 # Never-treated states have NA for treatment_year
 data <- data %>%
   mutate(
@@ -739,19 +682,31 @@ data <- data %>%
     # IMPORTANT: Set never-treated to -1000 (outside data range)
     # Then exclude with ref = c(-1, -1000) in fixest
     time_to_treat = if_else(is.na(treatment_year), -1000, year - treatment_year)
-  )</code></pre>
-  </div>
+  ){% endcapture %}
+  {% capture pc %}import pandas as pd
+import numpy as np
+
+# Create treatment year variable
+# Never-treated states have NaN for treatment_year
+treatment_map = {'CA': 1970, 'FL': 1971}  # etc.
+data['treatment_year'] = data['state'].map(treatment_map)
+
+# Binary: ever treated vs never treated
+data['treated'] = data['treatment_year'].notna().astype(int)
+
+# Post-treatment indicator
+data['treat_post'] = (
+    (data['year'] >= data['treatment_year']) & data['treatment_year'].notna()
+).astype(int)
+
+# Time to treatment (for event studies)
+# IMPORTANT: Set never-treated to -1000 (outside data range)
+data['time_to_treat'] = data['year'] - data['treatment_year']
+data['time_to_treat'] = data['time_to_treat'].fillna(-1000).astype(int){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Basic Event Study</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create relative time to treatment
+  {% capture sc %}* Create relative time to treatment
 gen rel_time = year - treatment_year
 
 * Create dummies for each relative time period
@@ -769,8 +724,8 @@ reghdfe outcome rel_m5-rel_m2 rel_0-rel_5, ///
 * Plot
 coefplot, keep(rel_*) vertical yline(0) ///
     xline(3.5, lpattern(dash)) ///
-    title("Event Study")</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggfixest, ggplot2, dplyr)
+    title("Event Study"){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, ggfixest, ggplot2, dplyr)
 
 # Create relative time variable
 # IMPORTANT: Never-treated units don't have a meaningful "time to treatment"
@@ -801,19 +756,41 @@ model <- feols(
 )
 
 # Plot with ggiplot (publication-ready)
-p <- ggiplot(model) +
+ggiplot(model) +
   labs(title = "Event Study",
        x = "Years Relative to Treatment",
        y = "Effect on Outcome") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_vline(xintercept = -0.5, linetype = "dashed", color = "red") +
-  theme_minimal()</code></pre>
-  </div>
+  theme_minimal(){% endcapture %}
+  {% capture pc %}import pyfixest as pf
+import numpy as np
 
-  <div class="callout-info">
-    <h4>A Note on Staggered Timing</h4>
-    <p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
-  </div>
+# Create relative time variable
+# Never-treated: set to -1000 (outside data range)
+data['rel_time'] = data['year'] - data['treatment_year']
+data['rel_time'] = data['rel_time'].fillna(-1000).astype(int)
+data['treated'] = data['treatment_year'].notna().astype(int)
+
+# Optional: bin endpoints
+data['rel_time'] = np.where(
+    data['rel_time'] == -1000, -1000,
+    np.clip(data['rel_time'], -6, 6)
+)
+
+# Event study with pyfixest
+# ref=c(-1, -1000) excludes both t=-1 and never-treated
+model = pf.feols(
+    'outcome ~ i(rel_time, treated, ref=c(-1, -1000)) | state + year',
+    vcov={'CRV1': 'state'}, data=data
+)
+
+# Plot
+model.iplot(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture callout_content %}<p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <section id="rd" class="tutorial-section">
@@ -821,21 +798,13 @@ p <- ggiplot(model) +
 
   <p>Regression discontinuity (RD) exploits a sharp threshold—a cutoff rule that determines who gets treated. When treatment is assigned based on whether someone crosses a threshold (e.g., a test score, age, income level), you can compare outcomes for people just barely above and just barely below the cutoff. These nearly-identical groups differ only in treatment status, creating a quasi-experimental setting.</p>
 
-  <div class="callout-info">
-    <h4>RD in Practice</h4>
-    <ul style="margin: 8px 0 0; padding-left: 18px;">
-      <li><strong>Almond, Doyle, Kowalski &amp; Williams (2010), "Estimating Marginal Returns to Medical Care: Evidence from At-risk Newborns"</strong> <em>QJE.</em> Exploits the "very low birth weight" (VLBW) classification at 1,500 grams. Newborns just below this cutoff receive substantially more medical care, allowing the authors to estimate whether the extra treatment improves infant health outcomes. <a href="https://doi.org/10.1162/qjec.2010.125.2.591" target="_blank">[Link]</a></li>
-      <li><strong>Almond &amp; Doyle (2011), "After Midnight: A Regression Discontinuity Design in Length of Postpartum Hospital Stays"</strong> <em>AEJ: Economic Policy.</em> Uses the midnight births cutoff: babies born just after midnight get counted as a new hospital day, leading to longer postpartum stays than babies born just before midnight. This discontinuity in hospital stay length lets them estimate the effect of extra hospital time on newborn health. <a href="https://doi.org/10.1257/pol.3.3.1" target="_blank">[Link]</a></li>
-    </ul>
-  </div>
-
   <h3>The RD Idea in One Picture</h3>
   <p>Imagine a college admissions test where anyone with a score ≥ 80 gets in, and anyone with a score < 80 is rejected. People with scores of 80 and 79 are nearly identical in ability, but vastly different in college attendance. If college causes higher earnings, we should see a jump in earnings right at the 80 cutoff.</p>
 
   <!-- RD Equation -->
-  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 16px 0; font-family: monospace;">
-    <div style="color: #666; margin-bottom: 8px;">The sharp RD estimating equation:</div>
-    <div style="font-size: 1.1em; text-align: center; padding: 10px;">
+  <div class="equation-box">
+    <div class="equation-label">The sharp RD estimating equation:</div>
+    <div class="equation-content">
       <span style="color: #1565c0;">Y<sub>i</sub></span> =
       β₀ + <span style="color: #c62828;">β₁</span><span style="color: #2e7d32;">Treat<sub>i</sub></span> +
       f(<span style="color: #7b1fa2;">X<sub>i</sub></span>) + ε<sub>i</sub>
@@ -853,24 +822,13 @@ p <- ggiplot(model) +
   <h3>Why RD Works</h3>
   <p>At the cutoff, treatment is essentially random. Someone with a test score of 79.9 has nearly the same ability as someone with 80.1, but their treatment status flips. By comparing outcomes just above and below the cutoff, you isolate the effect of treatment from all the underlying characteristics that typically confound it (ability, motivation, socioeconomic status).</p>
 
-  <div class="key-principle">
-    <h4>The Cutoff Is Key</h4>
-    <p>RD validity depends on the running variable being continuous and manipulation being impossible. For example: you can't improve your age (it's continuous and manipulation is impossible), but you could game a test score (it's discrete and manipulation is possible). The closer you are to the cutoff, the more convincing the design.</p>
-  </div>
+  {% capture kp_content %}<p>RD validity depends on the running variable being continuous and manipulation being impossible. For example: you can't improve your age (it's continuous and manipulation is impossible), but you could game a test score (it's discrete and manipulation is possible). The closer you are to the cutoff, the more convincing the design.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "The Cutoff Is Key", content: kp_content %}
 
   <h3>Implementation: Simple Local Linear Regression</h3>
   <p>The simplest approach: fit a line on each side of the cutoff using observations near the cutoff, then compute the gap where the lines meet.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create treatment indicator based on cutoff
+  {% capture sc %}* Create treatment indicator based on cutoff
 gen cutoff = 80
 gen treated = (test_score >= cutoff)
 
@@ -883,8 +841,8 @@ reg outcome treated score_centered c.score_centered#treated if abs(score_centere
 
 * Or use rdrobust (requires installation)
 ssc install rdrobust
-rdrobust outcome test_score, c(80) h(10)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(tidyverse, rdrobust)
+rdrobust outcome test_score, c(80) h(10){% endcapture %}
+  {% capture rc %}pacman::p_load(tidyverse, rdrobust)
 
 # Create treatment indicator
 data <- data %>%
@@ -908,8 +866,8 @@ rd_result <- rdrobust(
   x = data$test_score,
   c = 80  # cutoff
 )
-summary(rd_result)</code></pre>
-    <pre class="code-content python"><code class="language-python">import numpy as np
+summary(rd_result){% endcapture %}
+  {% capture pc %}import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn.linear_model import LinearRegression
@@ -938,8 +896,8 @@ window = 10
 window_data = data[np.abs(data['score_centered']) <= window]
 model = smf.ols('outcome ~ treated + score_centered + treated:score_centered',
                  data=window_data).fit()
-print(f"RD Estimate: {model.params['treated']:.4f}")</code></pre>
-  </div>
+print(f"RD Estimate: {model.params['treated']:.4f}"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Checking RD Validity</h3>
   <p>RD is only convincing if people can't precisely manipulate the running variable to cross the threshold. Check for:</p>
@@ -950,15 +908,7 @@ print(f"RD Estimate: {model.params['treated']:.4f}")</code></pre>
     <li><strong>Placebo tests:</strong> Try the same RD design on outcomes that shouldn't be affected by treatment. If you find effects, something is wrong with your design.</li>
   </ul>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Test covariate balance: does age jump at cutoff?
+  {% capture sc %}* Test covariate balance: does age jump at cutoff?
 reg age treated score_centered c.score_centered#treated ///
     if abs(score_centered) <= 10
 
@@ -970,8 +920,8 @@ reg parental_education treated score_centered c.score_centered#treated ///
     if abs(score_centered) <= 10
 
 * Density check: are observations bunched above cutoff?
-hist test_score if abs(score_centered) <= 5, by(treated)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggplot2)
+hist test_score if abs(score_centered) <= 5, by(treated){% endcapture %}
+  {% capture rc %}pacman::p_load(fixest, ggplot2)
 
 # Check covariate balance: does age jump at cutoff?
 balance_model <- feols(
@@ -990,19 +940,47 @@ placebo_model <- feols(
 summary(placebo_model)
 
 # Density check: histogram of running variable
-p <- ggplot(data %>% filter(abs(score_centered) <= 5),
+ggplot(data %>% filter(abs(score_centered) <= 5),
        aes(x = test_score, fill = treated)) +
   geom_histogram(bins = 20, alpha = 0.5) +
   geom_vline(xintercept = 80, linetype = "dashed") +
   theme_minimal() +
-  labs(title = "Density Check: Bunching at Cutoff?")</code></pre>
-  </div>
+  labs(title = "Density Check: Bunching at Cutoff?"){% endcapture %}
+  {% capture pc %}import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+
+# Check covariate balance: does age jump at cutoff?
+subset = data[data['score_centered'].abs() <= 10]
+balance = smf.ols(
+    'age ~ treated + score_centered + treated:score_centered',
+    data=subset
+).fit()
+print(balance.summary())
+# If treated coefficient ≈ 0, age is balanced (good)
+
+# Placebo test on variable unaffected by treatment
+placebo = smf.ols(
+    'parental_education ~ treated + score_centered + treated:score_centered',
+    data=subset
+).fit()
+print(placebo.summary())
+
+# Density check: histogram of running variable
+fig, ax = plt.subplots()
+near = data[data['score_centered'].abs() <= 5]
+ax.hist(near.loc[near['treated'] == 0, 'test_score'],
+        bins=20, alpha=0.5, label='Control')
+ax.hist(near.loc[near['treated'] == 1, 'test_score'],
+        bins=20, alpha=0.5, label='Treated')
+ax.axvline(80, linestyle='--', color='black')
+ax.legend()
+ax.set_title('Density Check: Bunching at Cutoff?')
+plt.show(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Bandwidth Selection</h3>
   <p>How close to the cutoff should you focus? Too close, and you have few observations and less precision. Too far, and people further from the cutoff may not be comparable. The rule of thumb: use observations within 1-2 standard deviations of the running variable, or use automated bandwidth selection (like rdrobust does).</p>
 
-  <div class="callout-warning">
-    <h4>RD Estimates Local Effects</h4>
-    <p>RD identifies the effect for people <em>at the cutoff</em>. This is the "local average treatment effect" (LATE). If people far from the cutoff would have very different treatment effects, RD won't tell you about those groups. Always be clear about whom your results apply to.</p>
-  </div>
+  {% capture callout_content %}<p>RD identifies the effect for people <em>at the cutoff</em>. This is the "local average treatment effect" (LATE). If people far from the cutoff would have very different treatment effects, RD won't tell you about those groups. Always be clear about whom your results apply to.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "RD Estimates Local Effects", content: callout_content %}
 </section>

@@ -13,17 +13,17 @@ current_page: bac-replication
 
 <p>We're replicating part of <strong>French &amp; Gumus (2024)</strong>, "Hit-and-Run or Hit-and-Stay? Unintended Effects of a Stricter BAC Limit." But more importantly, we're showing how you'd approach a project like this from scratch.</p>
 
-<div class="key-principle">
-  <h4>What You'll Learn</h4>
-  <ul>
-    <li>How to think through a research question and check if it's feasible</li>
-    <li>How to figure out what data you need (and where to get it)</li>
-    <li>How to decide on a unit of analysis and why it matters</li>
-    <li>How to deal with datasets that don't line up</li>
-    <li>The thought process behind merging, aggregating, and cleaning</li>
-    <li>How to actually run a diff-in-diff and interpret it</li>
-  </ul>
-</div>
+{% capture kp_content %}
+<ul>
+  <li>How to think through a research question and check if it's feasible</li>
+  <li>How to figure out what data you need (and where to get it)</li>
+  <li>How to decide on a unit of analysis and why it matters</li>
+  <li>How to deal with datasets that don't line up</li>
+  <li>The thought process behind merging, aggregating, and cleaning</li>
+  <li>How to actually run a diff-in-diff and interpret it</li>
+</ul>
+{% endcapture %}
+{% include "key-principle.liquid", title: "What You'll Learn", content: kp_content %}
 
 <h3 style="margin-top: 32px;">The Research Project Pipeline</h3>
 <p>Most empirical projects follow roughly the same flow:</p>
@@ -158,15 +158,15 @@ current_page: bac-replication
     </div>
   </div>
 
-  <div class="key-principle">
-    <h4>Checkpoint: Do We Have All Three?</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li><strong>Question:</strong> Does the 0.08 BAC law affect hit-and-run crashes? ✓</li>
-      <li><strong>Data:</strong> State-year panel of crashes, policies, and controls. ✓</li>
-      <li><strong>Identification:</strong> DiD exploiting staggered adoption with parallel trends test. ✓</li>
-    </ul>
-    <p style="margin-top: 12px;">We're ready to start building our dataset.</p>
-  </div>
+  {% capture kp_content %}
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li><strong>Question:</strong> Does the 0.08 BAC law affect hit-and-run crashes? ✓</li>
+    <li><strong>Data:</strong> State-year panel of crashes, policies, and controls. ✓</li>
+    <li><strong>Identification:</strong> DiD exploiting staggered adoption with parallel trends test. ✓</li>
+  </ul>
+  <p style="margin-top: 12px;">We're ready to start building our dataset.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Checkpoint: Do We Have All Three?", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -209,16 +209,7 @@ bac_replication/
   <h3 id="master-script">The Master Script</h3>
   <p>Create a master script that runs everything with one click. This is critical for reproducibility.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">/*==============================================================================
+  {% capture sc %}/*==============================================================================
     Master Do-File: BAC Laws and Hit-and-Run Crashes
     Replication of French & Gumus (2024)
 ==============================================================================*/
@@ -244,8 +235,8 @@ do "$analysis/code/01_summary_stats.do"
 do "$analysis/code/02_twfe_regression.do"
 do "$analysis/code/03_event_study.do"
 
-di "Done! Results in $analysis/output/"</code></pre>
-    <pre class="code-content r"><code class="language-r">#==============================================================================
+di "Done! Results in $analysis/output/"{% endcapture %}
+  {% capture rc %}#==============================================================================
 #    Master Script: BAC Laws and Hit-and-Run Crashes
 #    Replication of French & Gumus (2024)
 #==============================================================================
@@ -270,8 +261,8 @@ source(file.path(analysis, "code", "01_summary_stats.R"))
 source(file.path(analysis, "code", "02_twfe_regression.R"))
 source(file.path(analysis, "code", "03_event_study.R"))
 
-cat("Done! Results in", file.path(analysis, "output"))</code></pre>
-    <pre class="code-content python"><code class="language-python">#==============================================================================
+cat("Done! Results in", file.path(analysis, "output")){% endcapture %}
+  {% capture pc %}#==============================================================================
 #    Master Script: BAC Laws and Hit-and-Run Crashes
 #    Replication of French & Gumus (2024)
 #==============================================================================
@@ -297,8 +288,8 @@ exec(open(ANALYSIS / "code" / "01_summary_stats.py").read())
 exec(open(ANALYSIS / "code" / "02_twfe_regression.py").read())
 exec(open(ANALYSIS / "code" / "03_event_study.py").read())
 
-print(f"Done! Results in {ANALYSIS / 'output'}")</code></pre>
-  </div>
+print(f"Done! Results in {ANALYSIS / 'output'}"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <!-- ============================================================== -->
@@ -307,23 +298,23 @@ print(f"Done! Results in {ANALYSIS / 'output'}")</code></pre>
 
   <p>Before we dive into data sources, let's understand the <strong>overall strategy</strong> for building an analysis dataset. This is the core skill of empirical research.</p>
 
-  <div class="key-principle">
-    <h4>The Multi-Source Data Workflow</h4>
-    <p>In most empirical projects, your final dataset comes from <strong>multiple sources</strong> that need to be combined. The workflow is:</p>
-    <ol style="margin: 12px 0 0 0; padding-left: 24px;">
-      <li><strong>Identify your data sources</strong> — What datasets contain the variables you need?</li>
-      <li><strong>Clean each dataset separately</strong> — Fix coding issues, handle missing values, rename variables consistently</li>
-      <li><strong>Aggregate to a common unit</strong> — Each dataset might start at different levels (crash-level, county-level, etc.), but they all need to end up at the <em>same</em> unit of analysis (state-year in our case)</li>
-      <li><strong>Standardize identifiers</strong> — All datasets need the same ID variables (e.g., state FIPS codes) so they can be linked</li>
-      <li><strong>Merge everything together</strong> — Combine all cleaned datasets into one analysis file</li>
-      <li><strong>Run all analyses on the merged dataset</strong> — Your regressions, summary stats, and figures all use this single file</li>
-    </ol>
-  </div>
+  {% capture kp_content %}
+  <p>In most empirical projects, your final dataset comes from <strong>multiple sources</strong> that need to be combined. The workflow is:</p>
+  <ol style="margin: 12px 0 0 0; padding-left: 24px;">
+    <li><strong>Identify your data sources</strong> — What datasets contain the variables you need?</li>
+    <li><strong>Clean each dataset separately</strong> — Fix coding issues, handle missing values, rename variables consistently</li>
+    <li><strong>Aggregate to a common unit</strong> — Each dataset might start at different levels (crash-level, county-level, etc.), but they all need to end up at the <em>same</em> unit of analysis (state-year in our case)</li>
+    <li><strong>Standardize identifiers</strong> — All datasets need the same ID variables (e.g., state FIPS codes) so they can be linked</li>
+    <li><strong>Merge everything together</strong> — Combine all cleaned datasets into one analysis file</li>
+    <li><strong>Run all analyses on the merged dataset</strong> — Your regressions, summary stats, and figures all use this single file</li>
+  </ol>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Multi-Source Data Workflow", content: kp_content %}
 
-  <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <h4 style="margin: 0 0 8px; color: #e65100;">Why Separate Cleaning Steps?</h4>
-    <p style="margin: 0; font-size: 0.95rem;">Each data source has its own quirks: different variable names, different coding schemes, different time periods, different geographic units. If you try to merge raw data directly, you'll create a mess. By cleaning each source into a <strong>uniform format</strong> first, the merge step becomes trivial — just a simple join on state + year.</p>
-  </div>
+  {% capture callout_content %}
+  <p style="margin: 0; font-size: 0.95rem;">Each data source has its own quirks: different variable names, different coding schemes, different time periods, different geographic units. If you try to merge raw data directly, you'll create a mess. By cleaning each source into a <strong>uniform format</strong> first, the merge step becomes trivial — just a simple join on state + year.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Why Separate Cleaning Steps?", content: callout_content %}
 
   <p>In our project, we'll have:</p>
   <ul>
@@ -386,10 +377,11 @@ print(f"Done! Results in {ANALYSIS / 'output'}")</code></pre>
   <h3 id="control-data">Controls: What Else Might Affect Hit-and-Runs?</h3>
   <p>This is where you have to think carefully. What factors other than BAC laws might affect hit-and-run rates, and might also be correlated with when states adopt BAC laws?</p>
 
-  <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <strong>Student question:</strong> "Why do we need controls if we have fixed effects?"<br><br>
-    Fixed effects control for time-invariant state characteristics and common year shocks. But they don't control for things that vary <em>both</em> across states <em>and</em> over time. If recessions hit some states harder than others, and those same states happen to adopt BAC laws at different times, we could have a problem.
-  </div>
+  {% capture callout_content %}
+  <strong>Student question:</strong> "Why do we need controls if we have fixed effects?"<br><br>
+  Fixed effects control for time-invariant state characteristics and common year shocks. But they don't control for things that vary <em>both</em> across states <em>and</em> over time. If recessions hit some states harder than others, and those same states happen to adopt BAC laws at different times, we could have a problem.
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 
   <p>Economic conditions are an obvious candidate — unemployment affects driving behavior and crash rates. We can get this from <strong>FRED (Federal Reserve Economic Data)</strong>:</p>
 
@@ -399,16 +391,7 @@ print(f"Done! Results in {ANALYSIS / 'output'}")</code></pre>
     <li><strong>Variables:</strong> Unemployment rate, per capita income</li>
   </ul>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 01_download_fars.do - Download FARS data
+  {% capture sc %}* 01_download_fars.do - Download FARS data
 * Run from: $build/code/
 
 * Download FARS data (example for one year)
@@ -424,8 +407,8 @@ import delimited "accident.csv", clear
 save "$build/input/fars/accident_2000.dta", replace
 
 import delimited "vehicle.csv", clear
-save "$build/input/fars/vehicle_2000.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># 01_download_fars.R - Download FARS data
+save "$build/input/fars/vehicle_2000.dta", replace{% endcapture %}
+  {% capture rc %}# 01_download_fars.R - Download FARS data
 pacman::p_load(tidyverse)
 
 # Download FARS data
@@ -438,8 +421,8 @@ unzip(dest, exdir = file.path(build, "input", "fars", "2000"))
 
 # Read and save
 accident <- read_csv(file.path(build, "input", "fars", "2000", "accident.csv"))
-write_rds(accident, file.path(build, "input", "fars", "accident_2000.rds"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># 01_download_fars.py - Download FARS data
+write_rds(accident, file.path(build, "input", "fars", "accident_2000.rds")){% endcapture %}
+  {% capture pc %}# 01_download_fars.py - Download FARS data
 import pandas as pd
 import requests
 import zipfile
@@ -461,8 +444,8 @@ with zipfile.ZipFile(dest) as z:
 # Read and save
 accident = pd.read_csv(BUILD / "input" / "fars" / "2000" / "accident.csv",
                        encoding='latin-1')
-accident.to_parquet(BUILD / "input" / "fars" / "accident_2000.parquet")</code></pre>
-  </div>
+accident.to_parquet(BUILD / "input" / "fars" / "accident_2000.parquet"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <!-- ============================================================== -->
@@ -530,16 +513,7 @@ accident.to_parquet(BUILD / "input" / "fars" / "accident_2000.parquet")</code></
 
   <p>So we need to <strong>collapse</strong> the crash-level data: count how many hit-and-run crashes happened in each state-year.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 02_clean_fars.do - Clean and aggregate FARS to state-year
+  {% capture sc %}* 02_clean_fars.do - Clean and aggregate FARS to state-year
 * Run from: $build/code/
 
 * Load vehicle file (has hit-run indicator)
@@ -563,8 +537,8 @@ collapse (count) total_crashes=st_case ///
          by(state year)
 
 gen nhr_fatalities = total_crashes - hr_fatalities
-save "$build/output/state_year_crashes.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># 02_clean_fars.R - Clean and aggregate FARS to state-year
+save "$build/output/state_year_crashes.dta", replace{% endcapture %}
+  {% capture rc %}# 02_clean_fars.R - Clean and aggregate FARS to state-year
 pacman::p_load(tidyverse)
 
 # Load vehicle file and code hit-run
@@ -591,8 +565,8 @@ state_year <- crashes %>%
     .groups = "drop"
   )
 
-write_rds(state_year, file.path(build, "output", "state_year_crashes.rds"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># 02_clean_fars.py - Clean and aggregate FARS to state-year
+write_rds(state_year, file.path(build, "output", "state_year_crashes.rds")){% endcapture %}
+  {% capture pc %}# 02_clean_fars.py - Clean and aggregate FARS to state-year
 import pandas as pd
 
 # Load vehicle file and code hit-run
@@ -613,23 +587,15 @@ state_year = crashes.groupby(['state', 'year']).agg(
 ).reset_index()
 state_year['nhr_fatalities'] = state_year['total_crashes'] - state_year['hr_fatalities']
 
-state_year.to_parquet(BUILD / "output" / "state_year_crashes.parquet")</code></pre>
-  </div>
+state_year.to_parquet(BUILD / "output" / "state_year_crashes.parquet"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div style="background: #ffebee; border-left: 4px solid #c0392b; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <strong>Watch out for zeros!</strong> If a state-year has <em>zero</em> crashes, it won't appear in your aggregated data. You need to explicitly create rows for all state-years and fill missing crash counts with 0, not leave them as missing.
-  </div>
+  {% capture callout_content %}
+  <strong>Watch out for zeros!</strong> If a state-year has <em>zero</em> crashes, it won't appear in your aggregated data. You need to explicitly create rows for all state-years and fill missing crash counts with 0, not leave them as missing.
+  {% endcapture %}
+  {% include "callout.liquid", type: "danger", content: callout_content %}
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create complete state-year panel
+  {% capture sc %}* Create complete state-year panel
 * (ensures we have rows even for state-years with 0 crashes)
 preserve
 keep state
@@ -647,8 +613,8 @@ merge 1:1 state year using "state_year_crashes.dta"
 * Fill missing values with zeros (not missing!)
 foreach var in total_crashes hr_fatalities nhr_fatalities {
     replace `var' = 0 if missing(`var')
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># Create complete state-year panel
+}{% endcapture %}
+  {% capture rc %}# Create complete state-year panel
 complete_panel <- expand.grid(
   state = unique(crashes$state),
   year = 1982:2008
@@ -658,8 +624,8 @@ complete_panel <- expand.grid(
 state_year <- complete_panel %>%
   merge(state_year, by = c("state", "year"), all.x = TRUE) %>%
   mutate(across(c(total_crashes, hr_fatalities, nhr_fatalities),
-                ~replace_na(., 0)))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Create complete state-year panel
+                ~replace_na(., 0))){% endcapture %}
+  {% capture pc %}# Create complete state-year panel
 import itertools
 
 states = crashes['state'].unique()
@@ -671,8 +637,8 @@ complete_panel = pd.DataFrame(
 
 # Merge and fill zeros
 state_year = complete_panel.merge(state_year, on=['state', 'year'], how='left')
-state_year = state_year.fillna({'total_crashes': 0, 'hr_fatalities': 0, 'nhr_fatalities': 0})</code></pre>
-  </div>
+state_year = state_year.fillna({'total_crashes': 0, 'hr_fatalities': 0, 'nhr_fatalities': 0}){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <!-- ============================================================== -->
@@ -723,33 +689,25 @@ state_year = state_year.fillna({'total_crashes': 0, 'hr_fatalities': 0, 'nhr_fat
     </tbody>
   </table>
 
-  <div style="background: #ffebee; border-left: 4px solid #c0392b; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <strong>m:m merges are almost always wrong!</strong> If Stata tells you a merge is m:m, stop and investigate. It usually means your merge keys aren't unique when they should be, or your data has duplicates that need cleaning.
-  </div>
+  {% capture callout_content %}
+  <strong>m:m merges are almost always wrong!</strong> If Stata tells you a merge is m:m, stop and investigate. It usually means your merge keys aren't unique when they should be, or your data has duplicates that need cleaning.
+  {% endcapture %}
+  {% include "callout.liquid", type: "danger", content: callout_content %}
 
   <h3 id="merge-bac">Step 1: Merge BAC Adoption Dates (m:1) — The "Expand" Step</h3>
   <p>BAC adoption dates are at the <strong>state level</strong> (one row per state). We're merging them to <strong>state-year</strong> data, so many state-years match one state. This is an <strong>m:1 merge</strong>.</p>
 
-  <div class="key-principle">
-    <h4>Understanding the Expand Operation</h4>
-    <p style="margin: 8px 0;">This m:1 merge is how we <strong>expand</strong> state-level data to state-year level. Here's what happens:</p>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li><strong>Before merge:</strong> BAC dates have 50 rows (one per state), each with a single adoption year</li>
-      <li><strong>After merge:</strong> Each state's adoption year appears in all 27 rows for that state (one per year, 1982-2008)</li>
-    </ul>
-    <p style="margin: 8px 0 0;">The merge effectively "copies" the state-level variable to every state-year observation. This is the opposite of collapse: <strong>collapse</strong> reduces rows (many → one), while <strong>expand via merge</strong> replicates values across rows (one → many).</p>
-  </div>
+  {% capture kp_content %}
+  <p style="margin: 8px 0;">This m:1 merge is how we <strong>expand</strong> state-level data to state-year level. Here's what happens:</p>
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li><strong>Before merge:</strong> BAC dates have 50 rows (one per state), each with a single adoption year</li>
+    <li><strong>After merge:</strong> Each state's adoption year appears in all 27 rows for that state (one per year, 1982-2008)</li>
+  </ul>
+  <p style="margin: 8px 0 0;">The merge effectively "copies" the state-level variable to every state-year observation. This is the opposite of collapse: <strong>collapse</strong> reduces rows (many → one), while <strong>expand via merge</strong> replicates values across rows (one → many).</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Understanding the Expand Operation", content: kp_content %}
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 03_merge_controls.do - Merge all datasets
+  {% capture sc %}* 03_merge_controls.do - Merge all datasets
 * Run from: $build/code/
 
 * Load BAC adoption dates (one row per state)
@@ -770,8 +728,8 @@ drop _merge
 
 * Create treatment variables
 gen event_time = year - adoption_year
-gen treated = (event_time >= 0)</code></pre>
-    <pre class="code-content r"><code class="language-r"># 03_merge_controls.R - Merge all datasets
+gen treated = (event_time >= 0){% endcapture %}
+  {% capture rc %}# 03_merge_controls.R - Merge all datasets
 
 # Load BAC adoption dates
 bac_dates <- read_csv(file.path(build, "input", "apis", "bac08_adoption_dates.csv")) %>%
@@ -793,8 +751,8 @@ state_year <- state_year %>%
   )
 
 # Verify no missing adoption years
-stopifnot(sum(is.na(state_year$adoption_year)) == 0)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 03_merge_controls.py - Merge all datasets
+stopifnot(sum(is.na(state_year$adoption_year)) == 0){% endcapture %}
+  {% capture pc %}# 03_merge_controls.py - Merge all datasets
 import pandas as pd
 
 # Load BAC adoption dates
@@ -817,22 +775,13 @@ state_year['event_time'] = state_year['year'] - state_year['adoption_year']
 state_year['treated'] = (state_year['event_time'] >= 0).astype(int)
 
 # Verify no missing
-assert state_year['adoption_year'].notna().all()</code></pre>
-  </div>
+assert state_year['adoption_year'].notna().all(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="merge-controls">Step 2: Merge Economic Controls (1:1)</h3>
   <p>FRED data is already at the state-year level, matching our analysis data. This is a <strong>1:1 merge</strong>.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Merge unemployment (1:1 on state-year)
+  {% capture sc %}* Merge unemployment (1:1 on state-year)
 merge 1:1 state_fips year using "$build/input/fred/unemployment.dta", nogen
 
 * Merge income (1:1 on state-year)
@@ -843,8 +792,8 @@ gen ln_hr = ln(hr_fatalities + 1)
 gen ln_nhr = ln(nhr_fatalities + 1)
 
 * Save final analysis dataset
-save "$build/output/analysis_data.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load controls
+save "$build/output/analysis_data.dta", replace{% endcapture %}
+  {% capture rc %}# Load controls
 unemployment <- read_rds(file.path(build, "input", "fred", "unemployment.rds"))
 income <- read_rds(file.path(build, "input", "fred", "income.rds"))
 
@@ -858,8 +807,8 @@ state_year <- state_year %>%
   )
 
 # Save final analysis dataset
-write_rds(state_year, file.path(build, "output", "analysis_data.rds"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Load and merge controls
+write_rds(state_year, file.path(build, "output", "analysis_data.rds")){% endcapture %}
+  {% capture pc %}# Load and merge controls
 unemployment = pd.read_parquet(BUILD / "input" / "fred" / "unemployment.parquet")
 income = pd.read_parquet(BUILD / "input" / "fred" / "income.parquet")
 
@@ -872,20 +821,20 @@ state_year['ln_hr'] = np.log(state_year['hr_fatalities'] + 1)
 state_year['ln_nhr'] = np.log(state_year['nhr_fatalities'] + 1)
 
 # Save final analysis dataset
-state_year.to_parquet(BUILD / "output" / "analysis_data.parquet")</code></pre>
-  </div>
+state_year.to_parquet(BUILD / "output" / "analysis_data.parquet"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Final Analysis Dataset</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li><strong>Unit:</strong> State-year (50 states × 27 years = 1,350 obs)</li>
-      <li><strong>Outcome:</strong> <code>ln_hr</code> (log hit-run fatalities + 1)</li>
-      <li><strong>Treatment:</strong> <code>treated</code> (1 if 0.08 BAC law in effect)</li>
-      <li><strong>Event time:</strong> <code>event_time</code> (years since/until adoption)</li>
-      <li><strong>Controls:</strong> unemployment, income</li>
-      <li><strong>Fixed effects:</strong> State and year</li>
-    </ul>
-  </div>
+  {% capture kp_content %}
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li><strong>Unit:</strong> State-year (50 states × 27 years = 1,350 obs)</li>
+    <li><strong>Outcome:</strong> <code>ln_hr</code> (log hit-run fatalities + 1)</li>
+    <li><strong>Treatment:</strong> <code>treated</code> (1 if 0.08 BAC law in effect)</li>
+    <li><strong>Event time:</strong> <code>event_time</code> (years since/until adoption)</li>
+    <li><strong>Controls:</strong> unemployment, income</li>
+    <li><strong>Fixed effects:</strong> State and year</li>
+  </ul>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Final Analysis Dataset", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -894,15 +843,16 @@ state_year.to_parquet(BUILD / "output" / "analysis_data.parquet")</code></pre>
 
   <p>At this point, many students want to jump straight to the regression. <strong>Don't.</strong> You should always look at your data first. Here's why:</p>
 
-  <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <strong>What descriptive statistics tell you:</strong>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li>Did the merge work? (Do you have the right number of observations?)</li>
-      <li>Are there weird values that suggest coding errors?</li>
-      <li>Do treated and control groups look reasonably similar on observables?</li>
-      <li>Is there enough variation to detect an effect?</li>
-    </ul>
-  </div>
+  {% capture callout_content %}
+  <strong>What descriptive statistics tell you:</strong>
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li>Did the merge work? (Do you have the right number of observations?)</li>
+    <li>Are there weird values that suggest coding errors?</li>
+    <li>Do treated and control groups look reasonably similar on observables?</li>
+    <li>Is there enough variation to detect an effect?</li>
+  </ul>
+  {% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 
   <p>Create summary statistics showing how treated and untreated observations compare.</p>
 
@@ -922,16 +872,7 @@ state_year.to_parquet(BUILD / "output" / "analysis_data.parquet")</code></pre>
   <h3 id="summary-table">Summary Statistics Table</h3>
   <p>Create a table showing Total, Treated (post-treatment obs), and Untreated (pre-treatment obs):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 01_summary_stats.do - Descriptive statistics
+  {% capture sc %}* 01_summary_stats.do - Descriptive statistics
 * Run from: $analysis/code/
 
 use "$build/output/analysis_data.dta", clear
@@ -950,8 +891,8 @@ tabstat hr_fatalities nhr_fatalities unemployment, ///
 estpost tabstat hr_fatalities nhr_fatalities unemployment income, ///
     by(treated) stats(mean sd) columns(statistics)
 esttab using "$analysis/output/tables/summary_stats.tex", ///
-    cells("mean(fmt(2)) sd(fmt(2))") replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># 01_summary_stats.R - Descriptive statistics
+    cells("mean(fmt(2)) sd(fmt(2))") replace{% endcapture %}
+  {% capture rc %}# 01_summary_stats.R - Descriptive statistics
 pacman::p_load(tidyverse, kableExtra)
 
 # Load analysis data
@@ -978,8 +919,8 @@ overall <- state_year %>%
 
 # Combine and save
 summary_all <- bind_rows(summary_table, overall)
-write_csv(summary_all, file.path(analysis, "output", "tables", "summary_stats.csv"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># 01_summary_stats.py - Descriptive statistics
+write_csv(summary_all, file.path(analysis, "output", "tables", "summary_stats.csv")){% endcapture %}
+  {% capture pc %}# 01_summary_stats.py - Descriptive statistics
 import pandas as pd
 
 # Load analysis data
@@ -1001,8 +942,8 @@ print("\nOverall:")
 print(overall)
 
 # Save
-summary_by_treated.to_csv(ANALYSIS / "output" / "tables" / "summary_stats.csv")</code></pre>
-  </div>
+summary_by_treated.to_csv(ANALYSIS / "output" / "tables" / "summary_stats.csv"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Results</h3>
 
@@ -1056,16 +997,7 @@ summary_by_treated.to_csv(ANALYSIS / "output" / "tables" / "summary_stats.csv")<
   <h3 id="simple-twfe">The Simple Specification</h3>
   <p>The simplest specification estimates a single average treatment effect:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 02_twfe_regression.do - TWFE DiD regression
+  {% capture sc %}* 02_twfe_regression.do - TWFE DiD regression
 * Run from: $analysis/code/
 
 * Install reghdfe if needed
@@ -1082,8 +1014,8 @@ reghdfe ln_hr treated unemployment income, ///
     absorb(state_id year) cluster(state_id)
 
 * Interpretation: coefficient on 'treated' is the DiD estimate
-* Positive = hit-run crashes increased after 0.08 law</code></pre>
-    <pre class="code-content r"><code class="language-r"># 02_twfe_regression.R - TWFE DiD regression
+* Positive = hit-run crashes increased after 0.08 law{% endcapture %}
+  {% capture rc %}# 02_twfe_regression.R - TWFE DiD regression
 pacman::p_load(fixest, tidyverse)
 
 # Load analysis data
@@ -1096,8 +1028,8 @@ did_model <- feols(
   cluster = ~state_fips
 )
 
-summary(did_model)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 02_twfe_regression.py - TWFE DiD regression
+summary(did_model){% endcapture %}
+  {% capture pc %}# 02_twfe_regression.py - TWFE DiD regression
 import pandas as pd
 from linearmodels.panel import PanelOLS
 
@@ -1113,8 +1045,8 @@ model = PanelOLS.from_formula(
     data=panel
 )
 results = model.fit(cov_type='clustered', cluster_entity=True)
-print(results)</code></pre>
-  </div>
+print(results){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="event-study">Event Study: Testing the Identifying Assumption</h3>
 
@@ -1124,16 +1056,7 @@ print(results)</code></pre>
 
   <p>This is what an <strong>event study</strong> does. Instead of estimating one treatment effect, we estimate separate effects for each period relative to treatment:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 03_event_study.do - Event study
+  {% capture sc %}* 03_event_study.do - Event study
 * Run from: $analysis/code/
 
 use "$build/output/analysis_data.dta", clear
@@ -1171,8 +1094,8 @@ graph export "$analysis/output/figures/event_study.png", replace width(1200)
 *     panelvar(state_id) timevar(year) ///
 *     window(5 10) ///
 *     cluster(state_id)
-* xteventplot, title("Event Study: Hit-Run (xtevent)")</code></pre>
-    <pre class="code-content r"><code class="language-r"># 03_event_study.R - Event study
+* xteventplot, title("Event Study: Hit-Run (xtevent)"){% endcapture %}
+  {% capture rc %}# 03_event_study.R - Event study
 pacman::p_load(fixest, ggfixest, tidyverse)
 
 # Load analysis data
@@ -1212,8 +1135,8 @@ p <- ggiplot(es_model,
         xlab = "Years Since 0.08 BAC Law",
         ylab = "Coefficient")
 ggsave(file.path(analysis, "output", "figures", "event_study.png"),
-       p, width = 10, height = 6, dpi = 300)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 03_event_study.py - Event study
+       p, width = 10, height = 6, dpi = 300){% endcapture %}
+  {% capture pc %}# 03_event_study.py - Event study
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -1235,17 +1158,17 @@ for et in event_times:
 # (see full code in repository)
 
 # Save figure
-plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png", dpi=300)</code></pre>
-  </div>
+plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png", dpi=300){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Interpreting the Event Study</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li><strong>Pre-trends (t &lt; 0):</strong> Coefficients should be close to zero and statistically insignificant. This supports the parallel trends assumption.</li>
-      <li><strong>t = -1:</strong> This is the reference period (normalized to zero).</li>
-      <li><strong>Post-treatment (t ≥ 0):</strong> These show the dynamic treatment effect.</li>
-    </ul>
-  </div>
+  {% capture kp_content %}
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li><strong>Pre-trends (t &lt; 0):</strong> Coefficients should be close to zero and statistically insignificant. This supports the parallel trends assumption.</li>
+    <li><strong>t = -1:</strong> This is the reference period (normalized to zero).</li>
+    <li><strong>Post-treatment (t ≥ 0):</strong> These show the dynamic treatment effect.</li>
+  </ul>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Interpreting the Event Study", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -1272,16 +1195,7 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png", dpi=300)</code>
 
   <p>We export to LaTeX format because it integrates seamlessly with academic papers and maintains precise formatting. The code below creates a table comparing hit-and-run vs. non-hit-and-run crashes:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 04_tables.do - Publication tables
+  {% capture sc %}* 04_tables.do - Publication tables
 * Run from: $analysis/code/
 
 use "$build/output/analysis_data.dta", clear
@@ -1303,8 +1217,8 @@ esttab hr_model nhr_model using "$analysis/output/tables/table2.tex", ///
     stats(N r2, fmt(%9.0fc %9.3f) labels("Observations" "R-squared")) ///
     mtitles("Hit-Run" "Non-Hit-Run") ///
     title("Effect of 0.08 BAC Laws on Crashes") ///
-    replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># 04_tables.R - Publication tables
+    replace{% endcapture %}
+  {% capture rc %}# 04_tables.R - Publication tables
 pacman::p_load(fixest, modelsummary, tidyverse)
 
 # Load analysis data
@@ -1322,8 +1236,8 @@ modelsummary(
   stars = c('*' = .1, '**' = .05, '***' = .01),
   gof_map = c("nobs", "r.squared"),
   output = file.path(analysis, "output", "tables", "table2.tex")
-)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 04_tables.py - Publication tables
+){% endcapture %}
+  {% capture pc %}# 04_tables.py - Publication tables
 import pandas as pd
 
 # Load analysis data
@@ -1340,8 +1254,8 @@ results_df.to_csv(ANALYSIS / "output" / "tables" / "regression_results.csv", ind
 # Or use stargazer-like packages
 # pip install stargazer
 from stargazer.stargazer import Stargazer
-# ... (see documentation)</code></pre>
-  </div>
+# ... (see documentation){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="publication-figures">Creating Publication-Quality Figures</h3>
 
@@ -1372,16 +1286,7 @@ from stargazer.stargazer import Stargazer
 
   <p>The code below shows how to customize an event study plot for publication. Notice how each option improves readability:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* 05_figures.do - Publication figures
+  {% capture sc %}* 05_figures.do - Publication figures
 * Run from: $analysis/code/
 
 use "$build/output/analysis_data.dta", clear
@@ -1398,8 +1303,8 @@ coefplot, vertical keep(*.et_shifted) ///
     name(event_study, replace)
 
 * Export at high resolution for print
-graph export "$analysis/output/figures/event_study.png", replace width(1200)</code></pre>
-    <pre class="code-content r"><code class="language-r"># 05_figures.R - Publication figures
+graph export "$analysis/output/figures/event_study.png", replace width(1200){% endcapture %}
+  {% capture rc %}# 05_figures.R - Publication figures
 pacman::p_load(ggplot2, tidyverse)
 
 # Load analysis data
@@ -1425,8 +1330,8 @@ p <- ggplot(coef_data, aes(x = event_time, y = estimate)) +
   theme(panel.grid.minor = element_blank())
 
 ggsave(file.path(analysis, "output", "figures", "event_study.png"),
-       p, width = 8, height = 5, dpi = 300)</code></pre>
-    <pre class="code-content python"><code class="language-python"># 05_figures.py - Publication figures
+       p, width = 8, height = 5, dpi = 300){% endcapture %}
+  {% capture pc %}# 05_figures.py - Publication figures
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -1449,8 +1354,8 @@ ax.set_title('Effect of 0.08 BAC Law on Hit-and-Run Crashes')
 
 plt.tight_layout()
 plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
-            dpi=300, bbox_inches='tight')</code></pre>
-  </div>
+            dpi=300, bbox_inches='tight'){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="event-study-plot">The Event Study Plot</h3>
 
@@ -1476,15 +1381,15 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
     </p>
   </div>
 
-  <div class="key-principle">
-    <h4>Reading This Plot</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-      <li><strong>Each dot</strong> is a coefficient estimate—the effect at that time relative to treatment</li>
-      <li><strong>Vertical bars</strong> are 95% confidence intervals. If they cross zero, the effect is not statistically significant</li>
-      <li><strong>The red dashed line</strong> marks t=0 (when the 0.08 BAC law took effect)</li>
-      <li><strong>t = -1 is missing</strong> because it's the reference period (all other coefficients are relative to this point)</li>
-    </ul>
-  </div>
+  {% capture kp_content %}
+  <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+    <li><strong>Each dot</strong> is a coefficient estimate—the effect at that time relative to treatment</li>
+    <li><strong>Vertical bars</strong> are 95% confidence intervals. If they cross zero, the effect is not statistically significant</li>
+    <li><strong>The red dashed line</strong> marks t=0 (when the 0.08 BAC law took effect)</li>
+    <li><strong>t = -1 is missing</strong> because it's the reference period (all other coefficients are relative to this point)</li>
+  </ul>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Reading This Plot", content: kp_content %}
 
   <h3 id="interpreting-results">Interpreting the Results: What Does This Event Study Tell Us?</h3>
 
@@ -1522,32 +1427,32 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
     <p style="margin: 0;"><strong>In our plot:</strong> Post-treatment coefficients are <strong>positive</strong>—hit-and-run crashes <em>increased</em> after states adopted stricter BAC laws. The effect appears to grow over time rather than appearing immediately, suggesting a gradual behavioral adjustment. By 5+ years after adoption, hit-and-run crashes are noticeably higher in treated states.</p>
   </div>
 
-  <div class="key-principle">
-    <h4>Putting It All Together: The Story</h4>
-    <p style="margin: 8px 0;">This event study tells a coherent story:</p>
-    <ol style="margin: 8px 0 0 0; padding-left: 24px;">
-      <li><strong>Before the law:</strong> Treated and control states had similar hit-and-run trends (parallel trends ✓)</li>
-      <li><strong>No anticipation:</strong> Behavior didn't change before the law took effect (no anticipation ✓)</li>
-      <li><strong>After the law:</strong> Hit-and-run crashes increased in states that adopted 0.08 BAC limits</li>
-      <li><strong>The effect grew over time:</strong> Suggesting a gradual behavioral response, not a one-time shock</li>
-    </ol>
-    <p style="margin: 12px 0 0;"><strong>The interpretation:</strong> Stricter drunk driving penalties created an <em>unintended consequence</em>. When caught drunk driving became more costly, some drivers who caused crashes chose to flee the scene rather than face the harsher penalties. The policy reduced the expected punishment for drunk driving crashes—but only if you can escape before police arrive.</p>
-  </div>
+  {% capture kp_content %}
+  <p style="margin: 8px 0;">This event study tells a coherent story:</p>
+  <ol style="margin: 8px 0 0 0; padding-left: 24px;">
+    <li><strong>Before the law:</strong> Treated and control states had similar hit-and-run trends (parallel trends ✓)</li>
+    <li><strong>No anticipation:</strong> Behavior didn't change before the law took effect (no anticipation ✓)</li>
+    <li><strong>After the law:</strong> Hit-and-run crashes increased in states that adopted 0.08 BAC limits</li>
+    <li><strong>The effect grew over time:</strong> Suggesting a gradual behavioral response, not a one-time shock</li>
+  </ol>
+  <p style="margin: 12px 0 0;"><strong>The interpretation:</strong> Stricter drunk driving penalties created an <em>unintended consequence</em>. When caught drunk driving became more costly, some drivers who caused crashes chose to flee the scene rather than face the harsher penalties. The policy reduced the expected punishment for drunk driving crashes—but only if you can escape before police arrive.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "Putting It All Together: The Story", content: kp_content %}
 
-  <div style="background: #ffebee; border-left: 4px solid #c62828; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
-    <h4 style="margin: 0 0 8px; color: #c62828;">⚠️ Caution: What This Doesn't Tell Us</h4>
-    <p style="margin: 0; font-size: 0.95rem;">Event studies are powerful but not bulletproof. Flat pre-trends are <em>necessary</em> but not <em>sufficient</em> for causal identification. There could still be time-varying confounders that happen to coincide with treatment timing. The identifying assumption (parallel trends in the absence of treatment) is fundamentally untestable—we can only check whether it's <em>plausible</em>, not whether it's true.</p>
-  </div>
+  {% capture callout_content %}
+  <p style="margin: 0; font-size: 0.95rem;">Event studies are powerful but not bulletproof. Flat pre-trends are <em>necessary</em> but not <em>sufficient</em> for causal identification. There could still be time-varying confounders that happen to coincide with treatment timing. The identifying assumption (parallel trends in the absence of treatment) is fundamentally untestable—we can only check whether it's <em>plausible</em>, not whether it's true.</p>
+  {% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "⚠️ Caution: What This Doesn't Tell Us", content: callout_content %}
 </section>
 
 <!-- ============================================================== -->
 <section id="conclusion" class="tutorial-section">
   <h2>9. What Did We Learn?</h2>
 
-  <div class="key-principle">
-    <h4>The Results</h4>
-    <p>Consistent with French &amp; Gumus (2024), we find that 0.08 BAC laws are associated with an <strong>increase</strong> in hit-and-run fatalities. The event study shows the effect grows over time, suggesting a persistent behavioral response where drunk drivers flee crash scenes to avoid stricter penalties.</p>
-  </div>
+  {% capture kp_content %}
+  <p>Consistent with French &amp; Gumus (2024), we find that 0.08 BAC laws are associated with an <strong>increase</strong> in hit-and-run fatalities. The event study shows the effect grows over time, suggesting a persistent behavioral response where drunk drivers flee crash scenes to avoid stricter penalties.</p>
+  {% endcapture %}
+  {% include "key-principle.liquid", title: "The Results", content: kp_content %}
 
   <h3 id="bigger-picture">The Bigger Picture: How Research Actually Works</h3>
   <p>If you followed this example from start to finish, you've seen that empirical research involves a lot of mundane decisions: Which datasets to use? What unit of analysis? How to handle missing values? These decisions matter, and making them well requires understanding your research design.</p>

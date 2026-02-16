@@ -17,46 +17,28 @@ current_page: project-organization
     <li><strong>Supports reproducibility</strong> — you (or a referee) can recreate all results</li>
   </ul>
 
-  <div class="key-principle">
-    <h4>The Golden Rule</h4>
-    <p>Anyone should be able to run one script and reproduce all your results, starting from raw data. This includes future you, who will have forgotten everything.</p>
-  </div>
+  {% capture kp_content %}<p>Anyone should be able to run one script and reproduce all your results, starting from raw data. This includes future you, who will have forgotten everything.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "The Golden Rule", content: kp_content %}
 </section>
 
 <section id="project-setup" class="tutorial-section">
   <h2>Project Setup</h2>
 
-  <div class="key-principle">
-    <h4>Put Everything in Dropbox</h4>
-    <p>Before doing anything else, create your project folder in Dropbox. This gives you automatic backups and version history. When you accidentally delete code, you can right-click the file and restore it from any point in the last 30-180 days.</p>
-  </div>
+  {% capture kp_content %}<p>Before doing anything else, create your project folder in Dropbox. This gives you automatic backups and version history. When you accidentally delete code, you can right-click the file and restore it from any point in the last 30-180 days.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Put Everything in Dropbox", content: kp_content %}
 
   <h3>One-Command Setup Script</h3>
   <p>We provide a script that creates a well-organized project structure. Open your terminal and run:</p>
 
   <p><strong>Mac/Linux:</strong></p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>cd ~/Dropbox
-curl -fsSL https://theodorecaputi.com/teaching/14.33/files/setup.sh | bash -s my_1433_project</code></pre>
-  </div>
+  {% capture sc %}cd ~/Dropbox
+curl -fsSL https://theodorecaputi.com/teaching/14.33/files/setup.sh | bash -s my_1433_project{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p><strong>Windows PowerShell:</strong></p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">PowerShell</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>cd ~\Dropbox
-irm https://theodorecaputi.com/teaching/14.33/files/setup.ps1 | iex; Setup-Project "my_1433_project"</code></pre>
-  </div>
+  {% capture sc %}cd ~\Dropbox
+irm https://theodorecaputi.com/teaching/14.33/files/setup.ps1 | iex; Setup-Project "my_1433_project"{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "PowerShell" %}
 </section>
 
 <section id="folder-structure" class="tutorial-section">
@@ -114,10 +96,8 @@ my_project/
     </tbody>
   </table>
 
-  <div class="callout-danger">
-    <strong>Never Edit Raw Data</strong>
-    <p style="margin: 8px 0 0;">If you need to fix something in raw data, write code to do it. This creates a record of every change. Manually editing a CSV loses that history forever.</p>
-  </div>
+  {% capture callout_content %}<p style="margin: 8px 0 0;">If you need to fix something in raw data, write code to do it. This creates a record of every change. Manually editing a CSV loses that history forever.</p>{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "Never Edit Raw Data", content: callout_content %}
 </section>
 
 <section id="master-script" class="tutorial-section">
@@ -130,16 +110,7 @@ my_project/
     <li>Run all analysis scripts in order</li>
   </ol>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">/*==============================================================================
+  {% capture sc %}/*==============================================================================
     Master Do-File: My Research Project
     Author: Your Name
     Date: February 2026
@@ -170,8 +141,8 @@ do "$analysis/code/02_main_regression.do"
 do "$analysis/code/03_robustness.do"
 do "$analysis/code/04_figures.do"
 
-di "Done! All results in $analysis/output/"</code></pre>
-    <pre class="code-content r"><code class="language-r">#==============================================================================
+di "Done! All results in $analysis/output/"{% endcapture %}
+  {% capture rc %}#==============================================================================
 #    Master Script: My Research Project
 #    Author: Your Name
 #    Date: February 2026
@@ -201,8 +172,8 @@ source(file.path(analysis, "code", "02_main_regression.R"))
 source(file.path(analysis, "code", "03_robustness.R"))
 source(file.path(analysis, "code", "04_figures.R"))
 
-cat("Done! All results in", file.path(analysis, "output"), "\n")</code></pre>
-    <pre class="code-content python"><code class="language-python">"""
+cat("Done! All results in", file.path(analysis, "output"), "\n"){% endcapture %}
+  {% capture pc %}"""
 Master Script: My Research Project
 Author: Your Name
 Date: February 2026
@@ -233,13 +204,11 @@ exec(open(ANALYSIS / "code" / "02_main_regression.py").read())
 exec(open(ANALYSIS / "code" / "03_robustness.py").read())
 exec(open(ANALYSIS / "code" / "04_figures.py").read())
 
-print(f"Done! All results in {ANALYSIS / 'output'}")</code></pre>
-  </div>
+print(f"Done! All results in {ANALYSIS / 'output'}"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Number Your Scripts</h4>
-    <p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so the run order is obvious. This also keeps them sorted correctly in your file browser.</p>
-  </div>
+  {% capture kp_content %}<p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so the run order is obvious. This also keeps them sorted correctly in your file browser.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Number Your Scripts", content: kp_content %}
 </section>
 
 <section id="paths" class="tutorial-section">
@@ -247,16 +216,7 @@ print(f"Done! All results in {ANALYSIS / 'output'}")</code></pre>
 
   <p>Hardcoded paths like <code>"/Users/john/Desktop/data.csv"</code> break when anyone else runs your code. Use relative paths from your project root instead.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* BAD: Hardcoded path (breaks on other computers)
+  {% capture sc %}* BAD: Hardcoded path (breaks on other computers)
 use "/Users/john/Desktop/project/data/census.dta", clear
 
 * GOOD: Use globals set in master.do
@@ -264,8 +224,8 @@ use "$build/output/census_clean.dta", clear
 
 * Save output using globals
 save "$analysis/output/regression_results.dta", replace
-graph export "$analysis/output/figures/event_study.pdf", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># BAD: Hardcoded path (breaks on other computers)
+graph export "$analysis/output/figures/event_study.pdf", replace{% endcapture %}
+  {% capture rc %}# BAD: Hardcoded path (breaks on other computers)
 df <- read_csv("/Users/john/Desktop/project/data/census.csv")
 
 # GOOD: Use variables set in master.R
@@ -273,8 +233,8 @@ df <- read_csv(file.path(build, "output", "census_clean.csv"))
 
 # Save output using path variables
 write_csv(results, file.path(analysis, "output", "regression_results.csv"))
-ggsave(file.path(analysis, "output", "figures", "event_study.pdf"), p, width = 10, height = 6)</code></pre>
-    <pre class="code-content python"><code class="language-python"># BAD: Hardcoded path (breaks on other computers)
+ggsave(file.path(analysis, "output", "figures", "event_study.pdf"), p, width = 10, height = 6){% endcapture %}
+  {% capture pc %}# BAD: Hardcoded path (breaks on other computers)
 df = pd.read_csv("/Users/john/Desktop/project/data/census.csv")
 
 # GOOD: Use variables set in main.py
@@ -282,8 +242,8 @@ df = pd.read_csv(BUILD / "output" / "census_clean.csv")
 
 # Save output using path variables
 results.to_csv(ANALYSIS / "output" / "regression_results.csv")
-fig.savefig(ANALYSIS / "output" / "figures" / "event_study.pdf")</code></pre>
-  </div>
+fig.savefig(ANALYSIS / "output" / "figures" / "event_study.pdf"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="best-practices" class="tutorial-section">
@@ -293,16 +253,7 @@ fig.savefig(ANALYSIS / "output" / "figures" / "event_study.pdf")</code></pre>
 
   <p>Well-formatted code is easier to read and debug. Use section headers to organize your scripts, and include comments that explain <em>why</em> you're doing something (not just what):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* GOOD: Clear sections with headers
+  {% capture sc %}* GOOD: Clear sections with headers
 *==============================================================================
 * SECTION 1: LOAD AND CLEAN DATA
 *==============================================================================
@@ -325,8 +276,8 @@ drop if missing(income, education, age)
 
 * Document sample size
 count
-di "Final sample: " r(N) " observations"</code></pre>
-    <pre class="code-content r"><code class="language-r"># GOOD: Clear sections with headers
+di "Final sample: " r(N) " observations"{% endcapture %}
+  {% capture rc %}# GOOD: Clear sections with headers
 #==============================================================================
 # SECTION 1: LOAD AND CLEAN DATA
 #==============================================================================
@@ -350,8 +301,8 @@ df <- df %>%
   drop_na(income, education, age)
 
 # Document sample size
-cat("Final sample:", nrow(df), "observations\n")</code></pre>
-    <pre class="code-content python"><code class="language-python"># GOOD: Clear sections with headers
+cat("Final sample:", nrow(df), "observations\n"){% endcapture %}
+  {% capture pc %}# GOOD: Clear sections with headers
 #==============================================================================
 # SECTION 1: LOAD AND CLEAN DATA
 #==============================================================================
@@ -372,8 +323,8 @@ df['employed'] = (df['empstat'] == 1).astype(int)
 df = df.dropna(subset=['income', 'education', 'age'])
 
 # Document sample size
-print(f"Final sample: {len(df)} observations")</code></pre>
-  </div>
+print(f"Final sample: {len(df)} observations"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Debugging Tips</h3>
 
@@ -386,16 +337,7 @@ print(f"Final sample: {len(df)} observations")</code></pre>
 
   <p>Here's what defensive coding looks like in practice:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Before and after every major step:
+  {% capture sc %}* Before and after every major step:
 di "Before cleaning: " _N " observations"
 
 drop if age < 0 | age > 120
@@ -405,8 +347,8 @@ di "After cleaning: " _N " observations"
 * Check for unexpected values
 tab state, missing
 summarize income, detail
-assert income >= 0 | missing(income)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Before and after every major step:
+assert income >= 0 | missing(income){% endcapture %}
+  {% capture rc %}# Before and after every major step:
 cat("Before cleaning:", nrow(df), "observations\n")
 
 df <- df %>% filter(age >= 0, age <= 120)
@@ -416,8 +358,8 @@ cat("After cleaning:", nrow(df), "observations\n")
 # Check for unexpected values
 table(df$state, useNA = "ifany")
 summary(df$income)
-stopifnot(all(df$income >= 0 | is.na(df$income)))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Before and after every major step:
+stopifnot(all(df$income >= 0 | is.na(df$income))){% endcapture %}
+  {% capture pc %}# Before and after every major step:
 print(f"Before cleaning: {len(df)} observations")
 
 df = df[(df['age'] >= 0) & (df['age'] <= 120)]
@@ -427,53 +369,41 @@ print(f"After cleaning: {len(df)} observations")
 # Check for unexpected values
 print(df['state'].value_counts(dropna=False))
 print(df['income'].describe())
-assert (df['income'] >= 0).all() or df['income'].isna().any()</code></pre>
-  </div>
+assert (df['income'] >= 0).all() or df['income'].isna().any(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Save Intermediate Files</h3>
 
   <p>Save your data after each major cleaning step with numbered prefixes:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* After each major cleaning step, save the data
+  {% capture sc %}* After each major cleaning step, save the data
 save "$build/output/01_imported.dta", replace
 * ... cleaning code ...
 save "$build/output/02_cleaned.dta", replace
 * ... more cleaning ...
-save "$build/output/03_merged.dta", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># After each major cleaning step, save the data
+save "$build/output/03_merged.dta", replace{% endcapture %}
+  {% capture rc %}# After each major cleaning step, save the data
 saveRDS(df, file.path(build, "output", "01_imported.rds"))
 # ... cleaning code ...
 saveRDS(df, file.path(build, "output", "02_cleaned.rds"))
 # ... more cleaning ...
-saveRDS(df, file.path(build, "output", "03_merged.rds"))</code></pre>
-    <pre class="code-content python"><code class="language-python"># After each major cleaning step, save the data
+saveRDS(df, file.path(build, "output", "03_merged.rds")){% endcapture %}
+  {% capture pc %}# After each major cleaning step, save the data
 df.to_pickle(f"{BUILD}/output/01_imported.pkl")
 # ... cleaning code ...
 df.to_pickle(f"{BUILD}/output/02_cleaned.pkl")
 # ... more cleaning ...
-df.to_pickle(f"{BUILD}/output/03_merged.pkl")</code></pre>
-  </div>
+df.to_pickle(f"{BUILD}/output/03_merged.pkl"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Why This Matters</h4>
-    <p>When something breaks at step 5, you can start debugging from step 4 instead of re-running everything from scratch. This saves hours of debugging time, especially with large datasets that take time to process.</p>
-  </div>
+  {% capture kp_content %}<p>When something breaks at step 5, you can start debugging from step 4 instead of re-running everything from scratch. This saves hours of debugging time, especially with large datasets that take time to process.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Why This Matters", content: kp_content %}
 </section>
 
 <section id="checklist" class="tutorial-section">
   <h2>Project Checklist</h2>
 
-  <div class="callout-success">
-    <p style="margin: 0 0 12px; font-weight: 600;">Before submitting any project, verify:</p>
+  {% capture callout_content %}<p style="margin: 0 0 12px; font-weight: 600;">Before submitting any project, verify:</p>
     <ul style="margin: 0; padding-left: 20px;">
       <li>☐ Running <code>master.do</code> reproduces all results from raw data</li>
       <li>☐ All paths use globals/variables, not hardcoded paths</li>
@@ -481,6 +411,6 @@ df.to_pickle(f"{BUILD}/output/03_merged.pkl")</code></pre>
       <li>☐ README explains how to run the project</li>
       <li>☐ No temporary or test files left in folders</li>
       <li>☐ Scripts are numbered in run order</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "callout.liquid", type: "success", content: callout_content %}
 </section>

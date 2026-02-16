@@ -14,24 +14,15 @@ current_page: descriptive-analysis
   <h3>Basic Summary Statistics</h3>
   <p>Start with the basics: mean, standard deviation, min, and max. The <strong>mean</strong> tells you the central tendency. The <strong>standard deviation</strong> tells you how spread out the data is—if it's small relative to the mean, values cluster tightly; if it's large, there's wide variation. Check <strong>min and max</strong> for implausible values (negative ages, incomes in the billions) that signal data errors.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Basic summary
+  {% capture sc %}* Basic summary
 summarize income age education
 
 * Detailed summary with percentiles
 summarize income, detail
 
 * Summary by group
-bysort treatment: summarize outcome</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+bysort treatment: summarize outcome{% endcapture %}
+  {% capture rc %}pacman::p_load(dplyr)
 
 # Basic summary
 summary(data[, c("income", "age", "education")])
@@ -55,8 +46,8 @@ data %>%
     mean_outcome = mean(outcome, na.rm = TRUE),
     sd_outcome = sd(outcome, na.rm = TRUE),
     n = n()
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+  ){% endcapture %}
+  {% capture pc %}import pandas as pd
 
 # Basic summary
 data[["income", "age", "education"]].describe()
@@ -65,22 +56,13 @@ data[["income", "age", "education"]].describe()
 data["income"].describe(percentiles=[.25, .5, .75])
 
 # Summary by group
-data.groupby("treatment")["outcome"].agg(["mean", "std", "count"])</code></pre>
-  </div>
+data.groupby("treatment")["outcome"].agg(["mean", "std", "count"]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Tabulations and Cross-tabs</h3>
   <p>Tabulations count how many observations fall into each category. Use <strong>one-way tabs</strong> for categorical variables (education level, state, treatment status) to see the distribution. Use <strong>two-way tabs</strong> (cross-tabs) to see how two categorical variables relate—for example, what percentage of treated individuals have each education level? This is your first look at whether groups differ systematically.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* One-way tabulation
+  {% capture sc %}* One-way tabulation
 tab education
 
 * Two-way tabulation
@@ -90,8 +72,8 @@ tab education treatment
 tab education treatment, row col
 
 * Tabulate continuous variable
-tabstat income, by(education) stat(mean sd n)</code></pre>
-    <pre class="code-content r"><code class="language-r"># One-way tabulation
+tabstat income, by(education) stat(mean sd n){% endcapture %}
+  {% capture rc %}# One-way tabulation
 table(data$education)
 
 # Two-way tabulation
@@ -108,8 +90,8 @@ data %>%
     mean_income = mean(income, na.rm = TRUE),
     sd_income = sd(income, na.rm = TRUE),
     n = n()
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python"># One-way tabulation
+  ){% endcapture %}
+  {% capture pc %}# One-way tabulation
 data["education"].value_counts()
 
 # Two-way tabulation (cross-tab)
@@ -120,8 +102,8 @@ pd.crosstab(data["education"], data["treatment"], normalize="index")  # row %
 pd.crosstab(data["education"], data["treatment"], normalize="columns")  # col %
 
 # Summarize continuous by group
-data.groupby("education")["income"].agg(["mean", "std", "count"])</code></pre>
-  </div>
+data.groupby("education")["income"].agg(["mean", "std", "count"]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Balance Tables</h3>
   <p>A <strong>balance table</strong> compares characteristics across treatment and control groups. This is essential for any study with a treatment/control design because it reveals whether groups are comparable on observable characteristics.</p>
@@ -130,16 +112,7 @@ data.groupby("education")["income"].agg(["mean", "std", "count"])</code></pre>
 
   <p>A balance table typically shows: (1) the mean of each variable in the control group, (2) the mean in the treatment group, (3) the difference, and (4) a p-value testing whether the difference is statistically significant. You <em>hope</em> to see small differences—if treatment and control groups look similar on observables, it's more plausible they're also similar on unobservables. Large, significant differences don't doom your analysis (you can control for them), but they should make you more cautious about potential unobserved confounding.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Install if needed: ssc install balancetable
+  {% capture sc %}* Install if needed: ssc install balancetable
 
 * Create balance table
 balancetable treatment age female income education ///
@@ -151,8 +124,8 @@ balancetable treatment age female income education ///
 estpost ttest age female income education, by(treatment)
 esttab using "balance.tex", ///
     cells("mu_1 mu_2 b se") ///
-    label replace</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(modelsummary)
+    label replace{% endcapture %}
+  {% capture rc %}pacman::p_load(modelsummary)
 
 # Create balance table
 datasummary_balance(
@@ -166,8 +139,8 @@ datasummary_balance(
   ~ treatment,
   data = data,
   output = "balance_table.tex"
-)</code></pre>
-    <pre class="code-content python"><code class="language-python">from scipy import stats
+){% endcapture %}
+  {% capture pc %}from scipy import stats
 
 # Create balance table manually
 vars = ["age", "female", "income", "education"]
@@ -184,8 +157,8 @@ for var in vars:
         "p-value": pval
     })
 balance_df = pd.DataFrame(balance)
-print(balance_df.to_string(index=False))</code></pre>
-  </div>
+print(balance_df.to_string(index=False)){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="visualization" class="tutorial-section">
@@ -193,24 +166,13 @@ print(balance_df.to_string(index=False))</code></pre>
 
   <p>Good visualizations reveal patterns that tables obscure. A scatter plot can show you nonlinearity that summary statistics miss. A time series plot can reveal trends and structural breaks. Economists use visualization both for exploratory analysis (understanding your data) and for communication (convincing readers of your findings).</p>
 
-  <div class="key-principle">
-    <h4>Graphs Should Stand Alone</h4>
-    <p>Every figure should be understandable without reading the paper. Include clear axis labels, legends, and titles. Use notes to explain any non-obvious details.</p>
-  </div>
+  {% capture kp_content %}<p>Every figure should be understandable without reading the paper. Include clear axis labels, legends, and titles. Use notes to explain any non-obvious details.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Graphs Should Stand Alone", content: kp_content %}
 
   <h3>Histograms and Density Plots</h3>
   <p>Use histograms and density plots to visualize the distribution of a single variable. They answer: Is the distribution symmetric or skewed? Are there multiple modes (peaks)? Are there outliers? Comparing distributions across groups (overlapping densities) is a powerful way to see if treatment and control groups differ—before running any regressions.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Histogram
+  {% capture sc %}* Histogram
 histogram income, frequency ///
     title("Distribution of Income") ///
     xtitle("Annual Income ($)") ytitle("Frequency")
@@ -225,8 +187,8 @@ kdensity income, ///
 twoway (kdensity income if treatment == 0, lcolor(blue)) ///
        (kdensity income if treatment == 1, lcolor(red)), ///
     legend(label(1 "Control") label(2 "Treatment")) ///
-    title("Income by Treatment Status")</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(ggplot2)
+    title("Income by Treatment Status"){% endcapture %}
+  {% capture rc %}pacman::p_load(ggplot2)
 
 # Histogram
 p <- ggplot(data, aes(x = income)) +
@@ -246,8 +208,8 @@ p <- ggplot(data, aes(x = income, fill = factor(treatment))) +
   geom_density(alpha = 0.5) +
   scale_fill_manual(values = c("blue", "red"),
                     labels = c("Control", "Treatment")) +
-  labs(title = "Income by Treatment Status", fill = "Group")</code></pre>
-    <pre class="code-content python"><code class="language-python">import matplotlib.pyplot as plt
+  labs(title = "Income by Treatment Status", fill = "Group"){% endcapture %}
+  {% capture pc %}import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Histogram
@@ -268,22 +230,13 @@ for treat, color, label in [(0, "blue", "Control"), (1, "red", "Treatment")]:
         kind="kde", ax=ax, color=color, label=label
     )
 ax.legend()
-ax.set_title("Income by Treatment Status")</code></pre>
-  </div>
+ax.set_title("Income by Treatment Status"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Scatter Plots</h3>
   <p>Scatter plots show the relationship between two continuous variables. Look for: Is the relationship positive or negative? Is it linear or curved? How much scatter is there around the trend? A fitted line helps readers see the overall relationship, but be careful—it can hide important nonlinearity. <strong>Binned scatter plots</strong> (binscatter) are particularly useful: they divide the x-axis into bins, calculate the mean y-value in each bin, and plot those means. This smooths out noise while revealing the true relationship.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Basic scatter plot
+  {% capture sc %}* Basic scatter plot
 scatter income education, ///
     title("Income vs. Education") ///
     xtitle("Years of Education") ytitle("Income")
@@ -298,8 +251,8 @@ twoway (scatter income education) ///
 * Install: ssc install binscatter
 binscatter income education, ///
     title("Income vs. Education") ///
-    xtitle("Years of Education") ytitle("Mean Income")</code></pre>
-    <pre class="code-content r"><code class="language-r"># Basic scatter plot
+    xtitle("Years of Education") ytitle("Mean Income"){% endcapture %}
+  {% capture rc %}# Basic scatter plot
 p <- ggplot(data, aes(x = education, y = income)) +
   geom_point(alpha = 0.5) +
   labs(title = "Income vs. Education",
@@ -313,8 +266,8 @@ p <- ggplot(data, aes(x = education, y = income)) +
 
 # Binned scatter plot
 pacman::p_load(binsreg)
-binsreg(y = data$income, x = data$education)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Basic scatter plot
+binsreg(y = data$income, x = data$education){% endcapture %}
+  {% capture pc %}# Basic scatter plot
 plt.figure(figsize=(8, 6))
 plt.scatter(data["education"], data["income"], alpha=0.5)
 plt.title("Income vs. Education")
@@ -329,22 +282,13 @@ plt.scatter(data["education"], data["income"], alpha=0.5)
 plt.plot(data["education"].sort_values(), p(data["education"].sort_values()), "r-")
 
 # Seaborn regression plot (easier)
-sns.regplot(x="education", y="income", data=data)</code></pre>
-  </div>
+sns.regplot(x="education", y="income", data=data){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Time Series and Line Plots</h3>
   <p>Time series plots show how a variable changes over time. They're essential for any analysis with a temporal component—especially difference-in-differences designs, where you want to show parallel pre-trends. When comparing groups over time, use separate lines for each group. Look for: Do the lines move together before treatment? Does one line diverge after treatment? Any sudden jumps or level shifts? It's reassuring when raw trends look parallel before treatment, though keep in mind that unit and time fixed effects can make trends parallel even when the raw data isn't—so non-parallel raw trends aren't necessarily fatal.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Collapse to year-level means
+  {% capture sc %}* Collapse to year-level means
 preserve
 collapse (mean) income, by(year)
 
@@ -360,8 +304,8 @@ collapse (mean) income, by(year treatment)
 twoway (line income year if treatment == 0) ///
        (line income year if treatment == 1), ///
     legend(label(1 "Control") label(2 "Treatment"))
-restore</code></pre>
-    <pre class="code-content r"><code class="language-r"># Aggregate to year level
+restore{% endcapture %}
+  {% capture rc %}# Aggregate to year level
 yearly <- data %>%
   group_by(year) %>%
   summarize(mean_income = mean(income, na.rm = TRUE))
@@ -384,8 +328,8 @@ p <- ggplot(yearly_by_group, aes(x = year, y = mean_income,
   geom_point(size = 2) +
   scale_color_manual(values = c("blue", "red"),
                      labels = c("Control", "Treatment")) +
-  labs(color = "Group")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Aggregate to year level
+  labs(color = "Group"){% endcapture %}
+  {% capture pc %}# Aggregate to year level
 yearly = data.groupby("year")["income"].mean()
 
 # Line plot
@@ -398,30 +342,21 @@ plt.ylabel("Mean Income")
 # Multiple lines by group
 yearly_by_group = data.groupby(["year", "treatment"])["income"].mean().unstack()
 yearly_by_group.plot(marker="o")
-plt.legend(["Control", "Treatment"])</code></pre>
-  </div>
+plt.legend(["Control", "Treatment"]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Box Plots</h3>
   <p>Box plots summarize a distribution's key features: the median (center line), interquartile range (the box, showing where the middle 50% of data falls), and outliers (individual points beyond the "whiskers"). They're especially useful for comparing distributions across many groups—you can see at a glance which groups have higher medians, more spread, or more outliers. Unlike histograms, box plots work well even when you have many categories to compare.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Box plot by group
+  {% capture sc %}* Box plot by group
 graph box income, over(education) ///
-    title("Income Distribution by Education Level")</code></pre>
-    <pre class="code-content r"><code class="language-r"># Box plot by group
+    title("Income Distribution by Education Level"){% endcapture %}
+  {% capture rc %}# Box plot by group
 p <- ggplot(data, aes(x = factor(education), y = income)) +
   geom_boxplot(fill = "steelblue", alpha = 0.7) +
   labs(title = "Income Distribution by Education Level",
-       x = "Education Level", y = "Income")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Box plot by group
+       x = "Education Level", y = "Income"){% endcapture %}
+  {% capture pc %}# Box plot by group
 data.boxplot(column="income", by="education")
 plt.title("Income Distribution by Education Level")
 plt.suptitle("")  # Remove automatic title
@@ -429,6 +364,6 @@ plt.xlabel("Education Level")
 plt.ylabel("Income")
 
 # Or with seaborn
-sns.boxplot(x="education", y="income", data=data)</code></pre>
-  </div>
+sns.boxplot(x="education", y="income", data=data){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>

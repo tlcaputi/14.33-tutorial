@@ -15,17 +15,10 @@ current_page: auxiliary-programming-tips
 
   <p>Programs like the Stata visual editor or RStudio make running that code easier and prettier, but they aren't necessary. They're just convenient wrappers around the text. Since code is just text, you can run it directly from the command line:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>stata -b do my_analysis.do    # Run a Stata .do file
+  {% capture sc %}stata -b do my_analysis.do    # Run a Stata .do file
 Rscript my_analysis.R          # Run an R script
-python3 my_analysis.py         # Run a Python script</code></pre>
-  </div>
+python3 my_analysis.py         # Run a Python script{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p>That's it. No GUI needed. This is how most researchers actually run their code in practice, especially for long-running analyses.</p>
 
@@ -94,39 +87,27 @@ python3 my_analysis.py         # Run a Python script</code></pre>
     <li><strong>Use language-specific path functions.</strong> Most languages have built-in functions to handle paths correctly.</li>
   </ul>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Stata: Use forward slashes or ~
+  {% capture sc %}* Stata: Use forward slashes or ~
 * Good (works everywhere)
 use "~/projects/data/mydata.dta"
 
 * Also works
-use "/Users/alice/projects/data/mydata.dta"
-</code></pre>
-    <pre class="code-content r"><code class="language-r"># R: Use file.path() for automatic path handling
+use "/Users/alice/projects/data/mydata.dta"{% endcapture %}
+  {% capture rc %}# R: Use file.path() for automatic path handling
 my_file <- file.path("~", "projects", "data", "mydata.csv")
 data <- read.csv(my_file)
 
 # Or use forward slashes directly
-data <- read.csv("~/projects/data/mydata.csv")
-</code></pre>
-    <pre class="code-content python"><code class="language-python">from pathlib import Path
+data <- read.csv("~/projects/data/mydata.csv"){% endcapture %}
+  {% capture pc %}from pathlib import Path
 
 # Python: Use Path for cross-platform handling
 my_file = Path.home() / "projects" / "data" / "mydata.csv"
 df = pd.read_csv(my_file)
 
 # Or with forward slashes
-df = pd.read_csv("~/projects/data/mydata.csv")
-</code></pre>
-  </div>
+df = pd.read_csv("~/projects/data/mydata.csv"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="command-line-basics" class="tutorial-section">
@@ -138,17 +119,10 @@ df = pd.read_csv("~/projects/data/mydata.csv")
 
   <p>When you run a script from the terminal, your computer needs to know where to find <code>stata</code>, <code>Rscript</code>, or <code>python</code>. Check if they're already accessible:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal (Mac/Linux)</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>which stata
+  {% capture sc %}which stata
 which Rscript
-which python3</code></pre>
-  </div>
+which python3{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal (Mac/Linux)" %}
 
   <p>If any of these return "not found," you need to add them to your <code>PATH</code>. This tells your system where to look for executables.</p>
 
@@ -156,79 +130,41 @@ which python3</code></pre>
 
   <p>Edit your shell configuration file. On Mac, this is usually <code>~/.zshrc</code> (newer Macs) or <code>~/.bash_profile</code> (older). On Linux, it's <code>~/.bashrc</code>.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>nano ~/.zshrc</code></pre>
-  </div>
+  {% capture sc %}nano ~/.zshrc{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p>Add lines like these (adjust paths to where your software is actually installed):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">~/.zshrc</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>export PATH="/Applications/Stata/StataIC.app/Contents/MacOS:$PATH"
-export PATH="/usr/local/bin:$PATH"  # R usually installs here</code></pre>
-  </div>
+  {% capture sc %}export PATH="/Applications/Stata/StataIC.app/Contents/MacOS:$PATH"
+export PATH="/usr/local/bin:$PATH"  # R usually installs here{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "~/.zshrc" %}
 
   <p>Save and exit (Ctrl+X, then Y, then Enter in nano). Reload your shell:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>source ~/.zshrc</code></pre>
-  </div>
+  {% capture sc %}source ~/.zshrc{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p>Now test again:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>which stata</code></pre>
-  </div>
+  {% capture sc %}which stata{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <h3 id="running-scripts">Running Scripts from the Command Line</h3>
 
   <p>Once your software is in your PATH, you can run scripts directly:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-bash"># Run a Stata script
+  {% capture sc %}# Run a Stata script
 stata -b do analysis.do
 
 # Run an R script
 Rscript analysis.R
 
 # Run a Python script
-python3 analysis.py
-</code></pre>
-  </div>
+python3 analysis.py{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
-  <div class="key-principle">
-    <h4>Master Scripts</h4>
-    <p>Consider creating a master script that runs all your analysis scripts in order. This way, you can regenerate your entire analysis with a single command: <code>stata -b do master.do</code> or <code>Rscript master.R</code>. This is the gold standard for reproducibility.</p>
-  </div>
+  {% capture kp_content %}<p>Consider creating a master script that runs all your analysis scripts in order. This way, you can regenerate your entire analysis with a single command: <code>stata -b do master.do</code> or <code>Rscript master.R</code>. This is the gold standard for reproducibility.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Master Scripts", content: kp_content %}
 </section>
 
 <section id="logging" class="tutorial-section">
@@ -249,16 +185,7 @@ python3 analysis.py
 
   <p>Most statistical software can automatically create logs. Here's how:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Start logging at the beginning of your script
+  {% capture sc %}* Start logging at the beginning of your script
 log using "analysis.log", replace
 
 * Your analysis code here
@@ -266,9 +193,8 @@ summarize age income
 regress outcome x1 x2
 
 * Close the log at the end
-log close
-</code></pre>
-    <pre class="code-content r"><code class="language-r"># Using the logger package for clean logging
+log close{% endcapture %}
+  {% capture rc %}# Using the logger package for clean logging
 library(logger)
 
 # Set up logging to both console and file
@@ -279,9 +205,8 @@ log_info("Starting analysis...")
 log_info("Running regression...")
 # ... rest of your code
 
-log_info("Analysis complete.")
-</code></pre>
-    <pre class="code-content python"><code class="language-python">import logging
+log_info("Analysis complete."){% endcapture %}
+  {% capture pc %}import logging
 
 # Set up logging to both console and file
 logging.basicConfig(
@@ -298,28 +223,19 @@ logging.info("Starting analysis...")
 logging.info("Running regression...")
 # ... rest of your code
 
-logging.info("Analysis complete.")
-</code></pre>
-  </div>
+logging.info("Analysis complete."){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3 id="viewing-log">Viewing the Log</h3>
 
   <p>After running your script, open the log file to see all output:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code># View the log file
+  {% capture sc %}# View the log file
 cat analysis.log
 
 # Or open it in your editor
-nano analysis.log
-</code></pre>
-  </div>
+nano analysis.log{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
 </section>
 
@@ -340,14 +256,7 @@ nano analysis.log
 
   <p>Here's a bash script that runs a mixed-language analysis pipeline:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Bash (master.sh)</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>#!/bin/bash
+  {% capture sc %}#!/bin/bash
 
 echo "Starting analysis at $(date)"
 
@@ -363,30 +272,19 @@ Rscript scripts/03_analysis.R
 # Step 4: Generate tables (Stata's estout is convenient)
 stata -b do scripts/04_tables.do
 
-echo "Done at $(date)"
-</code></pre>
-  </div>
+echo "Done at $(date)"{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Bash (master.sh)" %}
 
   <p>Save this as <code>master.sh</code>, make it executable, and run it:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Terminal</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code>chmod +x master.sh
-./master.sh
-</code></pre>
-  </div>
+  {% capture sc %}chmod +x master.sh
+./master.sh{% endcapture %}
+  {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   <p>This runs scripts in multiple languages in sequence, using each language where it excels.</p>
 
-  <div class="key-principle">
-    <h4>Don't Worry Too Much</h4>
-    <p>You don't need to become a bash expert. For most empirical economics work, a simple master script in R or Stata is sufficient. Use bash only if it saves you significant time or makes your workflow cleaner.</p>
-  </div>
+  {% capture kp_content %}<p>You don't need to become a bash expert. For most empirical economics work, a simple master script in R or Stata is sufficient. Use bash only if it saves you significant time or makes your workflow cleaner.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Don't Worry Too Much", content: kp_content %}
 
   <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
     <a href="auxiliary-latex.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #fff; color: var(--primary); border: 1px solid var(--primary); border-radius: 8px; text-decoration: none; font-weight: 500;">

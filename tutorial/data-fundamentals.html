@@ -7,17 +7,13 @@ current_page: data-fundamentals
 <p class="subtitle">Load, clean, reshape, and merge your data</p>
 
 <!-- Growth Mindset Message -->
-<div class="callout-success">
-  <strong>Data wrangling is 80% of the work</strong>
-  <p>
+{% capture callout_content %}<p>
     The glamorous part of empirical economics is running regressions. But most of your time will be spent cleaning, reshaping, and merging data. This is normal. Professional economists spend most of their coding time on data prep too. Once you get comfortable with these operations, the analysis becomes straightforward.
-  </p>
-</div>
+  </p>{% endcapture %}
+{% include "callout.liquid", type: "success", title: "Data wrangling is 80% of the work", content: callout_content %}
 
-<div class="key-principle">
-  <h4>Think of Data as Excel Spreadsheets</h4>
-  <p>The datasets we work with in Stata and R are just <strong>tables</strong>—exactly like Excel spreadsheets. Each row is an observation (a person, a country-year, a transaction), and each column is a variable (age, GDP, price). If you've used Excel, you already understand the basic structure. The difference is that instead of clicking and dragging, we write code to manipulate these tables—which makes our work reproducible and scalable to millions of rows.</p>
-</div>
+{% capture kp_content %}<p>The datasets we work with in Stata and R are just <strong>tables</strong>—exactly like Excel spreadsheets. Each row is an observation (a person, a country-year, a transaction), and each column is a variable (age, GDP, price). If you've used Excel, you already understand the basic structure. The difference is that instead of clicking and dragging, we write code to manipulate these tables—which makes our work reproducible and scalable to millions of rows.</p>{% endcapture %}
+{% include "key-principle.liquid", title: "Think of Data as Excel Spreadsheets", content: kp_content %}
 
 <section id="unit-of-analysis" class="tutorial-section">
   <h2>Choosing Your Unit of Analysis</h2>
@@ -65,16 +61,14 @@ current_page: data-fundamentals
     </div>
   </div>
 
-  <div class="key-principle">
-    <h4>The Data Rarely Comes at the Right Level</h4>
-    <p>You'll often need to <strong>aggregate</strong> raw data to match your unit of analysis. For example:</p>
+  {% capture kp_content %}<p>You'll often need to <strong>aggregate</strong> raw data to match your unit of analysis. For example:</p>
     <ul style="margin: 8px 0 0 20px;">
       <li>You want state-year data, but your raw data has one row per <em>car crash</em>. You need to count crashes per state-year.</li>
       <li>You want individual-level data, but you have multiple survey responses per person. You need to collapse to one row per person.</li>
       <li>You want firm-year data, but you have daily stock prices. You need to aggregate to annual averages.</li>
     </ul>
-    <p style="margin-top: 12px;">The <a href="#aggregating">Aggregating Data</a> section below shows how to do this.</p>
-  </div>
+    <p style="margin-top: 12px;">The <a href="#aggregating">Aggregating Data</a> section below shows how to do this.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "The Data Rarely Comes at the Right Level", content: kp_content %}
 </section>
 
 <section id="reading-writing" class="tutorial-section">
@@ -83,24 +77,15 @@ current_page: data-fundamentals
   <h3>Loading Data</h3>
   <p>The first step in any analysis is loading your data into memory. Different file formats require different commands:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load Stata dataset
+  {% capture sc %}* Load Stata dataset
 use "data.dta", clear
 
 * Load CSV file
 import delimited "data.csv", clear
 
 * Load Excel file
-import excel "data.xlsx", sheet("Sheet1") firstrow clear</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(haven, readr, readxl)
+import excel "data.xlsx", sheet("Sheet1") firstrow clear{% endcapture %}
+  {% capture rc %}pacman::p_load(haven, readr, readxl)
 
 # Load Stata dataset
 data <- read_dta("data.dta")
@@ -109,8 +94,8 @@ data <- read_dta("data.dta")
 data <- read_csv("data.csv")
 
 # Load Excel file
-data <- read_excel("data.xlsx", sheet = "Sheet1")</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+data <- read_excel("data.xlsx", sheet = "Sheet1"){% endcapture %}
+  {% capture pc %}import pandas as pd
 
 # Load Stata dataset
 data = pd.read_stata("data.dta")
@@ -119,80 +104,60 @@ data = pd.read_stata("data.dta")
 data = pd.read_csv("data.csv")
 
 # Load Excel file
-data = pd.read_excel("data.xlsx", sheet_name="Sheet1")</code></pre>
-  </div>
+data = pd.read_excel("data.xlsx", sheet_name="Sheet1"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Loading Specific Variables or Observations</h3>
   <p>For large datasets, you can load only what you need:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load only specific variables
+  {% capture sc %}* Load only specific variables
 use income age education using "data.dta", clear
 
 * Load only observations meeting a condition
 use "data.dta" if year == 2020, clear
 
 * Combine both
-use income age using "data.dta" if state == "CA", clear</code></pre>
-    <pre class="code-content r"><code class="language-r"># Load specific columns from CSV
+use income age using "data.dta" if state == "CA", clear{% endcapture %}
+  {% capture rc %}# Load specific columns from CSV
 data <- read_csv("data.csv", col_select = c(income, age, education))
 
 # Filter while reading (with data.table for large files)
 pacman::p_load(data.table)
-data <- fread("data.csv", select = c("income", "age"))[year == 2020]</code></pre>
-    <pre class="code-content python"><code class="language-python"># Load specific columns
+data <- fread("data.csv", select = c("income", "age"))[year == 2020]{% endcapture %}
+  {% capture pc %}# Load specific columns
 data = pd.read_csv("data.csv", usecols=["income", "age", "education"])
 
 # Load and filter (for very large files, use chunks)
 data = pd.read_stata("data.dta", columns=["income", "age"])
-data = data[data["year"] == 2020]</code></pre>
-  </div>
+data = data[data["year"] == 2020]{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Saving Data</h3>
   <p>After cleaning or transforming your data, save it so you don't have to re-run everything next time:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Save as Stata dataset
+  {% capture sc %}* Save as Stata dataset
 save "cleaned_data.dta", replace
 
 * Export to CSV
-export delimited "cleaned_data.csv", replace</code></pre>
-    <pre class="code-content r"><code class="language-r"># Save as Stata dataset
+export delimited "cleaned_data.csv", replace{% endcapture %}
+  {% capture rc %}# Save as Stata dataset
 write_dta(data, "cleaned_data.dta")
 
 # Export to CSV
-write_csv(data, "cleaned_data.csv")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Save as Stata dataset
+write_csv(data, "cleaned_data.csv"){% endcapture %}
+  {% capture pc %}# Save as Stata dataset
 data.to_stata("cleaned_data.dta", write_index=False)
 
 # Export to CSV
-data.to_csv("cleaned_data.csv", index=False)</code></pre>
-  </div>
+data.to_csv("cleaned_data.csv", index=False){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Save Intermediate Files</h4>
-    <p>Save your data after each major step with numbered prefixes. When something breaks at step 5, you can start from step 4 instead of re-running everything:</p>
+  {% capture kp_content %}<p>Save your data after each major step with numbered prefixes. When something breaks at step 5, you can start from step 4 instead of re-running everything:</p>
     <ul style="margin: 8px 0 0 20px;">
       <li><code>01_imported.dta</code></li>
       <li><code>02_cleaned.dta</code></li>
       <li><code>03_merged.dta</code></li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Save Intermediate Files", content: kp_content %}
 </section>
 
 <section id="data-acquisition" class="tutorial-section">
@@ -200,26 +165,15 @@ data.to_csv("cleaned_data.csv", index=False)</code></pre>
 
   <p>Before you can load data, you need to <em>get</em> it. How you acquire your data matters for reproducibility.</p>
 
-  <div class="callout-danger">
-    <strong>The Golden Rule: Raw Data is READ-ONLY</strong>
-    <p>
+  {% capture callout_content %}<p>
       Never modify your original data files. Ever. If you need to clean or transform data, write code that reads the raw file and saves a new cleaned version. This way you can always trace back to the original source.
-    </p>
-  </div>
+    </p>{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "The Golden Rule: Raw Data is READ-ONLY", content: callout_content %}
 
   <h3>Download Programmatically When Possible</h3>
   <p>The best way to get data is to download it with code. This makes your entire pipeline reproducible—anyone can run your script and get the same data.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Example: Download FARS data (fatal crash data from NHTSA)
+  {% capture sc %}* Example: Download FARS data (fatal crash data from NHTSA)
 * Each year's data is a separate zip file
 
 local years "2000 2001 2002 2003 2004 2005"
@@ -233,8 +187,8 @@ foreach year of local years {
     unzipfile "data/raw/FARS`year'.zip", replace
 }
 
-* Now you have reproducible data acquisition!</code></pre>
-    <pre class="code-content r"><code class="language-r"># Example: Download FARS data (fatal crash data from NHTSA)
+* Now you have reproducible data acquisition!{% endcapture %}
+  {% capture rc %}# Example: Download FARS data (fatal crash data from NHTSA)
 pacman::p_load(tidyverse)
 
 years <- 2000:2005
@@ -252,8 +206,8 @@ for (year in years) {
   unzip(destfile, exdir = glue::glue("data/raw/FARS{year}"))
 }
 
-# Now you have reproducible data acquisition!</code></pre>
-    <pre class="code-content python"><code class="language-python"># Example: Download FARS data (fatal crash data from NHTSA)
+# Now you have reproducible data acquisition!{% endcapture %}
+  {% capture pc %}# Example: Download FARS data (fatal crash data from NHTSA)
 import requests
 import zipfile
 from pathlib import Path
@@ -272,25 +226,21 @@ for year in years:
     with zipfile.ZipFile(zip_path, 'r') as z:
         z.extractall(f"data/raw/FARS{year}")
 
-# Now you have reproducible data acquisition!</code></pre>
-  </div>
+# Now you have reproducible data acquisition!{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Why Programmatic Downloads Matter</h4>
-    <ul style="margin: 8px 0 0 20px;">
+  {% capture kp_content %}<ul style="margin: 8px 0 0 20px;">
       <li><strong>Reproducibility:</strong> Anyone can run your code and get the exact same data</li>
       <li><strong>Documentation:</strong> The URL in your code shows exactly where the data came from</li>
       <li><strong>Automation:</strong> Easy to update when new data is released</li>
       <li><strong>Version control:</strong> Your git history shows when you downloaded the data</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Why Programmatic Downloads Matter", content: kp_content %}
 
   <h3>When You Can't Download Programmatically</h3>
   <p>Sometimes data requires manual download (login required, CAPTCHA, web forms). In these cases, document thoroughly:</p>
 
-  <div class="callout-info">
-    <h4 style="margin: 0 0 12px;">Create a DATA_SOURCES.md File</h4>
-    <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code># Data Sources
+  {% capture callout_content %}<pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code># Data Sources
 
 ## FARS (Fatality Analysis Reporting System)
 - **Source:** NHTSA
@@ -304,8 +254,8 @@ for year in years:
 - **URL:** https://alcoholpolicy.niaaa.nih.gov/
 - **Downloaded:** 2026-02-04
 - **Notes:** Required selecting "Blood Alcohol Concentration Limits"
-  and exporting to CSV. See screenshots in docs/data_download/</code></pre>
-  </div>
+  and exporting to CSV. See screenshots in docs/data_download/</code></pre>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Create a DATA_SOURCES.md File", content: callout_content %}
 
   <h3>Archive Your Sources with archive.org</h3>
   <p>Websites change. Data gets moved or deleted. Before you start a project, archive your data sources:</p>
@@ -319,10 +269,8 @@ for year in years:
 
   <p style="margin-top: 16px;">This way, even if the original website disappears, you (and anyone replicating your work) can see exactly where your data came from.</p>
 
-  <div class="callout-warning">
-    <strong>Pro Tip: Screenshot the Download Process</strong>
-    <p>For data that requires navigating a web interface, take screenshots of each step. Save them in a <code>docs/data_download/</code> folder. Future you (and your replicators) will thank you.</p>
-  </div>
+  {% capture callout_content %}<p>For data that requires navigating a web interface, take screenshots of each step. Save them in a <code>docs/data_download/</code> folder. Future you (and your replicators) will thank you.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Pro Tip: Screenshot the Download Process", content: callout_content %}
 </section>
 
 <section id="cleaning" class="tutorial-section">
@@ -331,16 +279,7 @@ for year in years:
   <h3>Inspecting Your Data</h3>
   <p>Before doing anything else, look at your data. How many observations? What variables exist? Are there missing values? Any obvious errors? These commands give you a quick overview:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Overview of dataset
+  {% capture sc %}* Overview of dataset
 describe
 
 * Summary statistics
@@ -353,8 +292,8 @@ list in 1/10
 misstable summarize
 
 * Detailed info on specific variables
-codebook income education</code></pre>
-    <pre class="code-content r"><code class="language-r"># Overview of dataset
+codebook income education{% endcapture %}
+  {% capture rc %}# Overview of dataset
 str(data)
 glimpse(data)
 
@@ -365,8 +304,8 @@ summary(data)
 head(data, 10)
 
 # Check for missing values
-colSums(is.na(data))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Overview of dataset
+colSums(is.na(data)){% endcapture %}
+  {% capture pc %}# Overview of dataset
 data.info()
 data.dtypes
 
@@ -377,22 +316,13 @@ data.describe()
 data.head(10)
 
 # Check for missing values
-data.isna().sum()</code></pre>
-  </div>
+data.isna().sum(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Creating and Modifying Variables</h3>
   <p>Most analysis requires creating new variables—transformations like log income, indicators like "high earner," or cleaning up invalid values. Here are the essential operations:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Create new variable
+  {% capture sc %}* Create new variable
 gen log_income = log(income)
 
 * Conditional assignment
@@ -405,8 +335,8 @@ replace age = . if age < 0
 drop if missing(income)
 
 * Keep only certain variables
-keep id income age</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+keep id income age{% endcapture %}
+  {% capture rc %}pacman::p_load(dplyr)
 
 data <- data %>%
   mutate(
@@ -420,8 +350,8 @@ data <- data %>%
   # Drop observations
   filter(!is.na(income)) %>%
   # Keep only certain variables
-  select(id, income, age)</code></pre>
-    <pre class="code-content python"><code class="language-python">import numpy as np
+  select(id, income, age){% endcapture %}
+  {% capture pc %}import numpy as np
 
 # Create new variable
 data["log_income"] = np.log(data["income"])
@@ -436,22 +366,13 @@ data.loc[data["age"] < 0, "age"] = np.nan
 data = data.dropna(subset=["income"])
 
 # Keep only certain variables
-data = data[["id", "income", "age"]]</code></pre>
-  </div>
+data = data[["id", "income", "age"]]{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Recoding Categorical Variables</h3>
   <p>Often you need to convert continuous variables into categories (age groups, education levels) or simplify existing categories. This is called recoding:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Recode numeric values into categories
+  {% capture sc %}* Recode numeric values into categories
 recode education (1/8 = 1 "Less than HS") ///
                  (9/11 = 2 "Some HS") ///
                  (12 = 3 "HS Graduate") ///
@@ -459,8 +380,8 @@ recode education (1/8 = 1 "Less than HS") ///
                  (16/20 = 5 "College+"), gen(educ_cat)
 
 * Simple recode
-recode age (18/29 = 1) (30/49 = 2) (50/64 = 3) (65/100 = 4), gen(age_group)</code></pre>
-    <pre class="code-content r"><code class="language-r">data <- data %>%
+recode age (18/29 = 1) (30/49 = 2) (50/64 = 3) (65/100 = 4), gen(age_group){% endcapture %}
+  {% capture rc %}data <- data %>%
   mutate(
     educ_cat = case_when(
       education <= 8 ~ "Less than HS",
@@ -472,8 +393,8 @@ recode age (18/29 = 1) (30/49 = 2) (50/64 = 3) (65/100 = 4), gen(age_group)</cod
     age_group = cut(age, breaks = c(18, 30, 50, 65, 100),
                     labels = c("18-29", "30-49", "50-64", "65+"),
                     right = FALSE)
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python"># Using pd.cut for numeric ranges
+  ){% endcapture %}
+  {% capture pc %}# Using pd.cut for numeric ranges
 data["age_group"] = pd.cut(data["age"],
                            bins=[18, 30, 50, 65, 100],
                            labels=["18-29", "30-49", "50-64", "65+"])
@@ -488,17 +409,15 @@ conditions = [
 ]
 choices = ["Less than HS", "Some HS", "HS Graduate", "Some College", "College+"]
 # Note: default="" required for numpy 1.25+ when choices are strings
-data["educ_cat"] = np.select(conditions, choices, default="")</code></pre>
-  </div>
+data["educ_cat"] = np.select(conditions, choices, default=""){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="reshaping" class="tutorial-section">
   <h2>Reshaping Data</h2>
 
-  <div class="key-principle">
-    <h4>Long Data is (Almost) Always Better</h4>
-    <p>Most commands expect <strong>long format</strong>: multiple rows per unit, one column for values. If you're copy-pasting variable names with years (<code>income_2018</code>, <code>income_2019</code>...), you probably need to reshape to long.</p>
-  </div>
+  {% capture kp_content %}<p>Most commands expect <strong>long format</strong>: multiple rows per unit, one column for values. If you're copy-pasting variable names with years (<code>income_2018</code>, <code>income_2019</code>...), you probably need to reshape to long.</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Long Data is (Almost) Always Better", content: kp_content %}
 
   <h3>Wide vs. Long Format</h3>
   <div class="comparison-grid">
@@ -536,27 +455,17 @@ id  year  income
   <h3>Reshaping Wide to Long</h3>
 
   <!-- Predict box -->
-  <div class="callout-warning">
-    <strong>Before running this code, predict:</strong> If you have wide data with 100 people and columns for <code>income_2020</code>, <code>income_2021</code>, <code>income_2022</code>, how many rows will you have after reshaping to long?
+  {% capture callout_content %}If you have wide data with 100 people and columns for <code>income_2020</code>, <code>income_2021</code>, <code>income_2022</code>, how many rows will you have after reshaping to long?
     <details style="margin-top: 12px;">
       <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
       <p style="margin: 8px 0 0;">300 rows. Each of the 100 people will have 3 rows (one for each year). The data goes from 100 x 4 columns to 300 x 3 columns.</p>
-    </details>
-  </div>
+    </details>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "Before running this code, predict:", content: callout_content %}
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* i() = unit identifier, j() = what becomes the new column
+  {% capture sc %}* i() = unit identifier, j() = what becomes the new column
 reshape long income_, i(id) j(year)
-rename income_ income</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(tidyr)
+rename income_ income{% endcapture %}
+  {% capture rc %}pacman::p_load(tidyr)
 
 data_long <- data %>%
   pivot_longer(
@@ -565,8 +474,8 @@ data_long <- data %>%
     names_prefix = "income_",
     values_to = "income"
   ) %>%
-  mutate(year = as.numeric(year))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Melt wide to long
+  mutate(year = as.numeric(year)){% endcapture %}
+  {% capture pc %}# Melt wide to long
 data_long = pd.melt(
     data,
     id_vars=["id"],
@@ -575,25 +484,16 @@ data_long = pd.melt(
     value_name="income"
 )
 # Clean up year column
-data_long["year"] = data_long["year"].str.replace("income_", "").astype(int)</code></pre>
-  </div>
+data_long["year"] = data_long["year"].str.replace("income_", "").astype(int){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Reshaping Long to Wide</h3>
   <p>Sometimes you need the opposite—converting long data to wide format (e.g., for certain graph commands or exporting).</p>
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* i() = unit identifier, j() = column whose values become new variable names
+  {% capture sc %}* i() = unit identifier, j() = column whose values become new variable names
 reshape wide income, i(id) j(year)
 
-* This creates: income2020, income2021, etc.</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(tidyr)
+* This creates: income2020, income2021, etc.{% endcapture %}
+  {% capture rc %}pacman::p_load(tidyr)
 
 data_wide <- data_long %>%
   pivot_wider(
@@ -601,8 +501,8 @@ data_wide <- data_long %>%
     names_from = year,
     names_prefix = "income_",
     values_from = income
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python"># Pivot long to wide
+  ){% endcapture %}
+  {% capture pc %}# Pivot long to wide
 data_wide = data_long.pivot(
     index="id",
     columns="year",
@@ -610,8 +510,8 @@ data_wide = data_long.pivot(
 ).reset_index()
 
 # Rename columns
-data_wide.columns = ["id"] + [f"income_{y}" for y in data_wide.columns[1:]]</code></pre>
-  </div>
+data_wide.columns = ["id"] + [f"income_{y}" for y in data_wide.columns[1:]]{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 </section>
 
 <section id="aggregating" class="tutorial-section">
@@ -650,16 +550,7 @@ MA       2011    1                1                2
     <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0 0;">50 states × 20 years = 1,000 rows</p>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Start with crash-level data
+  {% capture sc %}* Start with crash-level data
 use "fars_crashes.dta", clear
 
 * Collapse to state-year level
@@ -669,8 +560,8 @@ collapse (count) total_crashes=crash_id ///
          by(state year)
 
 * Now you have one row per state-year
-* Ready to merge with policy data</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+* Ready to merge with policy data{% endcapture %}
+  {% capture rc %}pacman::p_load(dplyr)
 
 # Start with crash-level data
 crashes <- read_dta("fars_crashes.dta")
@@ -685,8 +576,8 @@ state_year <- crashes %>%
     .groups = "drop"
   )
 
-# Now you have one row per state-year</code></pre>
-    <pre class="code-content python"><code class="language-python">import pandas as pd
+# Now you have one row per state-year{% endcapture %}
+  {% capture pc %}import pandas as pd
 
 # Start with crash-level data
 crashes = pd.read_stata("fars_crashes.dta")
@@ -698,32 +589,21 @@ state_year = crashes.groupby(["state", "year"]).agg(
     total_fatalities=("fatalities", "sum")
 ).reset_index()
 
-# Now you have one row per state-year</code></pre>
-  </div>
+# Now you have one row per state-year{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Always Check Your Aggregation</h4>
-    <p>After aggregating, verify the results make sense:</p>
+  {% capture kp_content %}<p>After aggregating, verify the results make sense:</p>
     <ul style="margin: 8px 0 0 20px;">
       <li>Row count: Do you have the expected number of state-years?</li>
       <li>Totals: Does <code>sum(total_crashes)</code> equal the original row count?</li>
       <li>Unique IDs: Is each state-year now unique?</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Always Check Your Aggregation", content: kp_content %}
 
   <h3>Group Calculations with egen</h3>
   <p>The <code>egen</code> command ("extensions to generate") creates new variables based on functions applied across observations:</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Mean across all observations
+  {% capture sc %}* Mean across all observations
 egen income_mean = mean(income)
 
 * Mean within groups (by state)
@@ -733,8 +613,8 @@ bysort state: egen income_mean_state = mean(income)
 bysort state: egen income_max = max(income)
 bysort state: egen income_sd = sd(income)
 bysort state: egen income_count = count(income)
-bysort state: egen income_p50 = pctile(income), p(50)</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr)
+bysort state: egen income_p50 = pctile(income), p(50){% endcapture %}
+  {% capture rc %}pacman::p_load(dplyr)
 
 # Add group-level statistics while keeping all rows
 data <- data %>%
@@ -746,33 +626,22 @@ data <- data %>%
     income_count = n(),
     income_p50 = median(income, na.rm = TRUE)
   ) %>%
-  ungroup()</code></pre>
-    <pre class="code-content python"><code class="language-python"># Add group-level statistics while keeping all rows
+  ungroup(){% endcapture %}
+  {% capture pc %}# Add group-level statistics while keeping all rows
 data["income_mean_state"] = data.groupby("state")["income"].transform("mean")
 data["income_max"] = data.groupby("state")["income"].transform("max")
 data["income_sd"] = data.groupby("state")["income"].transform("std")
 data["income_count"] = data.groupby("state")["income"].transform("count")
-data["income_p50"] = data.groupby("state")["income"].transform("median")</code></pre>
-  </div>
+data["income_p50"] = data.groupby("state")["income"].transform("median"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>gen sum vs. egen sum</h4>
-    <p>In Stata, <code>gen sum()</code> creates a <em>running total</em>, while <code>egen sum()</code> creates the <em>group total</em>. Always read the help file—function names can be misleading!</p>
-  </div>
+  {% capture cm_content %}<p>In Stata, <code>gen sum()</code> creates a <em>running total</em>, while <code>egen sum()</code> creates the <em>group total</em>. Always read the help file—function names can be misleading!</p>{% endcapture %}
+  {% include "common-mistake.liquid", title: "gen sum vs. egen sum", content: cm_content %}
 
   <h3>Collapsing to Group Level</h3>
   <p>Use <code>collapse</code> to aggregate data to a higher level (e.g., individual → state, state-year → state):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Collapse to state-level means
+  {% capture sc %}* Collapse to state-level means
 collapse (mean) income age, by(state)
 
 * Multiple statistics
@@ -781,8 +650,8 @@ collapse (mean) income_mean=income ///
          (count) n=income, by(state)
 
 * Different statistics for different variables
-collapse (mean) income (max) tax_rate (sum) population, by(state year)</code></pre>
-    <pre class="code-content r"><code class="language-r"># Collapse to state level
+collapse (mean) income (max) tax_rate (sum) population, by(state year){% endcapture %}
+  {% capture rc %}# Collapse to state level
 state_data <- data %>%
   group_by(state) %>%
   summarize(
@@ -799,8 +668,8 @@ state_year_data <- data %>%
     tax_rate = max(tax_rate, na.rm = TRUE),
     population = sum(population, na.rm = TRUE),
     .groups = "drop"
-  )</code></pre>
-    <pre class="code-content python"><code class="language-python"># Collapse to state level
+  ){% endcapture %}
+  {% capture pc %}# Collapse to state level
 state_data = data.groupby("state").agg(
     income_mean=("income", "mean"),
     income_sd=("income", "std"),
@@ -812,16 +681,14 @@ state_year_data = data.groupby(["state", "year"]).agg(
     income=("income", "mean"),
     tax_rate=("tax_rate", "max"),
     population=("population", "sum")
-).reset_index()</code></pre>
-  </div>
+).reset_index(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>egen vs. collapse</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+  {% capture kp_content %}<ul style="margin: 8px 0 0 0; padding-left: 20px;">
       <li><strong>egen</strong> — Adds a new column but keeps all rows. Use when you need the group statistic alongside individual data.</li>
       <li><strong>collapse</strong> — Reduces the dataset to one row per group. Use when you want aggregated data only.</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "egen vs. collapse", content: kp_content %}
 </section>
 
 <section id="merging" class="tutorial-section">
@@ -846,15 +713,13 @@ state_year_data = data.groupby(["state", "year"]).agg(
 
   <h3>Merge Types by Relationship</h3>
 
-  <div class="key-principle">
-    <h4>Know Your Merge Type</h4>
-    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+  {% capture kp_content %}<ul style="margin: 8px 0 0 0; padding-left: 20px;">
       <li><strong>1:1</strong> — Each row matches exactly one row (person → demographics)</li>
       <li><strong>m:1</strong> — Many rows match one (students → school characteristics)</li>
       <li><strong>1:m</strong> — One row matches many (firm → firm-year panel)</li>
       <li><strong style="color: #c0392b;">m:m</strong> — <strong>Almost always wrong!</strong> If you think you need this, reshape first.</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "key-principle.liquid", title: "Know Your Merge Type", content: kp_content %}
 
   <h3>When Merges Create Duplicates</h3>
 
@@ -879,16 +744,7 @@ state_year_data = data.groupby(["state", "year"]).agg(
     </div>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* BEFORE merging: Check for unexpected duplicates
+  {% capture sc %}* BEFORE merging: Check for unexpected duplicates
 duplicates report person_id      // Should say "all unique" for 1:1
 duplicates report state          // OK to have duplicates for m:1
 
@@ -906,8 +762,8 @@ di "Rows before: `n_before'"
 di "Rows after: `n_after'"
 if `n_after' > `n_before' {
     di as error "WARNING: Row count increased - check for duplicate keys!"
-}</code></pre>
-    <pre class="code-content r"><code class="language-r"># BEFORE merging: Check for duplicates
+}{% endcapture %}
+  {% capture rc %}# BEFORE merging: Check for duplicates
 individuals %>% count(person_id) %>% filter(n > 1)  # Should be empty for 1:1
 state_data %>% count(state) %>% filter(n > 1)       # Should be empty
 
@@ -923,8 +779,8 @@ if (n_after > n_before) {
   warning("Row count increased! Check for duplicate keys in state_data")
   # Find the problem
   state_data %>% count(state) %>% filter(n > 1)
-}</code></pre>
-    <pre class="code-content python"><code class="language-python"># BEFORE merging: Check for duplicates
+}{% endcapture %}
+  {% capture pc %}# BEFORE merging: Check for duplicates
 print(individuals.groupby("person_id").size().loc[lambda x: x > 1])  # Should be empty
 print(state_data.groupby("state").size().loc[lambda x: x > 1])       # Should be empty
 
@@ -938,18 +794,16 @@ n_after = len(merged)
 # Check if row count changed unexpectedly
 if n_after > n_before:
     print("WARNING: Row count increased! Check for duplicate keys")
-    print(state_data.groupby("state").size().loc[lambda x: x > 1])</code></pre>
-  </div>
+    print(state_data.groupby("state").size().loc[lambda x: x > 1]){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="common-mistakes">
-    <h4>The Row Count Rule</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li><strong>1:1 merge:</strong> Row count should stay exactly the same (or decrease if using inner join)</li>
       <li><strong>m:1 merge:</strong> Row count should stay the same as master dataset</li>
       <li><strong>1:m merge:</strong> Row count will increase (one master row → many using rows)</li>
       <li>If row count increases when you didn't expect it, you have duplicate keys somewhere</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "The Row Count Rule", content: cm_content %}
 
   <h3>Example: Merging Individual Data with State Data</h3>
   <p>Suppose you have individual-level data and want to add state characteristics:</p>
@@ -974,16 +828,7 @@ TX       7.25     29500000</pre>
     </div>
   </div>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Load master data
+  {% capture sc %}* Load master data
 use "individuals.dta", clear
 
 * Merge: many individuals per state → m:1
@@ -1006,8 +851,8 @@ list if _merge == 2   // TX had no individuals
 
 * Keep matched only (after understanding why others didn't match)
 keep if _merge == 3
-drop _merge</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(dplyr, haven)
+drop _merge{% endcapture %}
+  {% capture rc %}pacman::p_load(dplyr, haven)
 
 individuals <- read_dta("individuals.dta")
 state_data <- read_dta("state_data.dta")
@@ -1019,8 +864,8 @@ merged <- merge(individuals, state_data, by = "state", all.x = TRUE)
 merged %>% filter(is.na(min_wage))  # NY had no state data
 
 # Inner merge: keep only matched
-merged <- merge(individuals, state_data, by = "state")</code></pre>
-    <pre class="code-content python"><code class="language-python">individuals = pd.read_stata("individuals.dta")
+merged <- merge(individuals, state_data, by = "state"){% endcapture %}
+  {% capture pc %}individuals = pd.read_stata("individuals.dta")
 state_data = pd.read_stata("state_data.dta")
 
 # Left join: keep all individuals, add state data where available
@@ -1033,34 +878,23 @@ print(merged["_merge"].value_counts())
 print(merged[merged["min_wage"].isna()])  # NY had no state data
 
 # Inner join: keep only matched
-merged = individuals.merge(state_data, on="state", how="inner")</code></pre>
-  </div>
+merged = individuals.merge(state_data, on="state", how="inner"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-warning">
-    <h4>What To Do After Checking _merge</h4>
-    <p>After running <code>tab _merge</code>, ask yourself: <strong>Why didn't these match?</strong> Common reasons:</p>
+  {% capture callout_content %}<p>After running <code>tab _merge</code>, ask yourself: <strong>Why didn't these match?</strong> Common reasons:</p>
     <ul>
       <li>Typos in merge keys ("NY" vs "New York")</li>
       <li>Different time periods (state data goes 2000–2010, individual data goes 1995–2015)</li>
       <li>Data errors or missing values in the key variable</li>
     </ul>
-    <p>Investigate with <code>list state if _merge == 1</code> before deciding whether to <code>keep if _merge == 3</code>. Always document why you dropped unmatched observations.</p>
-  </div>
+    <p>Investigate with <code>list state if _merge == 1</code> before deciding whether to <code>keep if _merge == 3</code>. Always document why you dropped unmatched observations.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", title: "What To Do After Checking _merge", content: callout_content %}
 
   <h3>Pre-Merge Data Cleaning</h3>
 
   <p>Merge variables must be <strong>exactly identical</strong> in both datasets—same name, same values, same type. Most merge problems come from subtle differences that require string cleaning.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Check if your variable is actually numeric or string
+  {% capture sc %}* Check if your variable is actually numeric or string
 browse, nolabel   // Shows actual values, not labels
 
 * Common string cleaning operations:
@@ -1082,8 +916,8 @@ rename statefip state
 
 * 6. Convert string to numeric (or vice versa)
 destring state_code, replace
-tostring state_fips, replace</code></pre>
-    <pre class="code-content r"><code class="language-r">pacman::p_load(stringr)
+tostring state_fips, replace{% endcapture %}
+  {% capture rc %}pacman::p_load(stringr)
 
 # Common string cleaning operations:
 
@@ -1104,8 +938,8 @@ data <- data %>% rename(state = statefip)
 
 # 6. Convert types
 data$state_code <- as.numeric(data$state_code)
-data$state_fips <- as.character(data$state_fips)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Common string cleaning operations:
+data$state_fips <- as.character(data$state_fips){% endcapture %}
+  {% capture pc %}# Common string cleaning operations:
 
 # 1. Remove periods
 data["state"] = data["state"].str.replace(".", "", regex=False)
@@ -1124,56 +958,43 @@ data = data.rename(columns={"statefip": "state"})
 
 # 6. Convert types
 data["state_code"] = pd.to_numeric(data["state_code"])
-data["state_fips"] = data["state_fips"].astype(str)</code></pre>
-  </div>
+data["state_fips"] = data["state_fips"].astype(str){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="key-principle">
-    <h4>Labels Can Be Deceiving</h4>
-    <p>In Stata, when you see "Washington" in the data browser, it might actually be stored as the number 53 with a label attached. Use <code>browse, nolabel</code> or <code>tab var, nolabel</code> to see the true values. Merges use the actual values, not the labels!</p>
-  </div>
+  {% capture kp_content %}<p>In Stata, when you see "Washington" in the data browser, it might actually be stored as the number 53 with a label attached. Use <code>browse, nolabel</code> or <code>tab var, nolabel</code> to see the true values. Merges use the actual values, not the labels!</p>{% endcapture %}
+  {% include "key-principle.liquid", title: "Labels Can Be Deceiving", content: kp_content %}
 
   <h3>Common Merge Problems</h3>
 
-  <div class="common-mistakes">
-    <h4>Watch Out For</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li><strong>Duplicates on key:</strong> If your key isn't unique when it should be, you'll get unexpected results. Always run <code>duplicates report</code> first.</li>
       <li><strong>Case sensitivity:</strong> "MA" ≠ "ma" in Stata. Use <code>upper()</code> or <code>lower()</code> to standardize.</li>
       <li><strong>Trailing spaces:</strong> "MA " ≠ "MA". Use <code>trim()</code> to remove.</li>
       <li><strong>Different variable types:</strong> String "1" ≠ numeric 1. Convert with <code>destring</code> or <code>tostring</code>.</li>
       <li><strong>Labels hiding values:</strong> What looks like "California" might be stored as 6. Check with <code>nolabel</code>.</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
 
   <h3>Appending (Stacking) Datasets</h3>
   <p>Use <code>append</code> to stack datasets vertically (same variables, different observations):</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Append multiple years of data
+  {% capture sc %}* Append multiple years of data
 use "data_2020.dta", clear
 append using "data_2021.dta"
-append using "data_2022.dta"</code></pre>
-    <pre class="code-content r"><code class="language-r"># Bind rows from multiple dataframes
+append using "data_2022.dta"{% endcapture %}
+  {% capture rc %}# Bind rows from multiple dataframes
 data_all <- bind_rows(
   read_dta("data_2020.dta"),
   read_dta("data_2021.dta"),
   read_dta("data_2022.dta")
-)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Concatenate multiple dataframes
+){% endcapture %}
+  {% capture pc %}# Concatenate multiple dataframes
 data_all = pd.concat([
     pd.read_stata("data_2020.dta"),
     pd.read_stata("data_2021.dta"),
     pd.read_stata("data_2022.dta")
-], ignore_index=True)</code></pre>
-  </div>
+], ignore_index=True){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
 </section>
 
@@ -1185,16 +1006,7 @@ data_all = pd.concat([
   <h3>Missing Values Are Infinity</h3>
   <p>In Stata, missing values (<code>.</code>) are treated as <strong>larger than any number</strong>. This means comparisons like <code>if x > 100</code> will include missing values.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* This INCLUDES missing values (dangerous!)
+  {% capture sc %}* This INCLUDES missing values (dangerous!)
 gen high_income = (income > 100000)
 
 * This is what you actually want
@@ -1204,38 +1016,28 @@ gen high_income = (income > 100000) if !missing(income)
 gen high_income = (income > 100000 & income < .)
 
 * The ordering is: all numbers < . < .a < .b < ... < .z
-* So . > 999999999 evaluates to TRUE</code></pre>
-    <pre class="code-content r"><code class="language-r"># R handles this more intuitively - NA propagates
+* So . > 999999999 evaluates to TRUE{% endcapture %}
+  {% capture rc %}# R handles this more intuitively - NA propagates
 high_income <- income > 100000
 # Returns NA where income is NA, not TRUE
 
 # But still be explicit about NA handling
-high_income <- income > 100000 & !is.na(income)</code></pre>
-    <pre class="code-content python"><code class="language-python"># Python/pandas handles this intuitively - NaN propagates
+high_income <- income > 100000 & !is.na(income){% endcapture %}
+  {% capture pc %}# Python/pandas handles this intuitively - NaN propagates
 high_income = data["income"] > 100000
 # Returns NaN where income is NaN, not True
 
 # But still be explicit about NA handling
-high_income = (data["income"] > 100000) & data["income"].notna()</code></pre>
-  </div>
+high_income = (data["income"] > 100000) & data["income"].notna(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-danger">
-    <strong>Why this matters:</strong> If you're creating indicator variables or filtering data, missing values will silently be included whenever you use <code>&gt;</code>, <code>&gt;=</code>, or <code>!=</code>. Your sample sizes will be wrong, and your estimates will be biased.
-  </div>
+  {% capture callout_content %}If you're creating indicator variables or filtering data, missing values will silently be included whenever you use <code>&gt;</code>, <code>&gt;=</code>, or <code>!=</code>. Your sample sizes will be wrong, and your estimates will be biased.{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
 
   <h3>egen group Silently Top-Codes</h3>
   <p>When you use <code>egen group()</code> to create a numeric ID from string or categorical variables, Stata uses an <code>int</code> by default. If you have more unique values than an int can hold (~32,000), <strong>it silently repeats the maximum value</strong>.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* DANGEROUS: If you have >32,767 unique beneficiaries,
+  {% capture sc %}* DANGEROUS: If you have >32,767 unique beneficiaries,
 * later IDs will all be assigned the same number!
 egen bene_id = group(beneficiary_name)
 
@@ -1247,37 +1049,27 @@ egen double bene_id = group(beneficiary_name)
 
 * Always verify you got the right number of groups
 distinct beneficiary_name
-assert r(ndistinct) == r(N)  // This will fail if top-coded</code></pre>
-    <pre class="code-content r"><code class="language-r"># R doesn't have this problem - factors work fine
+assert r(ndistinct) == r(N)  // This will fail if top-coded{% endcapture %}
+  {% capture rc %}# R doesn't have this problem - factors work fine
 data$bene_id <- as.numeric(factor(data$beneficiary_name))
 
 # Or use dplyr
 data <- data %>%
-  mutate(bene_id = as.numeric(factor(beneficiary_name)))</code></pre>
-    <pre class="code-content python"><code class="language-python"># Python doesn't have this problem - uses 64-bit integers by default
+  mutate(bene_id = as.numeric(factor(beneficiary_name))){% endcapture %}
+  {% capture pc %}# Python doesn't have this problem - uses 64-bit integers by default
 data["bene_id"] = pd.factorize(data["beneficiary_name"])[0] + 1
 
 # Verify
-assert data["bene_id"].nunique() == data["beneficiary_name"].nunique()</code></pre>
-  </div>
+assert data["bene_id"].nunique() == data["beneficiary_name"].nunique(){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-danger">
-    <strong>Why this matters:</strong> If you're creating panel identifiers, observations from different individuals will be assigned the same ID. Your fixed effects will be wrong, standard errors will be wrong, and you'll have no indication anything went wrong.
-  </div>
+  {% capture callout_content %}If you're creating panel identifiers, observations from different individuals will be assigned the same ID. Your fixed effects will be wrong, standard errors will be wrong, and you'll have no indication anything went wrong.{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
 
   <h3>Numeric Precision</h3>
   <p>Stata's <code>float</code> type only has ~7 digits of precision. Large IDs stored as floats will be silently corrupted.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* float has ~7 digits of precision
+  {% capture sc %}* float has ~7 digits of precision
 * This can cause merge failures on IDs!
 gen float id = 1234567890
 * id is now 1234567936 (corrupted!)
@@ -1291,37 +1083,28 @@ summarize id
 * If max is > 16777216 and storage type is float, you have a problem
 
 * Fix: compress optimizes storage types automatically
-compress</code></pre>
-    <pre class="code-content r"><code class="language-r"># R uses double precision by default, so this is less of an issue
+compress{% endcapture %}
+  {% capture rc %}# R uses double precision by default, so this is less of an issue
 # But be careful with very large integers
 id <- 1234567890  # Fine in R
 
 # For extremely large integers, use bit64 package
 pacman::p_load(bit64)
-big_id <- as.integer64("9223372036854775807")</code></pre>
-    <pre class="code-content python"><code class="language-python"># Python uses 64-bit integers by default, so this is less of an issue
+big_id <- as.integer64("9223372036854775807"){% endcapture %}
+  {% capture pc %}# Python uses 64-bit integers by default, so this is less of an issue
 id = 1234567890  # Fine in Python
 
 # pandas also handles large integers well
 data["id"] = pd.to_numeric(data["id"], downcast=None)  # Keep full precision
 
 # Check dtypes
-print(data.dtypes)</code></pre>
-  </div>
+print(data.dtypes){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   <h3>Sorting Instability</h3>
   <p>Stata's <code>sort</code> command is <strong>unstable</strong>—when there are ties, the order of tied observations is random and can change between runs. This causes reproducibility issues.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* DANGEROUS: Order of tied observations is random
+  {% capture sc %}* DANGEROUS: Order of tied observations is random
 sort state
 gen observation_number = _n  // Different every time you run!
 
@@ -1333,8 +1116,8 @@ gen observation_number = _n  // Now reproducible
 sort state, stable
 
 * Best practice: Always sort by enough variables to eliminate ties
-* or use stable when you don't care about tie-breaking</code></pre>
-    <pre class="code-content r"><code class="language-r"># R's order() is stable by default (preserves original order for ties)
+* or use stable when you don't care about tie-breaking{% endcapture %}
+  {% capture rc %}# R's order() is stable by default (preserves original order for ties)
 data <- data[order(data$state), ]
 
 # To be explicit about tie-breaking:
@@ -1342,33 +1125,23 @@ data <- data[order(data$state, data$id), ]
 
 # dplyr::arrange() is also stable
 pacman::p_load(dplyr)
-data <- data %>% arrange(state, id)</code></pre>
-    <pre class="code-content python"><code class="language-python"># pandas sort_values() has kind='stable' option
+data <- data %>% arrange(state, id){% endcapture %}
+  {% capture pc %}# pandas sort_values() has kind='stable' option
 data = data.sort_values('state', kind='stable')
 
 # Better: explicitly break ties
 data = data.sort_values(['state', 'id'])
 
-# Note: default sort is 'quicksort' which is unstable</code></pre>
-  </div>
+# Note: default sort is 'quicksort' which is unstable{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-danger">
-    <strong>Why this matters:</strong> If you create variables based on sort order (like <code>_n</code> for observation numbers or <code>by: gen first = _n == 1</code>), your results will differ across runs, making your analysis non-reproducible.
-  </div>
+  {% capture callout_content %}If you create variables based on sort order (like <code>_n</code> for observation numbers or <code>by: gen first = _n == 1</code>), your results will differ across runs, making your analysis non-reproducible.{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
 
   <h3>Variable Abbreviation</h3>
   <p>By default, Stata allows you to abbreviate variable names. This is <strong>dangerous</strong>—your code can silently operate on the wrong variable if you add new variables later.</p>
 
-  <div class="code-block">
-    <div class="code-header">
-      <div class="code-tabs">
-        <button class="code-tab active" data-lang="stata">Stata</button>
-        <button class="code-tab" data-lang="r">R</button>
-        <button class="code-tab" data-lang="python">Python</button>
-      </div>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre class="code-content stata active"><code class="language-stata">* Suppose you have: income, age, education
+  {% capture sc %}* Suppose you have: income, age, education
 summarize inc  // Works! Stata abbreviates to "income"
 
 * Later, you add: income_spouse
@@ -1379,36 +1152,33 @@ summarize inc  // ERROR: "inc" is ambiguous (income vs income_spouse)
 set varabbrev off
 
 * Now Stata requires exact variable names
-summarize income  // Must use full name</code></pre>
-    <pre class="code-content r"><code class="language-r"># R does NOT allow variable abbreviation by default
+summarize income  // Must use full name{% endcapture %}
+  {% capture rc %}# R does NOT allow variable abbreviation by default
 # You must use exact column names
 summary(data$income)  # Must be exact
 
 # Partial matching only happens with $ on lists, not data frames
-# This is generally not a problem in R</code></pre>
-    <pre class="code-content python"><code class="language-python"># Python does NOT allow column abbreviation
+# This is generally not a problem in R{% endcapture %}
+  {% capture pc %}# Python does NOT allow column abbreviation
 # You must use exact column names
 data['income'].describe()  # Must be exact
 
 # Autocomplete in IDEs helps with long names
-# No risk of silent abbreviation errors</code></pre>
-  </div>
+# No risk of silent abbreviation errors{% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <div class="callout-danger">
-    <strong>Why this matters:</strong> Code that works today can silently break when new variables are added to your dataset. Put <code>set varabbrev off</code> at the top of every do-file.
-  </div>
+  {% capture callout_content %}Code that works today can silently break when new variables are added to your dataset. Put <code>set varabbrev off</code> at the top of every do-file.{% endcapture %}
+  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
 
-  <div class="common-mistakes">
-    <h4>Defensive Coding Habits</h4>
-    <ul>
+  {% capture cm_content %}<ul>
       <li>Put <code>set varabbrev off</code> at the top of every do-file</li>
       <li>Always use <code>if !missing(x)</code> with inequality comparisons</li>
       <li>Always use <code>egen long</code> or <code>egen double</code> for group IDs</li>
       <li>Sort by enough variables to eliminate ties, or use <code>sort ..., stable</code></li>
       <li>Run <code>compress</code> after loading data to optimize storage types</li>
       <li>Use <code>assert</code> liberally to catch problems early</li>
-    </ul>
-  </div>
+    </ul>{% endcapture %}
+  {% include "common-mistake.liquid", title: "Defensive Coding Habits", content: cm_content %}
 </section>
 
 <!-- ==================== PRACTICE ==================== -->

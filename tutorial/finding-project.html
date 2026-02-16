@@ -114,28 +114,25 @@ current_page: finding-project
 
   <p>This is the hardest part. You need variation in X (your treatment) that is <strong>quasi-exogenous</strong>—not driven by the same factors that affect Y.</p>
 
-  <div class="callout-warning">
-    <strong>The key question:</strong> Why did some units get treated and others didn't? If the answer involves factors that also affect the outcome, you have selection bias and no identification.
-  </div>
+  {% capture callout_content %}<strong>The key question:</strong> Why did some units get treated and others didn't? If the answer involves factors that also affect the outcome, you have selection bias and no identification.{% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 
   <h3 id="did">Diff-in-Diff</h3>
 
   <p>Most students will use a difference-in-differences design. The key is to think about <strong>policies that changed in some places but not others</strong>. (See the <a href="causal-inference.html#did">Causal Inference</a> page for the theory behind DiD.)</p>
 
-  <div class="callout-info">
-    <h4 style="margin: 0 0 12px; color: #1565c0;">The Formula</h4>
-    <p style="margin: 0; font-size: 1.05em;">Think: <strong>"Some [states/cities/countries] adopted [policy X] at different times. Did this affect [outcome Y]?"</strong></p>
-  </div>
+  {% capture callout_content %}<h4 style="margin: 0 0 12px; color: #1565c0;">The Formula</h4>
+    <p style="margin: 0; font-size: 1.05em;">Think: <strong>"Some [states/cities/countries] adopted [policy X] at different times. Did this affect [outcome Y]?"</strong></p>{% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_content %}
 
-  <div class="callout-warning">
-    <h4 style="margin: 0 0 12px;">What You Need for a DiD / Event Study Project</h4>
+  {% capture callout_content %}<h4 style="margin: 0 0 12px;">What You Need for a DiD / Event Study Project</h4>
     <p style="margin: 0 0 8px;">For a diff-in-diff or event study to work, you need <strong>two things</strong>:</p>
     <ol style="margin: 0 0 12px; padding-left: 20px;">
       <li><strong>A treatment that affects some units but not others.</strong> A policy that rolled out to some states but not others, or at different times, gives you a treatment group and a control group.</li>
       <li><strong>Data on both groups, before and after the treatment.</strong> You need panel data (repeated observations over time) covering treated and untreated units in both the pre- and post-treatment periods.</li>
     </ol>
-    <p style="margin: 0;">This means <strong>your treatment should have happened some time ago</strong>—you need enough post-treatment data to measure effects. Most successful projects involve policies introduced in the <strong>2000s or 2010s</strong>, not the 2020s. A policy from 2023 gives you very little post-treatment data to work with.</p>
-  </div>
+    <p style="margin: 0;">This means <strong>your treatment should have happened some time ago</strong>—you need enough post-treatment data to measure effects. Most successful projects involve policies introduced in the <strong>2000s or 2010s</strong>, not the 2020s. A policy from 2023 gives you very little post-treatment data to work with.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", content: callout_content %}
 
   <p>Below are examples of policies with staggered adoption across states. Each is a potential <strong>treatment</strong> for a DiD design.</p>
 
@@ -220,16 +217,15 @@ current_page: finding-project
     </div>
   </div>
 
-  <div class="key-principle" style="margin: 24px 0;">
-    <h4>Turning a Treatment into a Project</h4>
+  {% capture kp_content %}<h4>Turning a Treatment into a Project</h4>
     <p style="margin: 8px 0 0;">Once you've identified a treatment (policy) that interests you, ask yourself three questions:</p>
     <ol style="margin: 12px 0 0; padding-left: 20px;">
       <li><strong>Can I find data on the treatment?</strong> You need to know when each state adopted the policy. Check NCSL, academic papers, or policy databases. If no one has compiled the dates, you might have to do it yourself—that's a lot of work.</li>
       <li><strong>What outcome might this policy affect?</strong> Think about what the policy was designed to change, or what it might unintentionally affect. Texting bans → traffic fatalities. Minimum wage → employment. Marijuana legalization → drug use, crime, traffic accidents, etc.</li>
       <li><strong>Can I find data on the outcome?</strong> The outcome must exist in a dataset that covers multiple states and years. FARS for traffic deaths, BRFSS for health behaviors, CPS for employment, etc.</li>
     </ol>
-    <p style="margin: 12px 0 0;"><strong>If you can answer "yes" to all three, you have a viable project.</strong> Pick something you genuinely find interesting—you'll spend weeks with this data.</p>
-  </div>
+    <p style="margin: 12px 0 0;"><strong>If you can answer "yes" to all three, you have a viable project.</strong> Pick something you genuinely find interesting—you'll spend weeks with this data.</p>{% endcapture %}
+  {% include "key-principle.liquid", content: kp_content %}
 
   <h3 id="rd">Regression Discontinuity</h3>
 
@@ -459,9 +455,8 @@ current_page: finding-project
     </a>
   </div>
 
-  <div id="data-formats" class="callout-info">
-    <strong>Don't let file formats limit you.</strong> Data in <code>.dta</code>, <code>.sas7bdat</code>, or <code>.rds</code> can be read in any language. The <code>haven</code> package in R and <code>pandas</code> in Python read most statistical formats directly. When in doubt, convert to CSV.
-  </div>
+  {% capture callout_content %}<strong>Don't let file formats limit you.</strong> Data in <code>.dta</code>, <code>.sas7bdat</code>, or <code>.rds</code> can be read in any language. The <code>haven</code> package in R and <code>pandas</code> in Python read most statistical formats directly. When in doubt, convert to CSV.{% endcapture %}
+  {% include "callout.liquid", type: "info", content: callout_content %}
 </section>
 
 <section id="examples" class="tutorial-section">
@@ -597,16 +592,15 @@ current_page: finding-project
 <section id="how-to-start" class="tutorial-section">
   <h2>How to Start</h2>
 
-  <div class="callout-success">
-    <h4 style="margin: 0 0 12px; color: #27ae60;">My Recommendation: Start with Identification</h4>
+  {% capture callout_content %}<h4 style="margin: 0 0 12px; color: #27ae60;">My Recommendation: Start with Identification</h4>
     <p style="margin: 0 0 12px;">I personally recommend starting with an <strong>identification strategy</strong>—find a policy or treatment that was implemented in some places but not others. You can find these either in the news or from existing academic papers.</p>
     <p style="margin: 0 0 12px;">Then, work outward from there:</p>
     <ol style="margin: 0 0 12px; padding-left: 20px;">
       <li><strong>Find treatment data:</strong> You need to know when and where the policy was implemented. Implementation dates are sometimes published alongside existing papers, or compiled by organizations like NCSL.</li>
       <li><strong>Find outcome data:</strong> Look for data on an outcome <em>at the same or more granular level as the treatment</em>, covering both before and after the treatment. For example, if the policy varies at the county level, you need county-level (or more granular) measures of employment, health, education, etc.</li>
       <li><strong>Form a question:</strong> Let the available data shape your research question. You don't need to start with a grand question—start with what's feasible and let the question emerge from what you can actually measure.</li>
-    </ol>
-  </div>
+    </ol>{% endcapture %}
+  {% include "callout.liquid", type: "success", content: callout_content %}
 
   <p>That said, you can start from any corner of the triangle:</p>
 
@@ -625,10 +619,9 @@ current_page: finding-project
     </div>
   </div>
 
-  <div class="key-principle" style="margin-top: 24px;">
-    <h4>Pro Tip: Read Published Papers</h4>
-    <p style="margin: 0;">The best way to learn what makes a viable project is to read papers in your area of interest. Pay attention to: What's the identification strategy? Where did they get the data? Could you do something similar with a different policy or outcome?</p>
-  </div>
+  {% capture kp_content %}<h4>Pro Tip: Read Published Papers</h4>
+    <p style="margin: 0;">The best way to learn what makes a viable project is to read papers in your area of interest. Pay attention to: What's the identification strategy? Where did they get the data? Could you do something similar with a different policy or outcome?</p>{% endcapture %}
+  {% include "key-principle.liquid", content: kp_content %}
 </section>
 
 <!--
