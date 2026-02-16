@@ -4,7 +4,7 @@
 local root "`c(pwd)'"
 
 * ── Load policy dates ────────────────────────────────────────
-import delimited "`root'/texting_ban_dates.csv", clear varnames(1)
+import delimited "`root'/build/input/texting_ban_dates.csv", clear varnames(1)
 destring texting_ban_year, replace force
 destring primary_enforcement, replace force
 save "`root'/build/output/texting_ban_dates.dta", replace

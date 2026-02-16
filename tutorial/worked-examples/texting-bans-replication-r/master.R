@@ -16,8 +16,12 @@ cat("============================================================\n")
 cat("Texting Bans and Traffic Fatalities -- Replication Package\n")
 cat("============================================================\n")
 
-ROOT <- dirname(normalizePath(sys.frame(1)$ofile %||% "master.R"))
-if (ROOT == ".") ROOT <- getwd()
+ROOT <- tryCatch({
+  dirname(rstudioapi::getActiveDocumentContext()$path)
+}, error = function(e) {
+  getwd()
+})
+if (is.null(ROOT) || ROOT == "" || ROOT == ".") ROOT <- getwd()
 
 BUILD    <- file.path(ROOT, "build")
 ANALYSIS <- file.path(ROOT, "analysis")

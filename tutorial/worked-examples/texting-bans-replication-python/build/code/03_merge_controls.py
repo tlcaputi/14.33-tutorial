@@ -12,7 +12,7 @@ import time
 
 # ── Load data ────────────────────────────────────────────────
 state_year = pd.read_parquet(BUILD / "output" / "state_year_fatalities.parquet")
-policy = pd.read_csv(ROOT / "texting_ban_dates.csv", na_values=["", "NA", "."])
+policy = pd.read_csv(ROOT / "build" / "input" / "texting_ban_dates.csv", na_values=["", "NA", "."])
 
 # ── Merge and create treatment variables ─────────────────────
 analysis_data = state_year.merge(policy, on="state", how="left")

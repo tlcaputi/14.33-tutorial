@@ -48,8 +48,13 @@ if (file.exists(CACHE_FILE)) {
       cat(" OK\n")
     }
 
-    df <- read_csv(csv_path, show_col_types = FALSE) %>%
-      select(STATE, STATENAME, YEAR, MONTH, FATALS) %>%
+    df <- read_csv(csv_path, show_col_types = FALSE)
+    # Normalize column names to uppercase (handles BOM and case variation)
+    names(df) <- toupper(trimws(names(df)))
+    # Some older FARS files don't have YEAR — add from filename
+    if (!"YEAR" %in% names(df)) df$YEAR <- year
+    df <- df %>%
+      select(STATE, YEAR, MONTH, FATALS) %>%
       rename_all(tolower)
     frames[[as.character(year)]] <- df
   }
