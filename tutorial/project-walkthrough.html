@@ -1298,3 +1298,30 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
   {% capture callout_content %}<p>Start with <strong>linear</strong> — it's simpler and less prone to overfitting. Use polynomial specifications as robustness checks. If the linear and polynomial estimates are very different, it suggests the result may be sensitive to functional form assumptions. The <code>rdrobust</code> package provides data-driven bandwidth selection and bias-corrected inference, and is the current best practice.</p>{% endcapture %}
   {% include "callout.liquid", type: "info", title: "Linear vs. Polynomial: Which to Use?", content: callout_content %}
 </section>
+
+<!-- ============================================================ -->
+<!-- EXERCISES -->
+<!-- ============================================================ -->
+<section id="exercises" class="tutorial-section">
+  <h2>Exercises</h2>
+
+  <p>Practice the techniques from this walkthrough. Each ZIP contains the exercise PDF, a codebook, and all necessary datasets.</p>
+
+  {% capture ex1_content %}<div style="text-align: center;">
+    <p><strong>Exercise 1</strong> — Data cleaning, merging, descriptive statistics, and difference-in-differences.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="data/exercises/exercise1.zip" download class="download-btn">Exercise 1</a>
+      <a href="data/exercises/exercise1-solutions.zip" download class="download-btn">Solutions</a>
+    </div>
+  </div>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Exercise 1", content: ex1_content %}
+
+  {% capture ex2_content %}<div style="text-align: center;">
+    <p><strong>Exercise 2</strong> — Merging, two-way fixed effects, event studies, and instrumental variables.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="data/exercises/exercise2.zip" download class="download-btn">Exercise 2</a>
+      <a href="data/exercises/exercise2-solutions.zip" download class="download-btn">Solutions</a>
+    </div>
+  </div>{% endcapture %}
+  {% include "callout.liquid", type: "info", title: "Exercise 2", content: ex2_content %}
+</section>
