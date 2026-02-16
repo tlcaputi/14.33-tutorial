@@ -24,7 +24,7 @@ current_page: auxiliary-latex
   {% capture kp_content %}
     <p>Run your analysis in R, Stata, or Python → generate individual table PDFs → embed them in a LaTeX document as figures. This gives you the best of both worlds: powerful data analysis tools plus beautiful document presentation.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Typical Workflow", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Typical Workflow", content: kp_content %}
 </section>
 
 <section id="installation" class="tutorial-section">
@@ -148,5 +148,5 @@ summary_table.to_latex("table.tex", index=False){% endcapture %}
   {% capture kp_content %}
     <p>Keep your tables in a dedicated folder (e.g., <code>tables/</code>) and compile them separately. This keeps your main paper LaTeX file clean and makes it easy to regenerate any table if your analysis changes.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Organization Tip", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Organization Tip", content: kp_content %}
 </section>

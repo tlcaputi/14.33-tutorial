@@ -167,7 +167,7 @@ print(balance_df.to_string(index=False)){% endcapture %}
   <p>Good visualizations reveal patterns that tables obscure. A scatter plot can show you nonlinearity that summary statistics miss. A time series plot can reveal trends and structural breaks. Economists use visualization both for exploratory analysis (understanding your data) and for communication (convincing readers of your findings).</p>
 
   {% capture kp_content %}<p>Every figure should be understandable without reading the paper. Include clear axis labels, legends, and titles. Use notes to explain any non-obvious details.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Graphs Should Stand Alone", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Graphs Should Stand Alone", content: kp_content %}
 
   <h3>Histograms and Density Plots</h3>
   <p>Use histograms and density plots to visualize the distribution of a single variable. They answer: Is the distribution symmetric or skewed? Are there multiple modes (peaks)? Are there outliers? Comparing distributions across groups (overlapping densities) is a powerful way to see if treatment and control groups differ—before running any regressions.</p>

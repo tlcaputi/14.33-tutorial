@@ -164,7 +164,7 @@ python3 analysis.py{% endcapture %}
   {% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
 
   {% capture kp_content %}<p>Consider creating a master script that runs all your analysis scripts in order. This way, you can regenerate your entire analysis with a single command: <code>stata -b do master.do</code> or <code>Rscript master.R</code>. This is the gold standard for reproducibility.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Master Scripts", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Master Scripts", content: kp_content %}
 </section>
 
 <section id="logging" class="tutorial-section">
@@ -284,7 +284,7 @@ echo "Done at $(date)"{% endcapture %}
   <p>This runs scripts in multiple languages in sequence, using each language where it excels.</p>
 
   {% capture kp_content %}<p>You don't need to become a bash expert. For most empirical economics work, a simple master script in R or Stata is sufficient. Use bash only if it saves you significant time or makes your workflow cleaner.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Don't Worry Too Much", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Don't Worry Too Much", content: kp_content %}
 
   <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
     <a href="auxiliary-latex.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #fff; color: var(--primary); border: 1px solid var(--primary); border-radius: 8px; text-decoration: none; font-weight: 500;">

@@ -10,7 +10,7 @@ current_page: regression
 {% capture callout_content %}<p style="margin: 8px 0 0;">
     Every regression command follows the same pattern: <code>reg Y X, options</code>. Fixed effects? Add <code>absorb()</code>. Clustered SEs? Add <code>cluster()</code>. IV? Wrap the endogenous variable. Once you understand the basic syntax, everything else is just variations on a theme.
   </p>{% endcapture %}
-{% include "callout.liquid", type: "success", title: "Regression is just a function", content: callout_content %}
+{% include "callout.liquid", type: "success", heading: "Regression is just a function", content: callout_content %}
 
 <section id="ols" class="tutorial-section">
   <h2>OLS Basics</h2>
@@ -86,7 +86,7 @@ model = smf.ols('income ~ education:age', data=data).fit(){% endcapture %}
       <li><strong>Log X:</strong> A 1% increase in X is associated with a (beta/100)-unit change in Y.</li>
       <li><strong>Log-Log:</strong> A 1% increase in X is associated with a beta% change in Y (elasticity).</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Coefficient Interpretation", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Coefficient Interpretation", content: kp_content %}
 
   <h3>Post-Estimation</h3>
   <p>After running a regression, you often want to do more than just look at coefficients. <strong>Predicted values</strong> show what your model expects for each observation—useful for identifying outliers or visualizing fit. <strong>Residuals</strong> are the difference between actual and predicted values—patterns in residuals can reveal model problems. <strong>Hypothesis tests</strong> let you ask specific questions: Is this coefficient different from zero? Are two coefficients equal? What's the combined effect of multiple variables?</p>
@@ -154,7 +154,7 @@ print(model.t_test("education + 2*age = 0")){% endcapture %}
   <p>The challenge is that standard OLS assumes errors are independent across observations. In real data, this is often violated: observations within the same state are correlated, the same person observed over time is correlated, etc. When errors are correlated, standard OLS standard errors are too small, leading to false confidence in your results.</p>
 
   {% capture kp_content %}<p>If observations within groups (states, firms, individuals over time) are correlated, standard OLS standard errors are too small. Cluster at the level of treatment variation or the highest level of aggregation that makes sense.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Always Cluster When in Doubt", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Always Cluster When in Doubt", content: kp_content %}
 
   <h3>Types of Standard Errors</h3>
   <p>Here are the main options for computing standard errors, from simplest to most robust:</p>
@@ -206,7 +206,7 @@ model = PanelOLS.from_formula(
       <li>With few clusters (<30), consider wild bootstrap or other small-sample corrections</li>
       <li>Never cluster at a finer level than treatment variation</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Clustering Rules of Thumb", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Clustering Rules of Thumb", content: cm_content %}
 </section>
 
 <section id="panel-data" class="tutorial-section">
@@ -236,7 +236,7 @@ model = PanelOLS.from_formula(
       <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
       <p style="margin: 8px 0 0;"><strong>State fixed effects!</strong> By including a dummy for each state, you're comparing each state to itself over time. California in 2020 is compared to California in 2015, not to Texas. This "differences out" all the permanent differences between states.</p>
     </details>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "🤔 Think about this:", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "🤔 Think about this:", content: callout_content %}
 
   {% capture sc %}* Declare panel structure
 xtset state year
@@ -324,10 +324,10 @@ print(model.summary){% endcapture %}
   <p>With both unit and time fixed effects (two-way fixed effects), your estimate of β₁ comes purely from <em>within-unit changes over time</em>, after removing any time trends common to all units. This is the workhorse specification for causal inference with panel data.</p>
 
   {% capture callout_content %}<p><strong>Difference-in-differences</strong> and <strong>event studies</strong>—the most common designs in applied microeconomics—are almost always estimated using two-way fixed effects. The unit fixed effects control for permanent differences between treated and control groups. The time fixed effects control for common shocks that hit everyone. What's left is the treatment effect: how treated units changed <em>relative to</em> control units, <em>relative to</em> the time trend. When you see a DiD or event study paper, you're almost certainly looking at a TWFE regression.</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "TWFE Powers DiD and Event Studies", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "TWFE Powers DiD and Event Studies", content: callout_content %}
 
   {% capture callout_content %}<p>Fixed effects only control for time-<em>invariant</em> confounders. If something changes over time and affects both your treatment and outcome (a time-varying confounder), fixed effects won't help. You'd need to control for it directly or find a different identification strategy.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "The Limitation", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "The Limitation", content: callout_content %}
 
 </section>
 
@@ -434,7 +434,7 @@ model = IV2SLS.from_formula(
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture kp_content %}<p>The F-statistic tests instrument relevance. Rule of thumb: F > 10 suggests the instrument is strong enough. Weak instruments (F < 10) lead to biased estimates and unreliable inference.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "First-Stage F-Statistic", content: kp_content %}
+  {% include "key-principle.liquid", heading: "First-Stage F-Statistic", content: kp_content %}
 
   <h3>Complete IV Example: Protest Size and Voting</h3>
   <p>Research question: Does protest size affect voting? Problem: larger protests might occur in places that would vote differently anyway. Solution: use weather (rain) as an instrument—rain reduces protest size but shouldn't directly affect voting.</p>
@@ -501,7 +501,7 @@ stargazer.render_latex()  # or .render_html(){% endcapture %}
       <li><strong>Invalid exclusion:</strong> If the instrument affects Y directly, your estimate is biased</li>
       <li><strong>LATE vs ATE:</strong> IV estimates effects only for "compliers" - this may not generalize</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Watch Out For", content: cm_content %}
 </section>
 
 <section id="did" class="tutorial-section">
@@ -562,7 +562,7 @@ stargazer.render_latex()  # or .render_html(){% endcapture %}
 
   <h3>Real-World Example: No-Fault Divorce and Female Suicide</h3>
   {% capture kp_content %}<p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Research Question", content: kp_content %}
 
   <p>The analysis requires setting up several key variables:</p>
   <ul>
@@ -920,7 +920,7 @@ p <- ggiplot(model) +
           <li><strong>Report honestly:</strong> Acknowledging anticipation is better than hiding it—it may be substantively interesting</li>
           <li><strong>Check the mechanism:</strong> Anticipation can help you understand <em>how</em> the policy works (e.g., through expectations vs. direct effects)</li>
         </ul>{% endcapture %}
-      {% include "common-mistake.liquid", title: "What to Do About Anticipation", content: cm_content %}
+      {% include "common-mistake.liquid", heading: "What to Do About Anticipation", content: cm_content %}
     </div>
   </div>
 
@@ -1044,7 +1044,7 @@ p <- ggiplot(model) +
   {% include "code-block.liquid", stata: sc, r: rc %}
 
   {% capture callout_content %}<p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <section id="tables" class="tutorial-section">
@@ -1053,7 +1053,7 @@ p <- ggiplot(model) +
   <p>Regression tables present your main results. The standard format in economics shows multiple specifications (columns) with the same outcome variable, progressively adding controls or changing samples. This shows readers how your results change as you adjust the model—stable coefficients across specifications build confidence in your findings.</p>
 
   {% capture kp_content %}<p>Export tables directly from your code to LaTeX or Word. Manual copying introduces errors and makes your work non-reproducible. Use <code>estout</code>/<code>esttab</code> in Stata, <code>etable</code>/<code>modelsummary</code> in R, or <code>stargazer</code> in Python.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Never Copy Numbers by Hand", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Never Copy Numbers by Hand", content: kp_content %}
 
   <h3>Basic Regression Tables</h3>
   <p>Standard elements include: coefficient estimates, standard errors (in parentheses below the coefficient), significance stars, the number of observations, R-squared or other fit statistics, and notes explaining what controls are included.</p>
@@ -1140,7 +1140,7 @@ print(summary_col([m1, m2, m3], stars=True).as_latex()){% endcapture %}
       <li><strong>etable</strong> (fixest): Best for quick tables with <code>feols()</code> models. Built into fixest, so no extra dependencies. Great for console output and fast LaTeX export.</li>
       <li><strong>modelsummary</strong>: Most flexible and modern. Works with any model type, exports to LaTeX/Word/HTML/PNG, and has excellent customization. <em>Recommended for publication tables.</em></li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "R Table Packages: Which to Use?", content: kp_content %}
+  {% include "key-principle.liquid", heading: "R Table Packages: Which to Use?", content: kp_content %}
 
   <h3>Customizing Tables</h3>
   <p>Default table output rarely matches what you need for publication. You'll want to: rename variables, add rows showing which controls or fixed effects are included, report the mean of the dependent variable, and drop unimportant coefficients.</p>
@@ -1201,5 +1201,5 @@ print(stargazer.render_latex()){% endcapture %}
       <li>Is sample size reported for each column?</li>
       <li>Are controls indicated (even if not shown)?</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Table Checklist", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Table Checklist", content: cm_content %}
 </section>

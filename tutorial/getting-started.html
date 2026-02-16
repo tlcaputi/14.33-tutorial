@@ -44,10 +44,10 @@ current_page: getting-started
   </div>
 
 {% capture kp_content %}<p>Use <strong>R or Stata</strong> throughout your project unless you're working with very large datasets (100+ million observations). For big data, use Python or SQL for data manipulation, then switch to R or Stata for analysis and creating publication-ready output. R and Stata have much better support for econometric methods and producing the tables you'll need for papers.</p>{% endcapture %}
-{% include "key-principle.liquid", title: "My Recommendation", content: kp_content %}
+{% include "key-principle.liquid", heading: "My Recommendation", content: kp_content %}
 
 {% capture kp_content %}<p>Stata is unusual: it assumes you're working with <strong>one dataset at a time</strong>. Commands like <code>summarize</code> or <code>regress</code> automatically operate on "the data" without you specifying which data. If you need to work with a second dataset, you <code>save</code> the current one, then <code>use</code> the new one. This feels strange if you're used to Python or R, but it makes simple analyses very concise.</p>{% endcapture %}
-{% include "key-principle.liquid", title: "The Stata Mental Model", content: kp_content %}
+{% include "key-principle.liquid", heading: "The Stata Mental Model", content: kp_content %}
 
   <p>For this class, any works fine. The toggle at the top of the sidebar lets you switch between Stata, R, and Python code examples.</p>
 </section>
@@ -163,7 +163,7 @@ import statsmodels.formula.api as smf{% endcapture %}
 {% include "code-block.liquid", python: pc %}
 
 {% capture kp_content %}<p>In R, use <code>pacman::p_load()</code>. In Python, put your <code>import</code> statements at the top. This ensures anyone running your code knows exactly what packages are needed.</p>{% endcapture %}
-{% include "key-principle.liquid", title: "Put Imports at the Top of Every Script", content: kp_content %}
+{% include "key-principle.liquid", heading: "Put Imports at the Top of Every Script", content: kp_content %}
 </section>
 
 <section id="interface" class="tutorial-section">
@@ -242,7 +242,7 @@ pd.read_csv?
 
 {% capture kp_content %}<p>Never type commands directly into the console for real work. Write everything in a <code>.do</code> file (Stata) or <code>.R</code> file. This is the #1 habit that separates beginners from competent researchers.</p>
 <p><strong>The test:</strong> Close everything, reopen, run your script. Does it work? If not, your analysis isn't reproducible.</p>{% endcapture %}
-{% include "key-principle.liquid", title: "Always Use Scripts", content: kp_content %}
+{% include "key-principle.liquid", heading: "Always Use Scripts", content: kp_content %}
 
   <p>Create a new file called <code>test.do</code>, <code>test.R</code>, or <code>test.py</code>:</p>
 

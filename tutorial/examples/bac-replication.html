@@ -23,7 +23,7 @@ current_page: bac-replication
   <li>How to actually run a diff-in-diff and interpret it</li>
 </ul>
 {% endcapture %}
-{% include "key-principle.liquid", title: "What You'll Learn", content: kp_content %}
+{% include "key-principle.liquid", heading: "What You'll Learn", content: kp_content %}
 
 <h3 style="margin-top: 32px;">The Research Project Pipeline</h3>
 <p>Most empirical projects follow roughly the same flow:</p>
@@ -166,7 +166,7 @@ current_page: bac-replication
   </ul>
   <p style="margin-top: 12px;">We're ready to start building our dataset.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Checkpoint: Do We Have All Three?", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Checkpoint: Do We Have All Three?", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -309,12 +309,12 @@ print(f"Done! Results in {ANALYSIS / 'output'}"){% endcapture %}
     <li><strong>Run all analyses on the merged dataset</strong> — Your regressions, summary stats, and figures all use this single file</li>
   </ol>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Multi-Source Data Workflow", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Multi-Source Data Workflow", content: kp_content %}
 
   {% capture callout_content %}
   <p style="margin: 0; font-size: 0.95rem;">Each data source has its own quirks: different variable names, different coding schemes, different time periods, different geographic units. If you try to merge raw data directly, you'll create a mess. By cleaning each source into a <strong>uniform format</strong> first, the merge step becomes trivial — just a simple join on state + year.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Why Separate Cleaning Steps?", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Why Separate Cleaning Steps?", content: callout_content %}
 
   <p>In our project, we'll have:</p>
   <ul>
@@ -705,7 +705,7 @@ state_year = state_year.fillna({'total_crashes': 0, 'hr_fatalities': 0, 'nhr_fat
   </ul>
   <p style="margin: 8px 0 0;">The merge effectively "copies" the state-level variable to every state-year observation. This is the opposite of collapse: <strong>collapse</strong> reduces rows (many → one), while <strong>expand via merge</strong> replicates values across rows (one → many).</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Understanding the Expand Operation", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Understanding the Expand Operation", content: kp_content %}
 
   {% capture sc %}* 03_merge_controls.do - Merge all datasets
 * Run from: $build/code/
@@ -834,7 +834,7 @@ state_year.to_parquet(BUILD / "output" / "analysis_data.parquet"){% endcapture %
     <li><strong>Fixed effects:</strong> State and year</li>
   </ul>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Final Analysis Dataset", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Final Analysis Dataset", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -1168,7 +1168,7 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png", dpi=300){% endc
     <li><strong>Post-treatment (t ≥ 0):</strong> These show the dynamic treatment effect.</li>
   </ul>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Interpreting the Event Study", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Interpreting the Event Study", content: kp_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -1389,7 +1389,7 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
     <li><strong>t = -1 is missing</strong> because it's the reference period (all other coefficients are relative to this point)</li>
   </ul>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Reading This Plot", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Reading This Plot", content: kp_content %}
 
   <h3 id="interpreting-results">Interpreting the Results: What Does This Event Study Tell Us?</h3>
 
@@ -1437,12 +1437,12 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
   </ol>
   <p style="margin: 12px 0 0;"><strong>The interpretation:</strong> Stricter drunk driving penalties created an <em>unintended consequence</em>. When caught drunk driving became more costly, some drivers who caused crashes chose to flee the scene rather than face the harsher penalties. The policy reduced the expected punishment for drunk driving crashes—but only if you can escape before police arrive.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Putting It All Together: The Story", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Putting It All Together: The Story", content: kp_content %}
 
   {% capture callout_content %}
   <p style="margin: 0; font-size: 0.95rem;">Event studies are powerful but not bulletproof. Flat pre-trends are <em>necessary</em> but not <em>sufficient</em> for causal identification. There could still be time-varying confounders that happen to coincide with treatment timing. The identifying assumption (parallel trends in the absence of treatment) is fundamentally untestable—we can only check whether it's <em>plausible</em>, not whether it's true.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "⚠️ Caution: What This Doesn't Tell Us", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "⚠️ Caution: What This Doesn't Tell Us", content: callout_content %}
 </section>
 
 <!-- ============================================================== -->
@@ -1452,7 +1452,7 @@ plt.savefig(ANALYSIS / "output" / "figures" / "event_study.png",
   {% capture kp_content %}
   <p>Consistent with French &amp; Gumus (2024), we find that 0.08 BAC laws are associated with an <strong>increase</strong> in hit-and-run fatalities. The event study shows the effect grows over time, suggesting a persistent behavioral response where drunk drivers flee crash scenes to avoid stricter penalties.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Results", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Results", content: kp_content %}
 
   <h3 id="bigger-picture">The Bigger Picture: How Research Actually Works</h3>
   <p>If you followed this example from start to finish, you've seen that empirical research involves a lot of mundane decisions: Which datasets to use? What unit of analysis? How to handle missing values? These decisions matter, and making them well requires understanding your research design.</p>

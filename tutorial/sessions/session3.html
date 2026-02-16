@@ -49,37 +49,49 @@ current_page: session3
   <!-- What is DiD - visual explanation -->
   <div style="background: #f5f5f5; padding: 20px; border-radius: 12px; margin: 20px 0;">
     <h4 style="margin-top: 0;">The Diff-in-Diff Idea in 30 Seconds</h4>
+
+    <p>Imagine a simple world with just two states and two time periods. California passes a new law in 2005; Texas doesn't. You observe the outcome in both states before and after:</p>
+
     <table style="width: 100%; border-collapse: collapse; text-align: center; margin: 12px 0;">
       <tr style="background: #e0e0e0;">
         <th style="padding: 12px; border: 1px solid #bdbdbd;"></th>
-        <th style="padding: 12px; border: 1px solid #bdbdbd;">Before Policy</th>
-        <th style="padding: 12px; border: 1px solid #bdbdbd;">After Policy</th>
+        <th style="padding: 12px; border: 1px solid #bdbdbd;">Before (2004)</th>
+        <th style="padding: 12px; border: 1px solid #bdbdbd;">After (2006)</th>
         <th style="padding: 12px; border: 1px solid #bdbdbd;">Difference</th>
       </tr>
       <tr>
-        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">Treated States</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">California (treated)</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">A</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">B</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">B - A</td>
       </tr>
       <tr>
-        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">Control States</td>
+        <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold;">Texas (control)</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">C</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">D</td>
         <td style="padding: 12px; border: 1px solid #e0e0e0;">D - C</td>
       </tr>
       <tr style="background: #e3f2fd;">
-        <td style="padding: 12px; border: 1px solid #bbdefb;" colspan="3"><strong>Diff-in-Diff Effect</strong></td>
+        <td style="padding: 12px; border: 1px solid #bbdefb;" colspan="3"><strong>Diff-in-Diff Estimate</strong></td>
         <td style="padding: 12px; border: 1px solid #bbdefb;"><strong>(B - A) - (D - C)</strong></td>
       </tr>
     </table>
-    <p style="margin: 0; font-size: 0.9em;">
-      <strong>Logic:</strong> Compare how treated states changed (B - A) to how control states changed (D - C). The difference between these differences is the treatment effect.
-    </p>
+
+    <p style="font-size: 0.9em;"><strong>Logic:</strong> California changed by (B - A), but part of that change might be a national trend. Texas changed by (D - C) without the law, so that's the trend. The difference of these differences strips out the trend and isolates the law's effect.</p>
+
+    <p style="font-size: 0.9em; margin-bottom: 0;"><strong>As a regression:</strong> This is equivalent to estimating</p>
+    <div class="equation-box" style="margin: 8px 0;">
+      <div class="equation-content">
+        Y<sub>it</sub> = β<sub>1</sub> · Treat<sub>i</sub> + β<sub>2</sub> · Post<sub>t</sub> + β<sub>3</sub> · (Treat<sub>i</sub> × Post<sub>t</sub>) + ε<sub>it</sub>
+      </div>
+    </div>
+    <p style="font-size: 0.9em; margin: 0;">where Treat<sub>i</sub> = 1 for California, Post<sub>t</sub> = 1 for 2006, and <strong>β<sub>3</sub> is the DiD estimate</strong> — the same (B - A) - (D - C).</p>
   </div>
 
+  <p>Of course, real research doesn't use just two states and two time periods. In practice, you often have many states adopting the same type of policy at <strong>different times</strong>. For example, no-fault divorce was adopted by different states between 1969 and 1985, while some states never adopted it at all. This <strong>staggered adoption</strong> creates a richer diff-in-diff design where you use all of these states and years together — which is what we'll do in this tutorial.</p>
+
   {% capture kp_content %}Did no-fault divorce laws reduce female suicide rates? The hypothesis is that women trapped in unhappy or abusive marriages might experience better mental health outcomes when divorce becomes easier to obtain.{% endcapture %}
-  {% include "key-principle.liquid", title: "The Research Question", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Research Question", content: kp_content %}
 
   <h3>What is No-Fault Divorce?</h3>
 
@@ -88,7 +100,7 @@ current_page: session3
   <ul>
     <li>States adopted no-fault divorce at different times (1969-1985)</li>
     <li>Some states never adopted it during our sample period</li>
-    <li>This <strong>staggered adoption</strong> creates our diff-in-diff design</li>
+    <li>This staggered adoption creates our diff-in-diff design — instead of one "treated" and one "control" state, we have many states switching on at different times</li>
   </ul>
 
   <h3>The Data</h3>
@@ -201,7 +213,7 @@ current_page: session3
   </div>
 
   {% capture callout_content %}<strong>In plain English:</strong> your outcome (e.g., female suicide rate) equals a treatment effect (β, what we want to estimate) plus state-specific constants (α<sub>i</sub>, which absorb permanent differences like "California has more people than Wyoming") plus year-specific shocks (γ<sub>t</sub>, which absorb things that hit all states in a given year, like a national recession) plus random noise (ε<sub>it</sub>).{% endcapture %}
-  {% include "callout.liquid", type: "info", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "The TWFE Equation", content: callout_content %}
 
   <p>Let's break this down:</p>
 
@@ -214,7 +226,7 @@ current_page: session3
   </ul>
 
   {% capture callout_content %}The coefficient β tells you: <em>how much did treated units change, relative to control units, relative to the overall time trend?</em> It's the "difference-in-differences"—the difference in how treated and control units evolved over time.{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "What β Captures", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "What β Captures", content: callout_content %}
 
   <h3>From DiD to Event Studies</h3>
 
@@ -251,7 +263,7 @@ current_page: session3
   <p>What about units that never get treated? They don't have a "treatment year," so "time to treatment" is undefined for them.</p>
 
   {% capture callout_content %}<strong>Why is this a problem?</strong> Never-treated states (like those that never passed the law) don't have a "year of treatment," so we can't compute <code>event_time = year - treatment_year</code> — the result would be missing. But we still want these states in our regression as the comparison group. The solution: give them a fake event-time value (-1000) that's far outside the real range (-5, -4, ..., 0, 1, 2, ...), so their observations won't be assigned to any event-time coefficient. Then we exclude -1000 from the event study dummies while keeping these states in the regression to help estimate the fixed effects.{% endcapture %}
-  {% include "callout.liquid", type: "warning", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Never-Treated Units", content: callout_content %}
 
   <p><strong>If you have never-treated units:</strong> You need to handle them carefully. The key insight is that never-treated units don't have a "time to treatment," so you can't create event-time dummies for them in the usual way. Common approaches:</p>
   <ul>
@@ -264,7 +276,7 @@ current_page: session3
   <p><strong>If you have NO never-treated units</strong> (everyone eventually gets treated, just at different times): You need <em>two</em> reference periods—one to avoid collinearity with unit fixed effects, and one to avoid collinearity with time fixed effects. Typically you'd omit both k = -1 and one endpoint (like the last period).</p>
 
   {% capture callout_content %}With staggered adoption and no never-treated group, the time-to-treatment dummies span the entire time dimension. Without a second normalization, the year fixed effects become collinear with the event-time dummies. Dropping an endpoint (like the last period in your event window) solves this.{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Why Two Reference Periods?", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Why Two Reference Periods?", content: callout_content %}
 
   <h3>Interpreting the Event Study Plot</h3>
 
@@ -409,7 +421,7 @@ df['_nfd'] = df['stfips'].map(adoption_years)
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture cm_content %}Notice that treatment is <strong>staggered</strong> - different states adopt at different times. Kansas and South Carolina adopted first (1969), while South Dakota adopted last (1985). This variation is what allows identification.{% endcapture %}
-  {% include "common-mistake.liquid", title: "Key Insight: Staggered Adoption", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Key Insight: Staggered Adoption", content: cm_content %}
 </section>
 
 <section id="twfe" class="tutorial-section">
@@ -499,7 +511,7 @@ print(model_twfe.summary()){% endcapture %}
   </div>
 
   {% capture kp_content %}The coefficient on <code>treat_post</code> represents the average effect of no-fault divorce on female suicide rates, controlling for state fixed effects, year fixed effects, and time-varying controls. A negative coefficient suggests the reform reduced suicide rates.{% endcapture %}
-  {% include "key-principle.liquid", title: "Interpreting the Coefficient", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Interpreting the Coefficient", content: kp_content %}
 </section>
 
 <section id="event-study" class="tutorial-section">
@@ -584,7 +596,7 @@ reg asmrs ib`true_neg1'.shifted_ttt pcinc asmrh cases i.stfips i.year, vce(clust
   {% include "code-block.liquid", stata: sc %}
 
   {% capture callout_content %}The manual approach above is good for understanding what's happening. In practice, use these cleaner methods:{% endcapture %}
-  {% include "callout.liquid", type: "success", title: "Easier Package-Based Approach", content: callout_content %}
+  {% include "callout.liquid", type: "success", heading: "Easier Package-Based Approach", content: callout_content %}
 
   {% capture sc %}* EASY WAY: Use xtevent package
 * Install once: ssc install xtevent
@@ -646,14 +658,14 @@ model_es.iplot(){% endcapture %}
   </div>
 
   {% capture cm_content %}We use t = -1 (one year before treatment) as our reference period because it's the last pre-treatment period. All coefficients are then interpreted relative to this period. This is standard practice in event studies.{% endcapture %}
-  {% include "common-mistake.liquid", title: "Why t = -1 as Reference?", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why t = -1 as Reference?", content: cm_content %}
 
   {% capture kp_content %}<ul>
       <li><strong>Pre-treatment coefficients</strong> (left of 0): Should be close to zero and statistically insignificant if parallel trends holds</li>
       <li><strong>Post-treatment coefficients</strong> (right of 0): Show how the treatment effect evolves over time</li>
       <li><strong>Reference period</strong> (t = -1): Always zero by construction</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Reading an Event Study Plot", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Reading an Event Study Plot", content: kp_content %}
 </section>
 
 <section id="interpretation" class="tutorial-section">
@@ -662,7 +674,7 @@ model_es.iplot(){% endcapture %}
   <h3>What to Look For</h3>
 
   {% capture kp_content %}In the event study plot, pre-treatment coefficients should be statistically indistinguishable from zero. If you see a clear trend before treatment, the parallel trends assumption may be violated.{% endcapture %}
-  {% include "key-principle.liquid", title: "Parallel Trends", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Parallel Trends", content: kp_content %}
 
   <h3>Common Issues</h3>
 
@@ -672,7 +684,7 @@ model_es.iplot(){% endcapture %}
   </ul>
 
   {% capture callout_content %}Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <!-- ==================== PRACTICE ==================== -->

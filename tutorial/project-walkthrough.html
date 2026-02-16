@@ -24,7 +24,7 @@ current_page: project-walkthrough
       <a href="data/pkg-python.zip" download class="download-btn">Python</a>
     </div>
   </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Download the Project", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Download the Project", content: callout_content %}
 
   <h3>What's Inside</h3>
 
@@ -274,7 +274,7 @@ print(crashes_sy.info()){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}<p>Separating your build code (data processing) from analysis code is a key principle of project organization. Save collapsed data so you can modify your analysis without re-running expensive data processing steps every time.</p>{% endcapture %}
-  {% include "callout.liquid", type: "success", title: "Why Save Intermediate Files?", content: callout_content %}
+  {% include "callout.liquid", type: "success", heading: "Why Save Intermediate Files?", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -377,7 +377,7 @@ print(panel.info()){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}<p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>keep()</code> option controls which observations to retain: <code>keep(match)</code> keeps only matched rows, <code>keep(master match)</code> keeps all master rows even if unmatched (like a left join). The <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Always Check Your Merges", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Always Check Your Merges", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -496,7 +496,7 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
       <li><strong>Post-treatment changes:</strong> Compare Treated After vs. Treated Before. This is the raw before/after for treated units.</li>
       <li><strong>Sample composition:</strong> Report observation counts for each group at the bottom of the table.</li>
     </ul>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "What to Look For", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "What to Look For", content: callout_content %}
 
   <h3>From Code Output to Publication-Ready Table</h3>
 
@@ -520,10 +520,10 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
       <li><strong>Fixed effects indicators:</strong> "Yes" or blank (not "No")</li>
       <li><strong>Sample size</strong> and <strong>R-squared</strong> at the bottom of every regression table</li>
     </ul>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Table Formatting Checklist", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Table Formatting Checklist", content: callout_content %}
 
   {% capture callout_content %}<p>Formatting tables and figures is an excellent use case for AI tools like ChatGPT or Claude. These tasks leave little room for hallucination—the AI just needs to adjust spacing, labels, and LaTeX formatting. Describe what you want and iterate.</p>{% endcapture %}
-  {% include "callout.liquid", type: "success", title: "AI Tools Are Great for Table Formatting", content: callout_content %}
+  {% include "callout.liquid", type: "success", heading: "AI Tools Are Great for Table Formatting", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -754,7 +754,7 @@ es.iplot(){% endcapture %}
       <li>Is the background white? (no gray default)</li>
       <li>Are confidence intervals shown as shaded bands (not error bars) where appropriate?</li>
     </ul>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Figure Checklist", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Figure Checklist", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -1089,7 +1089,7 @@ print(f"Class size coef: {iv_model.params['class_size']:.3f}"){% endcapture %}
   </figure>
 
   {% capture callout_content %}<p>OLS is biased because class size is correlated with school quality (omitted variable bias). The IV estimate isolates the causal effect by using only variation in class size driven by enrollment thresholds. The IV estimate should typically be larger in magnitude if OLS is biased toward zero (attenuation bias from measurement error) or could go either way depending on the source of endogeneity.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "OLS vs. IV: What to Expect", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "OLS vs. IV: What to Expect", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -1296,7 +1296,7 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
   </figure>
 
   {% capture callout_content %}<p>Start with <strong>linear</strong> — it's simpler and less prone to overfitting. Use polynomial specifications as robustness checks. If the linear and polynomial estimates are very different, it suggests the result may be sensitive to functional form assumptions. The <code>rdrobust</code> package provides data-driven bandwidth selection and bias-corrected inference, and is the current best practice.</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Linear vs. Polynomial: Which to Use?", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Linear vs. Polynomial: Which to Use?", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -1314,7 +1314,7 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
       <a href="data/exercises/exercise1-solutions.zip" download class="download-btn">Solutions</a>
     </div>
   </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Exercise 1", content: ex1_content %}
+  {% include "callout.liquid", type: "info", heading: "Exercise 1", content: ex1_content %}
 
   {% capture ex2_content %}<div style="text-align: center;">
     <p><strong>Exercise 2</strong> — Merging, two-way fixed effects, event studies, and instrumental variables.</p>
@@ -1323,5 +1323,5 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
       <a href="data/exercises/exercise2-solutions.zip" download class="download-btn">Solutions</a>
     </div>
   </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Exercise 2", content: ex2_content %}
+  {% include "callout.liquid", type: "info", heading: "Exercise 2", content: ex2_content %}
 </section>

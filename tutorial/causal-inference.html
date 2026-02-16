@@ -16,7 +16,7 @@ current_page: causal-inference
   {% capture kp_content %}
     <p>We want to know: if we took a specific person and randomly chose whether they attend MIT or not, how would their wages differ? This is fundamentally different from asking how MIT graduates compare to non-MIT graduates.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Goal of Causal Inference", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Goal of Causal Inference", content: kp_content %}
 </section>
 
 <section id="potential-outcomes" class="tutorial-section">
@@ -44,7 +44,7 @@ current_page: causal-inference
   {% capture kp_content %}
     <p>We can never observe both Y(1) and Y(0) for the same person. Sarah either goes to MIT or she doesn't. We observe one reality, not both. The unobserved outcome is called the <strong>counterfactual</strong>.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Fundamental Problem", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Fundamental Problem", content: kp_content %}
 
   <h3>Example: Sarah's Potential Outcomes</h3>
 
@@ -97,7 +97,7 @@ current_page: causal-inference
   {% capture cm_content %}
     <p>This comparison conflates the effect of MIT with the effect of <em>time</em> (aging, gaining experience, entering the labor market). Anyone's wages would increase from college to post-graduation, regardless of where they went to school.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Why This Fails", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why This Fails", content: cm_content %}
 
   <h3>Approach 2: MIT Grads vs. Non-MIT Grads</h3>
 
@@ -112,7 +112,7 @@ current_page: causal-inference
   {% capture cm_content %}
     <p>MIT students aren't a random sample. They're selected based on high test scores, strong work ethic, ambitious personalities, wealthy family backgrounds, etc. These same traits would lead to higher wages <em>even without MIT</em>. We can't tell how much of the $60,000 gap is MIT vs. pre-existing differences.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Why This Fails: Selection Bias", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why This Fails: Selection Bias", content: cm_content %}
 
   <!-- Visual: Selection Bias Diagram -->
   <div style="margin: 30px 0; text-align: center;">
@@ -178,7 +178,7 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit(){% endcapture 
       <li><strong>Who attends:</strong> Among admits, those who choose MIT over Harvard or Stanford may be different in unobservable ways</li>
     </ul>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Why This Still Fails", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why This Still Fails", content: cm_content %}
 
   <p>Consider two students who both scored 1520 on the SAT:</p>
 
@@ -208,7 +208,7 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit(){% endcapture 
   {% capture kp_content %}
     <p>You can only control for things you can measure. But the decision to attend MIT is driven by motivation, ambition, family expectations, risk tolerance, career goals—most of which we can't observe. Adding more controls helps, but can never fully solve the problem.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Selection on Unobservables", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Selection on Unobservables", content: kp_content %}
 </section>
 
 <section id="random-assignment" class="tutorial-section">
@@ -326,7 +326,7 @@ model = smf.ols('wages ~ attended_mit + sat_score', data=df).fit(){% endcapture 
   {% capture kp_content %}
     <p>DiD requires that absent treatment, the treatment group would have followed the same trend as the control group. This is <strong>untestable</strong> because we can't observe the counterfactual.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Critical Assumption", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Critical Assumption", content: kp_content %}
 
   <p>In the minimum wage example, we're assuming that if treated states had <em>not</em> raised their minimum wage, their employment would have evolved the same way as the control states' employment.</p>
 
@@ -553,7 +553,7 @@ print(rd_result){% endcapture %}
       <li><strong>Independence:</strong> The instrument must be as-if randomly assigned</li>
     </ol>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Requirements for a Valid Instrument", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Requirements for a Valid Instrument", content: kp_content %}
 
   <h3>Checking Relevance (First Stage)</h3>
 
@@ -587,7 +587,7 @@ print(first_stage.summary())
     </ul>
     <p>The instrument affects wages <em>directly</em>, not just through MIT attendance. The exclusion restriction is violated.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Why This Instrument FAILS", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why This Instrument FAILS", content: cm_content %}
 
   <!-- IV Diagram -->
   <div style="margin: 30px 0; text-align: center;">
@@ -698,5 +698,5 @@ print(first_stage.summary())
   {% capture kp_content %}
     <p>There is no perfect method. Every causal inference strategy requires assumptions that cannot be fully tested. The goal is to find <strong>plausible</strong> sources of variation and be transparent about what could go wrong. The best research combines multiple approaches and tests robustness.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Bottom Line", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Bottom Line", content: kp_content %}
 </section>

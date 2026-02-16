@@ -12,7 +12,7 @@ current_page: advanced
   <h2>Loops and Iteration</h2>
 
   {% capture kp_content %}<p>Imagine you have 20 outcome variables (income, hours, wages, savings, ...) and need to run the same regression for each one. You could copy-paste the regression command 20 times, changing the outcome variable each time. But if you later decide to add a control variable, you'd have to edit all 20 copies. With a loop, you write the regression once, wrap it in a loop, and let the computer run all 20 versions. Change the control? Edit one line.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Why Use Loops?", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Why Use Loops?", content: kp_content %}
 
   <p>A loop executes the same code multiple times, each time with different values. Instead of writing <code>summarize income</code>, <code>summarize age</code>, <code>summarize education</code> separately, you write one loop that summarizes each variable in a list. This is more concise, easier to modify, and less error-prone.</p>
 
@@ -227,7 +227,7 @@ results_df = pd.DataFrame([
   <h2>Functions and Programs</h2>
 
   {% capture kp_content %}<p>If you're copy-pasting code and changing small things, write a function instead. This reduces errors and makes your code easier to maintain.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Don't Repeat Yourself (DRY)", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Don't Repeat Yourself (DRY)", content: kp_content %}
 
   <h3>Writing Functions</h3>
   {% capture sc %}* Define a program (Stata's version of functions)
@@ -563,7 +563,7 @@ df = table.to_pandas(){% endcapture %}
       <li><strong>Avoid loops when possible:</strong> Vectorized operations are much faster</li>
       <li><strong>Use specialized packages:</strong> <code>reghdfe</code> in Stata, <code>fixest</code> in R are optimized for large data</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Speed Tips", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Speed Tips", content: kp_content %}
 </section>
 
 <section id="acknowledgements" class="tutorial-section">

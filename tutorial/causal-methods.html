@@ -10,7 +10,7 @@ current_page: causal-methods
 {% capture callout_content %}<p style="margin: 8px 0 0;">
     You have four main tools in your toolbox: IV uses an "experiment-like" random shock to your treatment; DiD/Event Studies compare treated and control groups before and after treatment; RD exploits a threshold or cutoff; and sometimes you find a real random experiment (RCT). Understanding when to use each is key.
   </p>{% endcapture %}
-{% include "callout.liquid", type: "success", title: "Four Identification Strategies", content: callout_content %}
+{% include "callout.liquid", type: "success", heading: "Four Identification Strategies", content: callout_content %}
 
 <section id="iv" class="tutorial-section">
   <h2>Instrumental Variables</h2>
@@ -118,7 +118,7 @@ model = IV2SLS.from_formula(
   <p>The first-stage F-statistic tests whether your instrument actually predicts the endogenous variable. Rule of thumb: F > 10 suggests the instrument is strong enough. Weak instruments (F < 10) lead to biased estimates and unreliable inference.</p>
 
   {% capture kp_content %}<p>Even if your instrument is valid (doesn't affect Y directly), it only helps if it's relevant (actually predicts X). Always report the first-stage F-statistic—readers need to know if your instrument is strong.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Instrument Strength Matters", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Instrument Strength Matters", content: kp_content %}
 
   <h3>Complete IV Example: Protest Size and Voting</h3>
   <p>Research question: Does protest size affect voting? Problem: larger protests might occur in places that would vote differently anyway. Solution: use weather (rain) as an instrument—rain reduces protest size but shouldn't directly affect voting.</p>
@@ -185,7 +185,7 @@ stargazer.render_latex()  # or .render_html(){% endcapture %}
       <li><strong>Invalid exclusion:</strong> If the instrument affects Y directly, your estimate is biased</li>
       <li><strong>LATE vs ATE:</strong> IV estimates effects only for "compliers" - this may not generalize</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Watch Out For", content: cm_content %}
 </section>
 
 <section id="did" class="tutorial-section">
@@ -246,7 +246,7 @@ stargazer.render_latex()  # or .render_html(){% endcapture %}
 
   <h3>Real-World Example: No-Fault Divorce and Female Suicide</h3>
   {% capture kp_content %}<p>Did the introduction of no-fault divorce laws affect female suicide rates? U.S. states adopted these laws at different times between 1969-1985, creating a natural experiment with staggered treatment timing.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Research Question", content: kp_content %}
 
   <p>The analysis requires setting up several key variables:</p>
   <ul>
@@ -622,7 +622,7 @@ model.iplot(){% endcapture %}
           <li><strong>Report honestly:</strong> Acknowledging anticipation is better than hiding it—it may be substantively interesting</li>
           <li><strong>Check the mechanism:</strong> Anticipation can help you understand <em>how</em> the policy works (e.g., through expectations vs. direct effects)</li>
         </ul>{% endcapture %}
-      {% include "common-mistake.liquid", title: "What to Do About Anticipation", content: cm_content %}
+      {% include "common-mistake.liquid", heading: "What to Do About Anticipation", content: cm_content %}
     </div>
   </div>
 
@@ -790,7 +790,7 @@ model.iplot(){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}<p>Recent research has found that DiD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "A Note on Staggered Timing", content: callout_content %}
 </section>
 
 <section id="rd" class="tutorial-section">
@@ -823,7 +823,7 @@ model.iplot(){% endcapture %}
   <p>At the cutoff, treatment is essentially random. Someone with a test score of 79.9 has nearly the same ability as someone with 80.1, but their treatment status flips. By comparing outcomes just above and below the cutoff, you isolate the effect of treatment from all the underlying characteristics that typically confound it (ability, motivation, socioeconomic status).</p>
 
   {% capture kp_content %}<p>RD validity depends on the running variable being continuous and manipulation being impossible. For example: you can't improve your age (it's continuous and manipulation is impossible), but you could game a test score (it's discrete and manipulation is possible). The closer you are to the cutoff, the more convincing the design.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "The Cutoff Is Key", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Cutoff Is Key", content: kp_content %}
 
   <h3>Implementation: Simple Local Linear Regression</h3>
   <p>The simplest approach: fit a line on each side of the cutoff using observations near the cutoff, then compute the gap where the lines meet.</p>
@@ -982,5 +982,5 @@ plt.show(){% endcapture %}
   <p>How close to the cutoff should you focus? Too close, and you have few observations and less precision. Too far, and people further from the cutoff may not be comparable. The rule of thumb: use observations within 1-2 standard deviations of the running variable, or use automated bandwidth selection (like rdrobust does).</p>
 
   {% capture callout_content %}<p>RD identifies the effect for people <em>at the cutoff</em>. This is the "local average treatment effect" (LATE). If people far from the cutoff would have very different treatment effects, RD won't tell you about those groups. Always be clear about whom your results apply to.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "RD Estimates Local Effects", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "RD Estimates Local Effects", content: callout_content %}
 </section>

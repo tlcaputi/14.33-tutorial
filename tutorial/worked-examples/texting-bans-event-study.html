@@ -17,7 +17,7 @@ current_page: texting-bans
   {% capture kp_content %}
   <p>Did state laws banning texting while driving reduce traffic fatalities? States adopted these bans at different times between 2007 and 2020, providing staggered variation for a difference-in-differences/event study design.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Research Question", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Research Question", content: kp_content %}
 
   <h3>What We'll Do</h3>
   <ol>
@@ -61,7 +61,7 @@ os.chdir("texting-bans"){% endcapture %}
   {% capture kp_content %}
   <p>The Fatality Analysis Reporting System (FARS) is a nationwide census of fatal motor vehicle crashes. Each row in the <code>accident.csv</code> file represents one fatal crash, with variables for state, date, number of fatalities, and crash characteristics.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Data Source", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Data Source", content: kp_content %}
 
   <h3>Download FARS Files</h3>
   <p>Download the accident files for each year. These are large files (~20-30MB each), so this may take a few minutes.</p>
@@ -274,7 +274,7 @@ state_year.to_csv("data/clean/state_year_fatalities.csv", index=False){% endcapt
   {% capture cm_content %}
   <p>State fixed effects already absorb time-invariant differences in population levels (Texas is always bigger than Vermont). The concern is <em>differential population growth</em> over the study period. If fast-growing states adopted texting bans at different times than slow-growing states, raw fatality counts could confound population trends with policy effects. Per-capita rates address this by removing variation due to changing population size.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Why Rates Matter (Even with State Fixed Effects)", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Why Rates Matter (Even with State Fixed Effects)", content: cm_content %}
 </section>
 
 <section id="merge-policy" class="tutorial-section">
@@ -324,7 +324,7 @@ print(policy.head(10)){% endcapture %}
   </ul>
   <p>Montana and Missouri (which only banned texting for drivers under 21, not a statewide comprehensive ban) have <code>texting_ban_year</code> set to NA. The <code>state</code> column uses numeric FIPS codes that match the FARS data, making the merge straightforward.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Policy Data Format", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Policy Data Format", content: kp_content %}
 
   <h3>Merge and Create Treatment Variables</h3>
 
@@ -407,7 +407,7 @@ analysis_data.to_csv("data/clean/analysis_data.csv", index=False){% endcapture %
   {% capture kp_content %}
   <p><code>event_time = year - texting_ban_year</code> measures years relative to treatment. Negative values are pre-treatment, zero is the treatment year, and positive values are post-treatment. This is the key variable for our event study.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Event Time", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Event Time", content: kp_content %}
 
   <h3>Merge Economic Controls</h3>
   <p>State and year fixed effects control for time-invariant state characteristics and common year shocks, but they don't control for things that vary <em>both</em> across states <em>and</em> over time. If economic conditions differ across states and correlate with when states adopt texting bans, we could have a problem. We'll add state-level unemployment and per capita income from <a href="https://fred.stlouisfed.org/" target="_blank">FRED</a>.</p>
@@ -736,7 +736,7 @@ print(event_study.summary){% endcapture %}
   {% capture cm_content %}
   <p>We cluster standard errors at the state level because (1) treatment varies at the state level, and (2) fatalities within a state are likely correlated over time. This is essential for correct inference in DiD designs.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Standard Errors", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Standard Errors", content: cm_content %}
 
   <h3>Results</h3>
   <p>The event study coefficients (relative to t = &minus;1) with 95% confidence intervals:</p>
@@ -906,7 +906,7 @@ plt.show(){% endcapture %}
   {% capture kp_content %}
   <p>Each package contains the analysis code and <code>texting_ban_dates.csv</code> (52 rows). FARS data (~400MB) and FRED economic data are downloaded automatically when you run the master script. The first run takes 15-20 minutes (mostly FARS downloads); subsequent runs use cached data and finish in under a minute.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "What's Included", content: kp_content %}
+  {% include "key-principle.liquid", heading: "What's Included", content: kp_content %}
 </section>
 
 <section id="interpretation" class="tutorial-section">
@@ -933,7 +933,7 @@ plt.show(){% endcapture %}
   {% capture cm_content %}
   <p>If you find no effect of texting bans on fatalities, that's a finding. It could mean bans are ineffective, or that enforcement is weak, or that texting wasn't a major cause of fatal crashes. Don't bury null results.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Null Results Are Results", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Null Results Are Results", content: cm_content %}
 
   <h3>Caveats and Extensions</h3>
   <ul style="line-height: 2;">
@@ -945,5 +945,5 @@ plt.show(){% endcapture %}
   {% capture callout_content %}
   <p>Recent research has found that DD estimates can be biased when there is both (A) staggered treatment timing and (B) heterogeneous treatment effects. You don't need to know anything about this for 14.33. If you're interested, ask your TA!</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "A Note on Staggered Timing", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "A Note on Staggered Timing", content: callout_content %}
 </section>

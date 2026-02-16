@@ -129,7 +129,7 @@ os.chdir("/Users/yourname/Dropbox/my_project"){% endcapture %}
   {% capture kp_1 %}
 <p>Starting fresh (<code>clear all</code>) prevents a common bug: accidentally using variables from a previous session. The log file creates a record of everything you did—invaluable when you need to remember your steps months later or when something goes wrong.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Why This Matters", content: kp_1 %}
+  {% include "key-principle.liquid", heading: "Why This Matters", content: kp_1 %}
 
   <h3 id="browsing">Step 2: First Look at Your Data</h3>
 
@@ -249,7 +249,7 @@ df['sex'].value_counts(normalize=True){% endcapture %}
   {% capture cm_1 %}
 <p>Stata's Data Editor lets you click on cells and change values. <strong>Never do this.</strong> Why? Because there's no record of what you changed. If you need to make changes, do it in code so your work is reproducible.</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "Never Manually Edit Data", content: cm_1 %}
+  {% include "common-mistake.liquid", heading: "Never Manually Edit Data", content: cm_1 %}
 
   <h3 id="sample-selection">Step 3: Selecting Your Sample</h3>
 
@@ -338,7 +338,7 @@ df = df[['id', 'age', 'income', 'sex', 'education']]{% endcapture %}
   {% capture kp_2 %}
 <p>After every <code>keep</code> or <code>drop</code>, run <code>count</code> (Stata) or <code>nrow(df)</code> (R) or <code>len(df)</code> (Python) to verify you have the expected number of observations. A common mistake is accidentally dropping everything!</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Check Your Work!", content: kp_2 %}
+  {% include "key-principle.liquid", heading: "Check Your Work!", content: kp_2 %}
 
   <h3 id="creating-variables">Step 4: Creating New Variables</h3>
 
@@ -475,7 +475,7 @@ df['income_k'] = df['income'] / 1000{% endcapture %}
   </tr>
 </table>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Language Comparison", content: kp_3 %}
+  {% include "key-principle.liquid", heading: "Language Comparison", content: kp_3 %}
 </section>
 
 <!-- ============================================================== -->
@@ -513,7 +513,7 @@ my_project/
   {% capture kp_4 %}
 <p>Never modify files in your <code>input/</code> folder. If you need to make changes, write code that reads the raw data and saves a cleaned version to <code>output/</code>. This way you can always reproduce your work from scratch.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "The Golden Rule: Raw Data is READ-ONLY", content: kp_4 %}
+  {% include "key-principle.liquid", heading: "The Golden Rule: Raw Data is READ-ONLY", content: kp_4 %}
 
   <h3 id="master-script">The Master Script</h3>
 
@@ -598,7 +598,7 @@ exec(open(os.path.join(ANALYSIS, "code", "03_robustness.py")).read()){% endcaptu
   {% capture kp_5 %}
 <p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so it's clear what order they run in. This also keeps them sorted correctly in your file browser.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "Number Your Scripts", content: kp_5 %}
+  {% include "key-principle.liquid", heading: "Number Your Scripts", content: kp_5 %}
 
   <!-- Quiz: Project Organization -->
   <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -852,7 +852,7 @@ df.to_csv("mydata_clean.csv", index=False){% endcapture %}
     </ul>
     <p><strong>Rule of thumb:</strong> If you're unsure, you probably want long format.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "When to Use Each Format", content: kp_content %}
+  {% include "key-principle.liquid", heading: "When to Use Each Format", content: kp_content %}
 
   <h3 id="reshape-wide-to-long">Reshaping: Wide to Long</h3>
 
@@ -962,7 +962,7 @@ df_wide.columns = ['country'] + [f'gdp{y}' for y in df_wide.columns[1:]]{% endca
   {% capture callout_content %}
     <p style="margin: 10px 0 0;">In Stata, the <strong>master</strong> dataset is the one already in memory (the one you're working with), and the <strong>using</strong> dataset is the one you're bringing in with the <code>merge</code> command. The notation <code>m:1</code> means "many-to-one": many rows in the master match one row in the using dataset. For example, if your master has 10,000 individual people and your using has 50 state-level rows, that's m:1—many people per state, one state row each. In R, the first argument to <code>merge()</code> plays the role of the master, and the second is the using.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Understanding Merge Notation:", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Understanding Merge Notation:", content: callout_content %}
 
   <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
     <thead>
@@ -1079,7 +1079,7 @@ merged = merged.drop(columns=['_merge']){% endcapture %}
     </ul>
     <p style="margin-top: 8px;">Most merge bugs are silent—your code runs but gives wrong answers. Checking <code>_merge</code> is how you catch them.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Always Check Your Merge!", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Always Check Your Merge!", content: callout_content %}
 </section>
 
 <!-- ==================== LOOPS AND LOCALS ==================== -->
@@ -1137,7 +1137,7 @@ for i in range(4):
     </ol>
     <p style="margin: 10px 0 0;">The backticks <code>`i'</code> get replaced with the current value of the loop variable.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "What happens when this runs (Stata):", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "What happens when this runs (Stata):", content: callout_content %}
 
   {% capture kp_content %}
     <ol>
@@ -1147,7 +1147,7 @@ for i in range(4):
     </ol>
     <p>This way, if something breaks, you know whether it's the code or the loop.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "How to Build a Loop", content: kp_content %}
+  {% include "key-principle.liquid", heading: "How to Build a Loop", content: kp_content %}
 
   <h3 id="foreach">Loop Variations</h3>
 
@@ -1210,7 +1210,7 @@ for v in ['income', 'age', 'education']:
       <li><code>foreach</code> = loop over a list of anything (variable names, file names, strings)</li>
     </ul>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "<code>foreach</code> vs <code>forvalues</code>:", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "<code>foreach</code> vs <code>forvalues</code>:", content: callout_content %}
 
   <!-- Quiz: Loops -->
   <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -1289,7 +1289,7 @@ print(f"The coefficient was {coef_val}"){% endcapture %}
   {% capture cm_content %}
     <p style="margin: 8px 0 0;">If you highlight <code>local x = 5</code> and run it, then separately highlight <code>display `x'</code> and run it, Stata says "x not found". Why? Locals disappear at the end of each "run". <strong>Solution:</strong> Highlight BOTH lines and run them together, or put them in a do-file. (R and Python don't have this issue.)</p>
   {% endcapture %}
-  {% include "common-mistake.liquid", title: "CRITICAL STATA QUIRK: Locals Only Last One \"Run\"", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "CRITICAL STATA QUIRK: Locals Only Last One \"Run\"", content: cm_content %}
 
   <h3 id="preserve">Preserve and Restore</h3>
 
@@ -1429,7 +1429,7 @@ model_cluster = smf.ols('wage ~ education + age + experience', data=df).fit(
     <p style="margin: 12px 0 0; font-size: 0.9em;"><strong>Rule of thumb:</strong> Cluster at the level of treatment assignment or the level where errors might be correlated.</p>
     <p style="margin: 10px 0 0; font-size: 0.9em;"><strong>*What is HC1?</strong> HC1 stands for "Heteroskedasticity-Consistent type 1." Stata's <code>, robust</code> option uses HC1 by default. R and Python require you to specify it explicitly. For most economics papers, HC1 is standard.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Which standard errors should I use?", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Which standard errors should I use?", content: callout_content %}
 
   <h3 id="interactions">Interactions</h3>
 
@@ -1474,7 +1474,7 @@ model = smf.ols('wage ~ education * experience', data=df).fit(){% endcapture %}
     </ul>
     <p style="margin: 10px 0 0;"><strong>Total effect of education for females</strong> = <code>education</code> + <code>1.female#c.education</code></p>
   {% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Interpreting <code>education##female</code> coefficients:", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Interpreting <code>education##female</code> coefficients:", content: callout_content %}
 
   <!-- Quiz: Regression -->
   <div class="section-quiz" style="background: #f8f9fa; border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -1541,7 +1541,7 @@ model = pf.feols('wage ~ education | state + year',
   {% capture kp_content %}
     <p>Use <code>reghdfe</code> (Stata), <code>fixest</code> (R), or <code>pyfixest</code> (Python) whenever you have many fixed effects (hundreds or thousands of groups). They're much faster than including dummy variables, and they handle multiple sets of fixed effects efficiently.</p>
   {% endcapture %}
-  {% include "key-principle.liquid", title: "When to Use High-Dimensional Fixed Effects", content: kp_content %}
+  {% include "key-principle.liquid", heading: "When to Use High-Dimensional Fixed Effects", content: kp_content %}
 
   <h3 id="iv">Instrumental Variables</h3>
 
@@ -1562,7 +1562,7 @@ model = pf.feols('wage ~ education | state + year',
     </ol>
     <p style="margin: 10px 0 0;">Condition 1 is testable. Condition 2 is not—you must argue it's plausible.</p>
   {% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "A valid instrument must satisfy two conditions:", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "A valid instrument must satisfy two conditions:", content: callout_content %}
 
   {% capture sc %}* Install ivreghdfe
 ssc install ivreghdfe  // run once

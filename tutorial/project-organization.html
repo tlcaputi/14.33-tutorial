@@ -18,14 +18,14 @@ current_page: project-organization
   </ul>
 
   {% capture kp_content %}<p>Anyone should be able to run one script and reproduce all your results, starting from raw data. This includes future you, who will have forgotten everything.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "The Golden Rule", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Golden Rule", content: kp_content %}
 </section>
 
 <section id="project-setup" class="tutorial-section">
   <h2>Project Setup</h2>
 
   {% capture kp_content %}<p>Before doing anything else, create your project folder in Dropbox. This gives you automatic backups and version history. When you accidentally delete code, you can right-click the file and restore it from any point in the last 30-180 days.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Put Everything in Dropbox", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Put Everything in Dropbox", content: kp_content %}
 
   <h3>One-Command Setup Script</h3>
   <p>We provide a script that creates a well-organized project structure. Open your terminal and run:</p>
@@ -97,7 +97,7 @@ my_project/
   </table>
 
   {% capture callout_content %}<p style="margin: 8px 0 0;">If you need to fix something in raw data, write code to do it. This creates a record of every change. Manually editing a CSV loses that history forever.</p>{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "Never Edit Raw Data", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "Never Edit Raw Data", content: callout_content %}
 </section>
 
 <section id="master-script" class="tutorial-section">
@@ -208,7 +208,7 @@ print(f"Done! All results in {ANALYSIS / 'output'}"){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture kp_content %}<p>Prefix scripts with numbers (<code>01_</code>, <code>02_</code>, etc.) so the run order is obvious. This also keeps them sorted correctly in your file browser.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Number Your Scripts", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Number Your Scripts", content: kp_content %}
 </section>
 
 <section id="paths" class="tutorial-section">
@@ -397,7 +397,7 @@ df.to_pickle(f"{BUILD}/output/03_merged.pkl"){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture kp_content %}<p>When something breaks at step 5, you can start debugging from step 4 instead of re-running everything from scratch. This saves hours of debugging time, especially with large datasets that take time to process.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Why This Matters", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Why This Matters", content: kp_content %}
 </section>
 
 <section id="checklist" class="tutorial-section">

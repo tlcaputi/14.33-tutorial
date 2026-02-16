@@ -10,10 +10,10 @@ current_page: data-fundamentals
 {% capture callout_content %}<p>
     The glamorous part of empirical economics is running regressions. But most of your time will be spent cleaning, reshaping, and merging data. This is normal. Professional economists spend most of their coding time on data prep too. Once you get comfortable with these operations, the analysis becomes straightforward.
   </p>{% endcapture %}
-{% include "callout.liquid", type: "success", title: "Data wrangling is 80% of the work", content: callout_content %}
+{% include "callout.liquid", type: "success", heading: "Data wrangling is 80% of the work", content: callout_content %}
 
 {% capture kp_content %}<p>The datasets we work with in Stata and R are just <strong>tables</strong>—exactly like Excel spreadsheets. Each row is an observation (a person, a country-year, a transaction), and each column is a variable (age, GDP, price). If you've used Excel, you already understand the basic structure. The difference is that instead of clicking and dragging, we write code to manipulate these tables—which makes our work reproducible and scalable to millions of rows.</p>{% endcapture %}
-{% include "key-principle.liquid", title: "Think of Data as Excel Spreadsheets", content: kp_content %}
+{% include "key-principle.liquid", heading: "Think of Data as Excel Spreadsheets", content: kp_content %}
 
 <section id="unit-of-analysis" class="tutorial-section">
   <h2>Choosing Your Unit of Analysis</h2>
@@ -68,7 +68,7 @@ current_page: data-fundamentals
       <li>You want firm-year data, but you have daily stock prices. You need to aggregate to annual averages.</li>
     </ul>
     <p style="margin-top: 12px;">The <a href="#aggregating">Aggregating Data</a> section below shows how to do this.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "The Data Rarely Comes at the Right Level", content: kp_content %}
+  {% include "key-principle.liquid", heading: "The Data Rarely Comes at the Right Level", content: kp_content %}
 </section>
 
 <section id="reading-writing" class="tutorial-section">
@@ -157,7 +157,7 @@ data.to_csv("cleaned_data.csv", index=False){% endcapture %}
       <li><code>02_cleaned.dta</code></li>
       <li><code>03_merged.dta</code></li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Save Intermediate Files", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Save Intermediate Files", content: kp_content %}
 </section>
 
 <section id="data-acquisition" class="tutorial-section">
@@ -168,7 +168,7 @@ data.to_csv("cleaned_data.csv", index=False){% endcapture %}
   {% capture callout_content %}<p>
       Never modify your original data files. Ever. If you need to clean or transform data, write code that reads the raw file and saves a new cleaned version. This way you can always trace back to the original source.
     </p>{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "The Golden Rule: Raw Data is READ-ONLY", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "The Golden Rule: Raw Data is READ-ONLY", content: callout_content %}
 
   <h3>Download Programmatically When Possible</h3>
   <p>The best way to get data is to download it with code. This makes your entire pipeline reproducible—anyone can run your script and get the same data.</p>
@@ -235,7 +235,7 @@ for year in years:
       <li><strong>Automation:</strong> Easy to update when new data is released</li>
       <li><strong>Version control:</strong> Your git history shows when you downloaded the data</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Why Programmatic Downloads Matter", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Why Programmatic Downloads Matter", content: kp_content %}
 
   <h3>When You Can't Download Programmatically</h3>
   <p>Sometimes data requires manual download (login required, CAPTCHA, web forms). In these cases, document thoroughly:</p>
@@ -255,7 +255,7 @@ for year in years:
 - **Downloaded:** 2026-02-04
 - **Notes:** Required selecting "Blood Alcohol Concentration Limits"
   and exporting to CSV. See screenshots in docs/data_download/</code></pre>{% endcapture %}
-  {% include "callout.liquid", type: "info", title: "Create a DATA_SOURCES.md File", content: callout_content %}
+  {% include "callout.liquid", type: "info", heading: "Create a DATA_SOURCES.md File", content: callout_content %}
 
   <h3>Archive Your Sources with archive.org</h3>
   <p>Websites change. Data gets moved or deleted. Before you start a project, archive your data sources:</p>
@@ -270,7 +270,7 @@ for year in years:
   <p style="margin-top: 16px;">This way, even if the original website disappears, you (and anyone replicating your work) can see exactly where your data came from.</p>
 
   {% capture callout_content %}<p>For data that requires navigating a web interface, take screenshots of each step. Save them in a <code>docs/data_download/</code> folder. Future you (and your replicators) will thank you.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Pro Tip: Screenshot the Download Process", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Pro Tip: Screenshot the Download Process", content: callout_content %}
 </section>
 
 <section id="cleaning" class="tutorial-section">
@@ -417,7 +417,7 @@ data["educ_cat"] = np.select(conditions, choices, default=""){% endcapture %}
   <h2>Reshaping Data</h2>
 
   {% capture kp_content %}<p>Most commands expect <strong>long format</strong>: multiple rows per unit, one column for values. If you're copy-pasting variable names with years (<code>income_2018</code>, <code>income_2019</code>...), you probably need to reshape to long.</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Long Data is (Almost) Always Better", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Long Data is (Almost) Always Better", content: kp_content %}
 
   <h3>Wide vs. Long Format</h3>
   <div class="comparison-grid">
@@ -460,7 +460,7 @@ id  year  income
       <summary style="cursor: pointer; color: var(--primary);">Click for answer</summary>
       <p style="margin: 8px 0 0;">300 rows. Each of the 100 people will have 3 rows (one for each year). The data goes from 100 x 4 columns to 300 x 3 columns.</p>
     </details>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Before running this code, predict:", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Before running this code, predict:", content: callout_content %}
 
   {% capture sc %}* i() = unit identifier, j() = what becomes the new column
 reshape long income_, i(id) j(year)
@@ -598,7 +598,7 @@ state_year = crashes.groupby(["state", "year"]).agg(
       <li>Totals: Does <code>sum(total_crashes)</code> equal the original row count?</li>
       <li>Unique IDs: Is each state-year now unique?</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Always Check Your Aggregation", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Always Check Your Aggregation", content: kp_content %}
 
   <h3>Group Calculations with egen</h3>
   <p>The <code>egen</code> command ("extensions to generate") creates new variables based on functions applied across observations:</p>
@@ -636,7 +636,7 @@ data["income_p50"] = data.groupby("state")["income"].transform("median"){% endca
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture cm_content %}<p>In Stata, <code>gen sum()</code> creates a <em>running total</em>, while <code>egen sum()</code> creates the <em>group total</em>. Always read the help file—function names can be misleading!</p>{% endcapture %}
-  {% include "common-mistake.liquid", title: "gen sum vs. egen sum", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "gen sum vs. egen sum", content: cm_content %}
 
   <h3>Collapsing to Group Level</h3>
   <p>Use <code>collapse</code> to aggregate data to a higher level (e.g., individual → state, state-year → state):</p>
@@ -688,7 +688,7 @@ state_year_data = data.groupby(["state", "year"]).agg(
       <li><strong>egen</strong> — Adds a new column but keeps all rows. Use when you need the group statistic alongside individual data.</li>
       <li><strong>collapse</strong> — Reduces the dataset to one row per group. Use when you want aggregated data only.</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "egen vs. collapse", content: kp_content %}
+  {% include "key-principle.liquid", heading: "egen vs. collapse", content: kp_content %}
 </section>
 
 <section id="merging" class="tutorial-section">
@@ -719,7 +719,7 @@ state_year_data = data.groupby(["state", "year"]).agg(
       <li><strong>1:m</strong> — One row matches many (firm → firm-year panel)</li>
       <li><strong style="color: #c0392b;">m:m</strong> — <strong>Almost always wrong!</strong> If you think you need this, reshape first.</li>
     </ul>{% endcapture %}
-  {% include "key-principle.liquid", title: "Know Your Merge Type", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Know Your Merge Type", content: kp_content %}
 
   {% capture callout_content %}<p><strong>Stata validates the relationship.</strong> When you write <code>merge m:1</code>, Stata checks that the using dataset actually has unique keys. If it doesn't, Stata throws an error. This is a safety feature.</p>
     <p><strong>R and Python do not validate.</strong> In R, <code>merge(x, y, by = "id")</code> performs whatever join the data produces—it doesn't verify whether it's 1:1 or m:1. The <code>all.x</code>, <code>all.y</code>, and <code>all</code> arguments only control which unmatched rows to keep (left, right, or outer join)—they say nothing about the merge type:</p>
@@ -732,7 +732,7 @@ state_year_data = data.groupby(["state", "year"]).agg(
       </tbody>
     </table>
     <p>In R, you must manually verify uniqueness (e.g., <code>stopifnot(!duplicated(state_data$state))</code>) before merging if you expect a 1:1 or m:1 relationship. Stata does this automatically.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "Stata Validates Merge Types; R Does Not", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "Stata Validates Merge Types; R Does Not", content: callout_content %}
 
   <h3>When Merges Create Duplicates</h3>
 
@@ -816,7 +816,7 @@ if n_after > n_before:
       <li><strong>1:m merge:</strong> Row count will increase (one master row → many using rows)</li>
       <li>If row count increases when you didn't expect it, you have duplicate keys somewhere</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "The Row Count Rule", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "The Row Count Rule", content: cm_content %}
 
   <h3>Example: Merging Individual Data with State Data</h3>
   <p>Suppose you have individual-level data and want to add state characteristics:</p>
@@ -901,7 +901,7 @@ merged = individuals.merge(state_data, on="state", how="inner"){% endcapture %}
       <li>Data errors or missing values in the key variable</li>
     </ul>
     <p>Investigate with <code>list state if _merge == 1</code> before deciding whether to <code>keep if _merge == 3</code>. Always document why you dropped unmatched observations.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", title: "What To Do After Checking _merge", content: callout_content %}
+  {% include "callout.liquid", type: "warning", heading: "What To Do After Checking _merge", content: callout_content %}
 
   <h3>Pre-Merge Data Cleaning</h3>
 
@@ -975,7 +975,7 @@ data["state_fips"] = data["state_fips"].astype(str){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture kp_content %}<p>In Stata, when you see "Washington" in the data browser, it might actually be stored as the number 53 with a label attached. Use <code>browse, nolabel</code> or <code>tab var, nolabel</code> to see the true values. Merges use the actual values, not the labels!</p>{% endcapture %}
-  {% include "key-principle.liquid", title: "Labels Can Be Deceiving", content: kp_content %}
+  {% include "key-principle.liquid", heading: "Labels Can Be Deceiving", content: kp_content %}
 
   <h3>Common Merge Problems</h3>
 
@@ -986,7 +986,7 @@ data["state_fips"] = data["state_fips"].astype(str){% endcapture %}
       <li><strong>Different variable types:</strong> String "1" ≠ numeric 1. Convert with <code>destring</code> or <code>tostring</code>.</li>
       <li><strong>Labels hiding values:</strong> What looks like "California" might be stored as 6. Check with <code>nolabel</code>.</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Watch Out For", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Watch Out For", content: cm_content %}
 
   <h3>Appending (Stacking) Datasets</h3>
   <p>Use <code>append</code> to stack datasets vertically (same variables, different observations):</p>
@@ -1045,7 +1045,7 @@ high_income = (data["income"] > 100000) & data["income"].notna(){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}If you're creating indicator variables or filtering data, missing values will silently be included whenever you use <code>&gt;</code>, <code>&gt;=</code>, or <code>!=</code>. Your sample sizes will be wrong, and your estimates will be biased.{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "Why this matters:", content: callout_content %}
 
   <h3>egen group Silently Top-Codes</h3>
   <p>When you use <code>egen group()</code> to create a numeric ID from string or categorical variables, Stata uses an <code>int</code> by default. If you have more unique values than an int can hold (~32,000), <strong>it silently repeats the maximum value</strong>.</p>
@@ -1077,7 +1077,7 @@ assert data["bene_id"].nunique() == data["beneficiary_name"].nunique(){% endcapt
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}If you're creating panel identifiers, observations from different individuals will be assigned the same ID. Your fixed effects will be wrong, standard errors will be wrong, and you'll have no indication anything went wrong.{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "Why this matters:", content: callout_content %}
 
   <h3>Numeric Precision</h3>
   <p>Stata's <code>float</code> type only has ~7 digits of precision. Large IDs stored as floats will be silently corrupted.</p>
@@ -1149,7 +1149,7 @@ data = data.sort_values(['state', 'id'])
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}If you create variables based on sort order (like <code>_n</code> for observation numbers or <code>by: gen first = _n == 1</code>), your results will differ across runs, making your analysis non-reproducible.{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "Why this matters:", content: callout_content %}
 
   <h3>Variable Abbreviation</h3>
   <p>By default, Stata allows you to abbreviate variable names. This is <strong>dangerous</strong>—your code can silently operate on the wrong variable if you add new variables later.</p>
@@ -1181,7 +1181,7 @@ data['income'].describe()  # Must be exact
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}Code that works today can silently break when new variables are added to your dataset. Put <code>set varabbrev off</code> at the top of every do-file.{% endcapture %}
-  {% include "callout.liquid", type: "danger", title: "Why this matters:", content: callout_content %}
+  {% include "callout.liquid", type: "danger", heading: "Why this matters:", content: callout_content %}
 
   {% capture cm_content %}<ul>
       <li>Put <code>set varabbrev off</code> at the top of every do-file</li>
@@ -1191,7 +1191,7 @@ data['income'].describe()  # Must be exact
       <li>Run <code>compress</code> after loading data to optimize storage types</li>
       <li>Use <code>assert</code> liberally to catch problems early</li>
     </ul>{% endcapture %}
-  {% include "common-mistake.liquid", title: "Defensive Coding Habits", content: cm_content %}
+  {% include "common-mistake.liquid", heading: "Defensive Coding Habits", content: cm_content %}
 </section>
 
 <!-- ==================== PRACTICE ==================== -->
