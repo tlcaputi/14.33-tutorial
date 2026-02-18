@@ -56,12 +56,16 @@ current_page: project-walkthrough
 ├── build/
 │   ├── code/
 │   │   ├── 01_collapse_crashes.do
-│   │   └── 02_merge_datasets.do
+│   │   ├── 02_collapse_demographics.do
+│   │   └── 03_merge_datasets.do
 │   ├── input/                 ← Raw data (NEVER modified by code)
 │   │   ├── crash_data.csv
+│   │   ├── demographic_survey/
+│   │   │   ├── demographic_survey_1995.csv
+│   │   │   ├── ...
+│   │   │   └── demographic_survey_2015.csv
 │   │   ├── iv_data.csv
 │   │   ├── rd_data.csv
-│   │   ├── state_demographics.dta
 │   │   ├── policy_adoptions.csv
 │   │   └── state_names.csv
 │   └── output/                ← Empty; created by build scripts
@@ -101,7 +105,8 @@ cd "$root"
 
 * Build stage
 do "$build/code/01_collapse_crashes.do"
-do "$build/code/02_merge_datasets.do"
+do "$build/code/02_collapse_demographics.do"
+do "$build/code/03_merge_datasets.do"
 
 * Analysis stage
 do "$analysis/code/01_descriptive_table.do"
@@ -119,7 +124,8 @@ analysis <- file.path(root, "analysis")
 
 # Build stage
 source(file.path(build, "code", "01_collapse_crashes.R"))
-source(file.path(build, "code", "02_merge_datasets.R"))
+source(file.path(build, "code", "02_collapse_demographics.R"))
+source(file.path(build, "code", "03_merge_datasets.R"))
 
 # Analysis stage
 source(file.path(analysis, "code", "01_descriptive_table.R"))
@@ -136,7 +142,8 @@ analysis = os.path.join(root, "analysis")
 
 scripts = [
     f"{build}/code/01_collapse_crashes.py",
-    f"{build}/code/02_merge_datasets.py",
+    f"{build}/code/02_collapse_demographics.py",
+    f"{build}/code/03_merge_datasets.py",
     f"{analysis}/code/01_descriptive_table.py",
     f"{analysis}/code/02_dd_regression.py",
     f"{analysis}/code/03_event_study.py",
@@ -182,26 +189,31 @@ print(crashes.describe())
 print(crashes['severity'].value_counts()){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
-  <h3>Reading a Stata (.dta) File</h3>
-  <p>The demographics data is in Stata's native format. All three languages can read <code>.dta</code> files.</p>
+  <h3>Reading a Single Demographic Survey File</h3>
+  <p>The demographics data arrives as <strong>per-year CSV files</strong> at the individual level — one file for each year (1995–2015). This is common with survey data. We'll need to loop and <strong>append</strong> them together later, but for now let's just read a single year to inspect the data.</p>
 
-  {% capture sc %}* Read Stata file
-use "$build/input/state_demographics.dta", clear
+  {% capture sc %}* Read one year of demographic survey data
+import delimited "$build/input/demographic_survey/demographic_survey_2005.csv", clear
 describe
-summarize population median_income pct_urban{% endcapture %}
-  {% capture rc %}pacman::p_load(haven)
+summarize{% endcapture %}
+  {% capture rc %}pacman::p_load(data.table)
 
-# Read Stata file
-demographics <- read_dta("build/input/state_demographics.dta")
-str(demographics)
-summary(demographics[, c("population", "median_income", "pct_urban")]){% endcapture %}
+# Read one year of demographic survey data
+survey_2005 <- fread("build/input/demographic_survey/demographic_survey_2005.csv")
+str(survey_2005)
+summary(survey_2005){% endcapture %}
   {% capture pc %}import pandas as pd
 
-# Read Stata file
-demographics = pd.read_stata("build/input/state_demographics.dta")
-print(demographics.info())
-print(demographics[['population', 'median_income', 'pct_urban']].describe()){% endcapture %}
+# Read one year of demographic survey data
+survey_2005 = pd.read_csv(
+    "build/input/demographic_survey/demographic_survey_2005.csv"
+)
+print(survey_2005.info())
+print(survey_2005.describe()){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture callout_content %}<p>Notice: <code>income</code> is a string like <code>"$35,120"</code> (dollar sign and commas) — we'll clean it in the build step with <code>destring</code>. Each row is a survey respondent with a <code>weight</code> column for computing population-weighted statistics. Also note that <code>state_fips</code> includes 51 (DC) — we'll drop that during filtering.</p>{% endcapture %}
+  {% include "callout.liquid", type: "warning", heading: "Dirty Data Alert", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -291,6 +303,152 @@ print(crashes_sy.info()){% endcapture %}
 
   {% capture callout_content %}<p>Separating your build code (data processing) from analysis code is a key principle of project organization. Save collapsed data so you can modify your analysis without re-running expensive data processing steps every time.</p>{% endcapture %}
   {% include "callout.liquid", type: "success", heading: "Why Save Intermediate Files?", content: callout_content %}
+
+  <h3>Collapsing Survey Data: Appending, Cleaning, and Weighted Aggregation</h3>
+
+  <p>The demographics data arrives as <strong>separate CSV files for each year</strong> — a common format for survey data. We need to: (1) <strong>loop and append</strong> the per-year files into one dataset, (2) <strong>filter</strong> out DC and pre-2000 years, (3) <strong>clean</strong> string variables with <code>destring</code>, and (4) <strong>collapse</strong> individuals to state-year using survey weights.</p>
+
+  <p>This is a different kind of collapse than the crash data. With crashes, we <em>counted events</em>. With demographics, we're <em>aggregating characteristics</em> — population is the sum of survey weights, but income and urbanization need to be <strong>weighted averages</strong> (a respondent with a higher weight represents more people in the population).</p>
+
+  {% capture sc %}clear all
+
+* --- Start a log file to record all output ---
+log using "$build/output/02_collapse_demographics.log", replace
+
+* --- Step 1: Convert each CSV to .dta ---
+forvalues y = 1995/2015 {
+    import delimited ///
+        "$build/input/demographic_survey/demographic_survey_`y'.csv", clear
+    gen year = `y'
+    save "$build/output/survey_`y'.dta", replace
+}
+
+* --- Step 2: Append all years ---
+clear
+forvalues y = 1995/2015 {
+    append using "$build/output/survey_`y'.dta"
+}
+
+* --- Step 2: Inspect ---
+tab year
+tab state_fips if state_fips == 51
+
+* --- Step 3: Filter ---
+drop if state_fips == 51
+drop if year < 2000
+
+* --- Step 4: Clean ---
+destring income, replace ignore("$,")
+
+* --- Step 5: Sanity check ---
+preserve
+    summarize income weight urban
+restore
+
+* --- Step 6: Collapse to state-year ---
+collapse (rawsum) population = weight ///
+    (mean) median_income = income ///
+    (mean) pct_urban = urban ///
+    [aweight=weight], by(state_fips year)
+
+* --- Step 7: Verify ---
+assert _N == 800
+
+save "$build/output/demographics_state_year.dta", replace
+
+log close{% endcapture %}
+  {% capture rc %}cat("Running 02_collapse_demographics.R...\n")
+
+pacman::p_load(data.table)
+
+# --- Step 1: Loop over years and append ---
+years <- 1995:2015
+frames <- list()
+for (y in years) {
+  fp <- file.path(root, "build/input/demographic_survey",
+                  paste0("demographic_survey_", y, ".csv"))
+  dt <- fread(fp)
+  dt[, year := y]
+  frames[[as.character(y)]] <- dt
+}
+county <- rbindlist(frames)
+
+# --- Step 2: Filter ---
+county <- county[state_fips != 51]
+county <- county[year >= 2000]
+
+# --- Step 3: Clean ---
+county[, income := as.numeric(gsub("[$,]", "", income))]
+
+# --- Step 4: Collapse to state-year (weighted) ---
+demographics <- county[, .(
+  population = sum(weight),
+  median_income = weighted.mean(income, w = weight),
+  pct_urban = weighted.mean(urban, w = weight)
+), by = .(state_fips, year)]
+
+stopifnot(nrow(demographics) == 800)
+
+fwrite(demographics, file.path(root, "build/output/demographics_state_year.csv"))
+cat("  Saved demographics_state_year.csv:", nrow(demographics), "rows\n"){% endcapture %}
+  {% capture pc %}import pandas as pd
+import numpy as np
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+
+input_dir = ROOT / "build/input/demographic_survey"
+output_file = ROOT / "build/output/demographics_state_year.csv"
+
+# --- Step 1: Loop over years and append ---
+frames = []
+for year in range(1995, 2016):
+    fp = input_dir / f"demographic_survey_{year}.csv"
+    df_year = pd.read_csv(fp)
+    df_year["year"] = year
+    frames.append(df_year)
+survey = pd.concat(frames, ignore_index=True)
+
+# --- Step 2: Filter ---
+survey = survey[survey["state_fips"] != 51]
+survey = survey[survey["year"] >= 2000]
+
+# --- Step 3: Clean ---
+survey["income"] = (
+    survey["income"]
+    .str.replace("$", "", regex=False)
+    .str.replace(",", "", regex=False)
+    .astype(float)
+)
+
+# --- Step 4: Collapse to state-year (weighted) ---
+demographics = survey.groupby(["state_fips", "year"]).apply(
+    lambda g: pd.Series({
+        "population": g["weight"].sum(),
+        "median_income": np.average(g["income"], weights=g["weight"]),
+        "pct_urban": np.average(g["urban"], weights=g["weight"]),
+    }),
+    include_groups=False,
+).reset_index()
+
+assert len(demographics) == 800, f"Expected 800 rows, got {len(demographics)}"
+
+output_file.parent.mkdir(parents=True, exist_ok=True)
+demographics.to_csv(output_file, index=False)
+print(f"Saved demographics_state_year.csv: {len(demographics)} rows"){% endcapture %}
+  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+
+  {% capture callout_content %}<p>This code block introduces several new concepts:</p>
+    <ul>
+      <li><strong><code>log using</code> / <code>log close</code></strong> saves all Stata output to a text file — essential for debugging and reproducibility.</li>
+      <li><strong><code>append</code></strong> stacks datasets vertically (same variables, more rows). The loop reads each year's file and appends it to the growing dataset.</li>
+      <li><strong><code>destring</code></strong> converts string variables to numeric, stripping unwanted characters like <code>$</code> and <code>,</code>.</li>
+      <li><strong><code>tab</code></strong> tabulates frequencies — here it reveals that <code>state_fips == 51</code> (DC) is in the data and must be dropped.</li>
+      <li><strong><code>preserve</code> / <code>restore</code></strong> lets you temporarily modify the data (e.g., run a quick summary) without losing your work in progress.</li>
+      <li><strong><code>assert</code></strong> verifies that a condition holds. If <code>_N != 800</code>, Stata stops with an error — catching data issues early.</li>
+      <li><strong>Weighted collapse</strong>: the <code>[aweight=weight]</code> option computes weighted means using survey weights, so respondents representing more people count more.</li>
+    </ul>{% endcapture %}
+  {% include "callout.liquid", type: "info", heading: "New Commands in This Section", content: callout_content %}
 </section>
 
 <!-- ============================================================ -->
@@ -301,7 +459,9 @@ print(crashes_sy.info()){% endcapture %}
 
   <p>Now we merge four datasets together: (1) aggregated crashes, (2) state demographics, (3) policy adoption dates, and (4) state names. Each merge uses <code>state_fips</code> as the key, with some using <code>year</code> as well.</p>
 
-  {% capture sc %}* Convert CSVs to .dta for merging
+  {% capture sc %}clear all
+
+* Convert CSVs to .dta for merging
 import delimited "$build/input/policy_adoptions.csv", clear
 save "$build/output/policy_adoptions.dta", replace
 
@@ -311,8 +471,8 @@ save "$build/output/state_names.dta", replace
 * Load the main dataset and merge everything sequentially
 use "$build/output/crashes_state_year.dta", clear
 
-* Merge 1: Demographics — keep only matched rows
-merge 1:1 state_fips year using "$build/input/state_demographics.dta", ///
+* Merge 1: Demographics (collapsed from survey data) — keep only matched rows
+merge 1:1 state_fips year using "$build/output/demographics_state_year.dta", ///
     keep(match) nogen
 
 * Merge 2: Policy adoptions — keep master + matched (some states never adopt)
@@ -323,23 +483,24 @@ merge m:1 state_fips using "$build/output/policy_adoptions.dta", ///
 merge m:1 state_fips using "$build/output/state_names.dta", ///
     keep(match) nogen
 
-* Create treatment indicator
-gen treated = (year >= adoption_year & !missing(adoption_year))
+* Create treatment indicators
+gen ever_treated = !missing(adoption_year)
+gen post_treated = (year >= adoption_year & ever_treated)
 gen log_pop = ln(population)
 
-* Save final analysis dataset
-save "$build/output/analysis_panel.dta", replace
-describe{% endcapture %}
-  {% capture rc %}pacman::p_load(data.table, haven)
+save "$build/output/analysis_panel.dta", replace{% endcapture %}
+  {% capture rc %}cat("Running 03_merge_datasets.R...\n")
+
+pacman::p_load(data.table)
 
 # Load all datasets
-crashes_sy <- fread("build/output/crashes_state_year.csv")
-demographics <- as.data.table(read_dta("build/input/state_demographics.dta"))
-policies <- fread("build/input/policy_adoptions.csv")
-state_names <- fread("build/input/state_names.csv")
+crashes <- fread(file.path(root, "build/output/crashes_state_year.csv"))
+demographics <- fread(file.path(root, "build/output/demographics_state_year.csv"))
+policies <- fread(file.path(root, "build/input/policy_adoptions.csv"))
+state_names <- fread(file.path(root, "build/input/state_names.csv"))
 
 # Merge 1: Crashes + Demographics (on state_fips + year)
-panel <- merge(crashes_sy, demographics, by = c("state_fips", "year"), all = FALSE)
+panel <- merge(crashes, demographics, by = c("state_fips", "year"), all = FALSE)
 cat("After merge 1:", nrow(panel), "rows\n")
 
 # Merge 2: + Policy adoptions (on state_fips only — many:1)
@@ -350,26 +511,35 @@ cat("After merge 2:", nrow(panel), "rows\n")
 panel <- merge(panel, state_names, by = "state_fips", all.x = TRUE)
 cat("After merge 3:", nrow(panel), "rows\n")
 
-# Create treatment indicator
-panel[, treated := fifelse(
-  !is.na(adoption_year) & year >= adoption_year, 1L, 0L
+# Create treatment indicators
+panel[, ever_treated := fifelse(!is.na(adoption_year), 1L, 0L)]
+panel[, post_treated := fifelse(
+  ever_treated == 1L & year >= adoption_year, 1L, 0L
 )]
 panel[, log_pop := log(population)]
 
-# Save final analysis dataset
-fwrite(panel, "build/output/analysis_panel.csv")
-str(panel){% endcapture %}
+fwrite(panel, file.path(root, "build/output/analysis_panel.csv"))
+cat("  Saved analysis_panel.csv:", nrow(panel), "rows\n"){% endcapture %}
   {% capture pc %}import pandas as pd
 import numpy as np
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+
+crashes_file = ROOT / "build/output/crashes_state_year.csv"
+demographics_file = ROOT / "build/output/demographics_state_year.csv"
+policy_file = ROOT / "build/input/policy_adoptions.csv"
+names_file = ROOT / "build/input/state_names.csv"
+output_file = ROOT / "build/output/analysis_panel.csv"
 
 # Load all datasets
-crashes_sy = pd.read_csv("build/output/crashes_state_year.csv")
-demographics = pd.read_stata("build/input/state_demographics.dta")
-policies = pd.read_csv("build/input/policy_adoptions.csv")
-state_names = pd.read_csv("build/input/state_names.csv")
+crashes = pd.read_csv(crashes_file)
+demographics = pd.read_csv(demographics_file)
+policies = pd.read_csv(policy_file)
+state_names = pd.read_csv(names_file)
 
 # Merge 1: Crashes + Demographics (on state_fips + year)
-panel = crashes_sy.merge(demographics, on=['state_fips', 'year'], how='inner')
+panel = crashes.merge(demographics, on=['state_fips', 'year'], how='inner')
 print(f"After merge 1: {len(panel)} rows")
 
 # Merge 2: + Policy adoptions (on state_fips only — many:1)
@@ -380,16 +550,17 @@ print(f"After merge 2: {len(panel)} rows")
 panel = panel.merge(state_names, on='state_fips', how='left')
 print(f"After merge 3: {len(panel)} rows")
 
-# Create treatment indicator
-panel['treated'] = (
+# Create treatment indicators
+panel['ever_treated'] = panel['adoption_year'].notna().astype(int)
+panel['post_treated'] = (
     (panel['year'] >= panel['adoption_year']) &
     panel['adoption_year'].notna()
 ).astype(int)
 panel['log_pop'] = np.log(panel['population'])
 
-# Save final analysis dataset
-panel.to_csv("build/output/analysis_panel.csv", index=False)
-print(panel.info()){% endcapture %}
+output_file.parent.mkdir(parents=True, exist_ok=True)
+panel.to_csv(output_file, index=False)
+print(f"Saved analysis_panel.csv: {len(panel)} rows"){% endcapture %}
   {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
 
   {% capture callout_content %}<p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>keep()</code> option controls which observations to retain: <code>keep(match)</code> keeps only matched rows, <code>keep(master match)</code> keeps all master rows even if unmatched (like a left join). The <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>{% endcapture %}
@@ -460,7 +631,7 @@ panel <- fread("build/output/analysis_panel.csv")
 panel[, ever_treated := !is.na(adoption_year)]
 panel[, group := fifelse(
   !ever_treated, "Untreated",
-  fifelse(treated == 1, "Treated x Post", "Treated x Pre")
+  fifelse(post_treated == 1, "Treated x Post", "Treated x Pre")
 )]
 
 # Variables for the table
@@ -482,9 +653,9 @@ panel = pd.read_csv("build/output/analysis_panel.csv")
 
 # Create group column
 panel['group'] = 'Untreated'
-panel.loc[panel['adoption_year'].notna() & (panel['treated'] == 1),
+panel.loc[panel['adoption_year'].notna() & (panel['post_treated'] == 1),
           'group'] = 'Treated x Post'
-panel.loc[panel['adoption_year'].notna() & (panel['treated'] == 0),
+panel.loc[panel['adoption_year'].notna() & (panel['post_treated'] == 0),
           'group'] = 'Treated x Pre'
 
 # Variables for the table
@@ -554,19 +725,19 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
   {% capture sc %}use "$build/output/analysis_panel.dta", clear
 
 * Label variables for table output
-label variable treated "Treated"
+label variable post_treated "Treat $\times$ Post"
 label variable log_pop "Log Population"
 label variable median_income "Median Income"
 
 * Main DD regression: effect of policy on fatal crashes
-reghdfe fatal_crashes treated, absorb(state_fips year) vce(cluster state_fips){% endcapture %}
+reghdfe fatal_crashes post_treated, absorb(state_fips year) vce(cluster state_fips){% endcapture %}
   {% capture rc %}pacman::p_load(fixest, data.table)
 
 panel <- fread("build/output/analysis_panel.csv")
 
 # Main DD regression
 main <- feols(
-  fatal_crashes ~ treated | state_fips + year,
+  fatal_crashes ~ post_treated | state_fips + year,
   data = panel, vcov = ~state_fips
 )
 summary(main){% endcapture %}
@@ -577,7 +748,7 @@ panel = pd.read_csv("build/output/analysis_panel.csv")
 
 # Main DD regression
 main = pf.feols(
-    "fatal_crashes ~ treated | state_fips + year",
+    "fatal_crashes ~ post_treated | state_fips + year",
     vcov={"CRV1": "state_fips"}, data=panel
 )
 print(main.summary()){% endcapture %}
@@ -784,39 +955,39 @@ es.iplot(){% endcapture %}
   {% capture sc %}use "$build/output/analysis_panel.dta", clear
 
 * Label variables for table output
-label variable treated "Treated"
+label variable post_treated "Treat $\times$ Post"
 label variable log_pop "Log Population"
 label variable median_income "Median Income"
 
 * Col 1: Main result
-reghdfe fatal_crashes treated, absorb(state_fips year) vce(cluster state_fips)
+reghdfe fatal_crashes post_treated, absorb(state_fips year) vce(cluster state_fips)
 estadd local state_fe "Yes"
 estadd local year_fe "Yes"
 estimates store m1
 
 * Col 2: With controls
-reghdfe fatal_crashes treated log_pop median_income, ///
+reghdfe fatal_crashes post_treated log_pop median_income, ///
     absorb(state_fips year) vce(cluster state_fips)
 estadd local state_fe "Yes"
 estadd local year_fe "Yes"
 estimates store m2
 
 * Col 3: South only
-reghdfe fatal_crashes treated log_pop if region == "South", ///
+reghdfe fatal_crashes post_treated log_pop if region == "South", ///
     absorb(state_fips year) vce(cluster state_fips)
 estadd local state_fe "Yes"
 estadd local year_fe "Yes"
 estimates store m3
 
 * Col 4: Non-South
-reghdfe fatal_crashes treated log_pop if region != "South", ///
+reghdfe fatal_crashes post_treated log_pop if region != "South", ///
     absorb(state_fips year) vce(cluster state_fips)
 estadd local state_fe "Yes"
 estadd local year_fe "Yes"
 estimates store m4
 
 * Col 5: Serious crashes as outcome
-reghdfe serious_crashes treated log_pop, ///
+reghdfe serious_crashes post_treated log_pop, ///
     absorb(state_fips year) vce(cluster state_fips)
 estadd local state_fe "Yes"
 estadd local year_fe "Yes"
@@ -854,24 +1025,24 @@ esttab m1 m2 m3 m4 m5 ///
 panel <- fread("build/output/analysis_panel.csv")
 
 # Col 1: Main result
-m1 <- feols(fatal_crashes ~ treated | state_fips + year,
+m1 <- feols(fatal_crashes ~ post_treated | state_fips + year,
             data = panel, vcov = ~state_fips)
 
 # Col 2: With controls
-m2 <- feols(fatal_crashes ~ treated + log_pop + median_income
+m2 <- feols(fatal_crashes ~ post_treated + log_pop + median_income
             | state_fips + year,
             data = panel, vcov = ~state_fips)
 
 # Col 3: South only
-m3 <- feols(fatal_crashes ~ treated + log_pop | state_fips + year,
+m3 <- feols(fatal_crashes ~ post_treated + log_pop | state_fips + year,
             data = panel[region == "South"], vcov = ~state_fips)
 
 # Col 4: Non-South
-m4 <- feols(fatal_crashes ~ treated + log_pop | state_fips + year,
+m4 <- feols(fatal_crashes ~ post_treated + log_pop | state_fips + year,
             data = panel[region != "South"], vcov = ~state_fips)
 
 # Col 5: Serious crashes as outcome
-m5 <- feols(serious_crashes ~ treated + log_pop | state_fips + year,
+m5 <- feols(serious_crashes ~ post_treated + log_pop | state_fips + year,
             data = panel, vcov = ~state_fips)
 
 # Export professional table
@@ -891,7 +1062,7 @@ etable(
   dict = c(
     fatal_crashes = "Fatal Crashes",
     serious_crashes = "Serious Crashes",
-    treated = "Policy Adopted",
+    post_treated = "Treat x Post",
     log_pop = "Log(Population)",
     median_income = "Median Income"
   ),
@@ -903,26 +1074,26 @@ import pandas as pd
 panel = pd.read_csv("build/output/analysis_panel.csv")
 
 # Col 1: Main result
-m1 = pf.feols("fatal_crashes ~ treated | state_fips + year",
+m1 = pf.feols("fatal_crashes ~ post_treated | state_fips + year",
               vcov={"CRV1": "state_fips"}, data=panel)
 
 # Col 2: With controls
-m2 = pf.feols("fatal_crashes ~ treated + log_pop + median_income"
+m2 = pf.feols("fatal_crashes ~ post_treated + log_pop + median_income"
               " | state_fips + year",
               vcov={"CRV1": "state_fips"}, data=panel)
 
 # Col 3: South only
-m3 = pf.feols("fatal_crashes ~ treated + log_pop | state_fips + year",
+m3 = pf.feols("fatal_crashes ~ post_treated + log_pop | state_fips + year",
               vcov={"CRV1": "state_fips"},
               data=panel[panel['region'] == 'South'])
 
 # Col 4: Non-South
-m4 = pf.feols("fatal_crashes ~ treated + log_pop | state_fips + year",
+m4 = pf.feols("fatal_crashes ~ post_treated + log_pop | state_fips + year",
               vcov={"CRV1": "state_fips"},
               data=panel[panel['region'] != 'South'])
 
 # Col 5: Serious crashes as outcome
-m5 = pf.feols("serious_crashes ~ treated + log_pop | state_fips + year",
+m5 = pf.feols("serious_crashes ~ post_treated + log_pop | state_fips + year",
               vcov={"CRV1": "state_fips"}, data=panel)
 
 # Export table
@@ -933,7 +1104,7 @@ pf.etable(
     labels={
         "fatal_crashes": "Fatal Crashes",
         "serious_crashes": "Serious Crashes",
-        "treated": "Policy Adopted",
+        "post_treated": "Treat x Post",
         "log_pop": "Log(Population)",
         "median_income": "Median Income",
     },
