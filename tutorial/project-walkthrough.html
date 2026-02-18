@@ -6,7 +6,7 @@ current_page: project-walkthrough
 <h1>Complete Project Walkthrough</h1>
 <p class="subtitle">From raw data to publication-ready output — start to finish</p>
 
-<p>This walkthrough takes you through an entire empirical project: loading data, cleaning, merging multiple datasets, running a difference-in-differences analysis with event study, and producing publication-quality tables and figures. We also cover instrumental variables and regression discontinuity as standalone analyses.</p>
+<p>The project asks a simple question: <strong>does a state-level policy reduce fatal car crashes?</strong> We start at the end — with the research question and the estimating equation — and work backwards to figure out what the data must look like, then build it from raw ingredients. Along the way, you'll load data, clean, merge multiple datasets, run a difference-in-differences analysis with an event study, and produce publication-quality tables and figures. We also cover instrumental variables and regression discontinuity as standalone analyses.</p>
 
 <!-- ============================================================ -->
 <!-- PROJECT DIRECTORY SETUP -->
@@ -951,7 +951,7 @@ pf.etable(
 <section id="iv-analysis" class="tutorial-section">
   <h2>Part G: Instrumental Variables</h2>
 
-  <p>This section uses a separate, pre-built dataset (<code>iv_data.csv</code>) inspired by Angrist & Lavy (1999). We estimate the effect of class size on test scores, using a Maimonides-rule instrument (enrollment determines class size via a maximum-of-40 rule).</p>
+  <p>The question: <strong>does class size affect student test scores?</strong> Simply comparing small and large classes won't work — schools with smaller classes may differ in ways that also affect scores (e.g., funding, parental involvement). We need exogenous variation in class size. This section uses a dataset inspired by Angrist &amp; Lavy (1999), who exploit a Maimonides rule: Israeli schools must split a class once enrollment exceeds 40, creating sharp jumps in class size that are driven by enrollment rather than school quality.</p>
 
   <h3>The Setup</h3>
   <ul>
@@ -1113,7 +1113,7 @@ print(f"Class size coef: {iv_model.params['class_size']:.3f}"){% endcapture %}
 <section id="rd-analysis" class="tutorial-section">
   <h2>Part H: Regression Discontinuity</h2>
 
-  <p>This section uses a pre-built dataset (<code>rd_data.csv</code>) inspired by Carpenter & Dobkin (2009). We estimate the effect of legal drinking access (turning 21) on mortality using a sharp RD design.</p>
+  <p>The question: <strong>does legal access to alcohol increase mortality?</strong> We can't just compare people who drink to people who don't — drinkers differ from non-drinkers in many ways. But on your 21st birthday, you go from no legal access to full legal access overnight, while nothing else changes discontinuously. This section uses a dataset inspired by Carpenter &amp; Dobkin (2009), who compare mortality rates just below and just above age 21 to isolate the effect of legal drinking access.</p>
 
   <h3>The Setup</h3>
   <ul>
@@ -1323,20 +1323,20 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
   <p>Practice the techniques from this walkthrough. Each ZIP contains the exercise PDF, a codebook, and all necessary datasets.</p>
 
   {% capture ex1_content %}<div style="text-align: center;">
-    <p><strong>Exercise 1</strong> — Data cleaning, merging, descriptive statistics, and difference-in-differences.</p>
+    <p><strong>Exercise 1 (Basic)</strong> — Data cleaning, merging, descriptive statistics, and difference-in-differences.</p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
       <a href="data/exercises/exercise1.zip" download class="download-btn">Exercise 1</a>
-      <a href="data/exercises/exercise1-solutions.zip" download class="download-btn">Solutions</a>
+      <!-- <a href="data/exercises/exercise1-solutions.zip" download class="download-btn">Solutions</a> -->
     </div>
   </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Exercise 1", content: ex1_content %}
+  {% include "callout.liquid", type: "info", heading: "Exercise 1 (Basic)", content: ex1_content %}
 
   {% capture ex2_content %}<div style="text-align: center;">
-    <p><strong>Exercise 2</strong> — Merging, two-way fixed effects, event studies, and instrumental variables.</p>
+    <p><strong>Exercise 2 (Advanced)</strong> — Merging, two-way fixed effects, event studies, and instrumental variables.</p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
       <a href="data/exercises/exercise2.zip" download class="download-btn">Exercise 2</a>
-      <a href="data/exercises/exercise2-solutions.zip" download class="download-btn">Solutions</a>
+      <!-- <a href="data/exercises/exercise2-solutions.zip" download class="download-btn">Solutions</a> -->
     </div>
   </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Exercise 2", content: ex2_content %}
+  {% include "callout.liquid", type: "info", heading: "Exercise 2 (Advanced)", content: ex2_content %}
 </section>
