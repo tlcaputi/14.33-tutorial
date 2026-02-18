@@ -1048,7 +1048,7 @@ m5 <- feols(serious_crashes ~ post_treated + log_pop | state_fips + year,
 # Export professional table
 etable(
   m1, m2, m3, m4, m5,
-  tex = TRUE, file = "analysis/output/tables/dd_table.tex", replace = TRUE,
+  tex = TRUE, file = "analysis/output/tables/dd_results.tex", replace = TRUE,
   headers = list(
     ":_sym:" = c("(1)", "(2)", "(3)", "(4)", "(5)")
   ),
@@ -1100,7 +1100,7 @@ m5 = pf.feols("serious_crashes ~ post_treated + log_pop | state_fips + year",
 pf.etable(
     [m1, m2, m3, m4, m5],
     type="tex",
-    file="analysis/output/tables/dd_table.tex",
+    file_name="analysis/output/tables/dd_results.tex",
     labels={
         "fatal_crashes": "Fatal Crashes",
         "serious_crashes": "Serious Crashes",
