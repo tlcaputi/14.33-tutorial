@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 
 # Load results from previous scripts
-twfe_results = pd.read_csv(ANALYSIS / "output" / "tables" / "twfe_results.csv", index_col=0)
+twfe_results = pd.read_csv(ANALYSIS / "output" / "tables" / "twfe_results.csv")
+twfe_results = twfe_results.set_index('outcome')
 es_hr = pd.read_csv(ANALYSIS / "output" / "tables" / "es_coefficients_hr.csv")
 es_nhr = pd.read_csv(ANALYSIS / "output" / "tables" / "es_coefficients_nhr.csv")
 

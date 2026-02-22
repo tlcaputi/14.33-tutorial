@@ -43,11 +43,15 @@ current_page: getting-started
     </div>
   </div>
 
-{% capture kp_content %}<p>Use <strong>R or Stata</strong> throughout your project unless you're working with very large datasets (100+ million observations). For big data, use Python or SQL for data manipulation, then switch to R or Stata for analysis and creating publication-ready output. R and Stata have much better support for econometric methods and producing the tables you'll need for papers.</p>{% endcapture %}
-{% include "key-principle.liquid", heading: "My Recommendation", content: kp_content %}
+  <div class="key-principle">
+    <h4>My Recommendation</h4>
+    <p>Use <strong>R or Stata</strong> throughout your project unless you're working with very large datasets (100+ million observations). For big data, use Python or SQL for data manipulation, then switch to R or Stata for analysis and creating publication-ready output. R and Stata have much better support for econometric methods and producing the tables you'll need for papers.</p>
+  </div>
 
-{% capture kp_content %}<p>Stata is unusual: it assumes you're working with <strong>one dataset at a time</strong>. Commands like <code>summarize</code> or <code>regress</code> automatically operate on "the data" without you specifying which data. If you need to work with a second dataset, you <code>save</code> the current one, then <code>use</code> the new one. This feels strange if you're used to Python or R, but it makes simple analyses very concise.</p>{% endcapture %}
-{% include "key-principle.liquid", heading: "The Stata Mental Model", content: kp_content %}
+  <div class="key-principle">
+    <h4>The Stata Mental Model</h4>
+    <p>Stata is unusual: it assumes you're working with <strong>one dataset at a time</strong>. Commands like <code>summarize</code> or <code>regress</code> automatically operate on "the data" without you specifying which data. If you need to work with a second dataset, you <code>save</code> the current one, then <code>use</code> the new one. This feels strange if you're used to Python or R, but it makes simple analyses very concise.</p>
+  </div>
 
   <p>For this class, any works fine. The toggle at the top of the sidebar lets you switch between Stata, R, and Python code examples.</p>
 </section>
@@ -56,19 +60,10 @@ current_page: getting-started
   <h2>Installation</h2>
 
   <h3>Stata</h3>
-  <p>MIT provides Stata licenses for students:</p>
-  <ol>
-    <li>Go to <a href="https://econ-help.mit.edu/" target="_blank">econ-help.mit.edu</a></li>
-    <li>Look under <strong>Desktop</strong> and find <strong>Department Wide StataNow/SE License</strong></li>
-    <li>Log in with your MIT credentials</li>
-    <li>Download Stata (StataNow) for your OS (Windows, Mac, or Linux)</li>
-    <li>Download the PDF with the license information</li>
-    <li>Install Stata, then copy the license information from the PDF into the registration prompt to activate it</li>
-  </ol>
-  <p>Stata is also available via the <a href="https://ist.mit.edu/stata" target="_blank">MIT IST Stata page</a>, but that appears to be for Athena systems only.</p>
+  <p>MIT provides Stata licenses for students. Visit the <a href="https://ist.mit.edu/stata" target="_blank">MIT IST Stata page</a> to download and install.</p>
 
   <h3>R and RStudio</h3>
-  <p>R is free and open-source. You may also want RStudio, which provides a nicer interface.</p>
+  <p>R is free and open-source. You'll also want RStudio, which provides a much nicer interface.</p>
 
   <p><strong>Option 1: Graphical installers</strong></p>
   <ol>
@@ -78,23 +73,37 @@ current_page: getting-started
 
   <p><strong>Option 2: Command line (Mac)</strong></p>
   <p>If you have <a href="https://brew.sh" target="_blank">Homebrew</a> installed, this is faster:</p>
-{% capture sc %}# Install Homebrew first if you don't have it
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Install Homebrew first if you don't have it
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Install R and RStudio
 brew install --cask r
-brew install --cask rstudio{% endcapture %}
-{% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
+brew install --cask rstudio</code></pre>
+  </div>
 
   <p><strong>Option 3: Command line (Windows)</strong></p>
   <p>If you have <a href="https://chocolatey.org" target="_blank">Chocolatey</a> or <a href="https://scoop.sh" target="_blank">Scoop</a>:</p>
-{% capture sc %}# Using Chocolatey
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Chocolatey
 choco install r.project rstudio
 
 # Or using Scoop
 scoop bucket add extras
-scoop install r rstudio{% endcapture %}
-{% include "code-block.liquid", stata: sc, stata_label: "PowerShell (Admin)" %}
+scoop install r rstudio</code></pre>
+  </div>
 
   <h3>Python</h3>
   <p>Python is free and open-source. We recommend using Anaconda or Miniconda for scientific computing.</p>
@@ -103,21 +112,35 @@ scoop install r rstudio{% endcapture %}
   <p>Download from <a href="https://www.anaconda.com/download" target="_blank">anaconda.com</a>. Anaconda includes Python, Jupyter notebooks, and most data science packages pre-installed.</p>
 
   <p><strong>Option 2: Command line (Mac)</strong></p>
-{% capture sc %}# Using Homebrew
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Homebrew
 brew install python
 
 # Or install Miniconda (lighter than Anaconda)
-brew install --cask miniconda{% endcapture %}
-{% include "code-block.liquid", stata: sc, stata_label: "Terminal" %}
+brew install --cask miniconda</code></pre>
+  </div>
 
   <p><strong>Option 3: Command line (Windows)</strong></p>
-{% capture sc %}# Using Chocolatey
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">PowerShell (Admin)</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code># Using Chocolatey
 choco install python anaconda3
 
 # Or using Scoop
 scoop install python
-scoop install anaconda3{% endcapture %}
-{% include "code-block.liquid", stata: sc, stata_label: "PowerShell (Admin)" %}
+scoop install anaconda3</code></pre>
+  </div>
 
   </section>
 
@@ -129,41 +152,71 @@ scoop install anaconda3{% endcapture %}
   <h3>Stata</h3>
   <p>In Stata, you install packages using <code>ssc install</code> for packages from the Statistical Software Components archive:</p>
 
-{% capture sc %}* Install commonly used packages
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Install commonly used packages
 ssc install estout      // For regression tables
 ssc install reghdfe     // Fast fixed effects regression
 ssc install ftools      // Required by reghdfe
 ssc install coefplot    // For coefficient plots
-ssc install binscatter  // For binned scatter plots{% endcapture %}
-{% include "code-block.liquid", stata: sc %}
+ssc install binscatter  // For binned scatter plots</code></pre>
+  </div>
 
   <h3>R</h3>
   <p>In R, we recommend using the <code>pacman</code> package, which automatically installs packages if they're not already installed:</p>
 
-{% capture rc %}# Install pacman if you don't have it, then load packages
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="r">R</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content r active"><code class="language-r"># Install pacman if you don't have it, then load packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, haven, fixest, modelsummary){% endcapture %}
-{% include "code-block.liquid", r: rc %}
+pacman::p_load(tidyverse, haven, fixest, modelsummary)</code></pre>
+  </div>
 
   <h3>Python</h3>
   <p>In Python, use <code>pip</code> to install packages from the command line:</p>
 
-{% capture pc %}# Install commonly used packages
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="python">Terminal</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content python active"><code class="language-python"># Install commonly used packages
 pip install pandas numpy matplotlib seaborn
-pip install statsmodels linearmodels
-pip install openpyxl  # For Excel files{% endcapture %}
-{% include "code-block.liquid", python: pc, python_label: "Terminal" %}
+pip install statsmodels pyfixest
+pip install openpyxl  # For Excel files</code></pre>
+  </div>
 
   <p>Then at the top of your Python scripts:</p>
 
-{% capture pc %}import pandas as pd
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content python active"><code class="language-python">import pandas as pd
 import numpy as np
 import statsmodels.api as sm
-import statsmodels.formula.api as smf{% endcapture %}
-{% include "code-block.liquid", python: pc %}
+import statsmodels.formula.api as smf</code></pre>
+  </div>
 
-{% capture kp_content %}<p>In R, use <code>pacman::p_load()</code>. In Python, put your <code>import</code> statements at the top. This ensures anyone running your code knows exactly what packages are needed.</p>{% endcapture %}
-{% include "key-principle.liquid", heading: "Put Imports at the Top of Every Script", content: kp_content %}
+  <div class="key-principle">
+    <h4>Put Imports at the Top of Every Script</h4>
+    <p>In R, use <code>pacman::p_load()</code>. In Python, put your <code>import</code> statements at the top. This ensures anyone running your code knows exactly what packages are needed.</p>
+  </div>
 </section>
 
 <section id="interface" class="tutorial-section">
@@ -182,15 +235,24 @@ import statsmodels.formula.api as smf{% endcapture %}
   <h3>Working Directory</h3>
   <p>The working directory is the folder your program looks in by default. Set it at the start of every script:</p>
 
-{% capture sc %}* Set working directory
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Set working directory
 cd "/Users/yourname/Dropbox/my_1433_project"
 
 * Check it worked
 pwd
 
 * Now use relative paths
-use "build/output/cleaned_data.dta", clear{% endcapture %}
-{% capture rc %}# Set working directory
+use "build/output/cleaned_data.dta", clear</code></pre>
+    <pre class="code-content r"><code class="language-r"># Set working directory
 setwd("/Users/yourname/Dropbox/my_1433_project")
 
 # Check it worked
@@ -198,8 +260,8 @@ getwd()
 
 # Now use relative paths
 pacman::p_load(haven)
-data <- read_dta("build/output/cleaned_data.dta"){% endcapture %}
-{% capture pc %}import os
+data <- read_dta("build/output/cleaned_data.dta")</code></pre>
+    <pre class="code-content python"><code class="language-python">import os
 import pandas as pd
 
 # Set working directory
@@ -209,44 +271,64 @@ os.chdir("/Users/yourname/Dropbox/my_1433_project")
 print(os.getcwd())
 
 # Now use relative paths
-data = pd.read_stata("build/output/cleaned_data.dta"){% endcapture %}
-{% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+data = pd.read_stata("build/output/cleaned_data.dta")</code></pre>
+  </div>
 
   <h3>Getting Help</h3>
   <p>When you encounter an unfamiliar command or forget the syntax, use the built-in help system:</p>
 
-{% capture sc %}* Get help on a command
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Get help on a command
 help regress
 
 * Search for commands
-search panel data{% endcapture %}
-{% capture rc %}# Get help on a function
+search panel data</code></pre>
+    <pre class="code-content r"><code class="language-r"># Get help on a function
 ?lm
 help(lm)
 
 # Search for functions
-??regression{% endcapture %}
-{% capture pc %}# Get help on a function
+??regression</code></pre>
+    <pre class="code-content python"><code class="language-python"># Get help on a function
 help(pd.read_csv)
 
 # Or in Jupyter/IPython
 pd.read_csv?
 
 # Search documentation online
-# https://pandas.pydata.org/docs/{% endcapture %}
-{% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+# https://pandas.pydata.org/docs/</code></pre>
+  </div>
 </section>
 
 <section id="first-script" class="tutorial-section">
   <h2>Your First Script</h2>
 
-{% capture kp_content %}<p>Never type commands directly into the console for real work. Write everything in a <code>.do</code> file (Stata) or <code>.R</code> file. This is the #1 habit that separates beginners from competent researchers.</p>
-<p><strong>The test:</strong> Close everything, reopen, run your script. Does it work? If not, your analysis isn't reproducible.</p>{% endcapture %}
-{% include "key-principle.liquid", heading: "Always Use Scripts", content: kp_content %}
+  <div class="key-principle">
+    <h4>Always Use Scripts</h4>
+    <p>Never type commands directly into the console for real work. Write everything in a <code>.do</code> file (Stata) or <code>.R</code> file. This is the #1 habit that separates beginners from competent researchers.</p>
+    <p><strong>The test:</strong> Close everything, reopen, run your script. Does it work? If not, your analysis isn't reproducible.</p>
+  </div>
 
   <p>Create a new file called <code>test.do</code>, <code>test.R</code>, or <code>test.py</code>:</p>
 
-{% capture sc %}/*==============================================================================
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">/*==============================================================================
     test.do
     My first Stata script
 ==============================================================================*/
@@ -268,8 +350,8 @@ regress price mpg weight
 scatter price mpg
 graph export "my_first_graph.png", replace
 
-di "Script completed successfully!"{% endcapture %}
-{% capture rc %}#===============================================================================
+di "Script completed successfully!"</code></pre>
+    <pre class="code-content r"><code class="language-r">#===============================================================================
 #   test.R
 #   My first R script
 #===============================================================================
@@ -289,14 +371,14 @@ model <- lm(mpg ~ hp + wt, data = mtcars)
 summary(model)
 
 # Save a graph
-p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point() +
   geom_smooth(method = "lm") +
   labs(title = "MPG vs Weight", x = "Weight (1000 lbs)", y = "MPG")
-ggsave("my_first_graph.png", p, width = 8, height = 6)
+ggsave("my_first_graph.png")
 
-cat("Script completed successfully!\n"){% endcapture %}
-{% capture pc %}#===============================================================================
+cat("Script completed successfully!\n")</code></pre>
+    <pre class="code-content python"><code class="language-python">#===============================================================================
 #   test.py
 #   My first Python script
 #===============================================================================
@@ -326,8 +408,8 @@ plt.ylabel("MPG")
 plt.title("MPG vs Weight")
 plt.savefig("my_first_graph.png")
 
-print("Script completed successfully!"){% endcapture %}
-{% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+print("Script completed successfully!")</code></pre>
+  </div>
 
   <p>Run the entire script (not line by line!) and verify it works.</p>
 </section>

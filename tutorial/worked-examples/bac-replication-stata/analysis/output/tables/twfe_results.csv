@@ -1,0 +1,3 @@
+outcome,coefficient,std_error,pvalue,n_obs,r2
+Hit-Run,.05837946,.044558872,.1962489,1350,.91343153
+Non-Hit-Run,.017828261,.017197495,.30497509,1350,.98742211

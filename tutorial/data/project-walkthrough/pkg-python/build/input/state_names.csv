@@ -1,0 +1,51 @@
+state_fips,state_name,region
+1,Alabama,South
+2,Alaska,West
+3,Arizona,West
+4,Arkansas,South
+5,California,West
+6,Colorado,West
+7,Connecticut,Northeast
+8,Delaware,South
+9,Florida,South
+10,Georgia,South
+11,Hawaii,West
+12,Idaho,West
+13,Illinois,Midwest
+14,Indiana,Midwest
+15,Iowa,Midwest
+16,Kansas,Midwest
+17,Kentucky,South
+18,Louisiana,South
+19,Maine,Northeast
+20,Maryland,South
+21,Massachusetts,Northeast
+22,Michigan,Midwest
+23,Minnesota,Midwest
+24,Mississippi,South
+25,Missouri,Midwest
+26,Montana,West
+27,Nebraska,Midwest
+28,Nevada,West
+29,New Hampshire,Northeast
+30,New Jersey,Northeast
+31,New Mexico,West
+32,New York,Northeast
+33,North Carolina,South
+34,North Dakota,Midwest
+35,Ohio,Midwest
+36,Oklahoma,South
+37,Oregon,West
+38,Pennsylvania,Northeast
+39,Rhode Island,Northeast
+40,South Carolina,South
+41,South Dakota,Midwest
+42,Tennessee,South
+43,Texas,South
+44,Utah,West
+45,Vermont,Northeast
+46,Virginia,South
+47,Washington,West
+48,West Virginia,South
+49,Wisconsin,Midwest
+50,Wyoming,West

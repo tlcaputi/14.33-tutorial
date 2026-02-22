@@ -6,7 +6,7 @@ current_page: project-walkthrough
 <h1>Complete Project Walkthrough</h1>
 <p class="subtitle">From raw data to publication-ready output — start to finish</p>
 
-<p>The project asks a simple question: <strong>does a state-level policy reduce fatal car crashes?</strong> We start at the end — with the research question and the estimating equation — and work backwards to figure out what the data must look like, then build it from raw ingredients. Along the way, you'll load data, clean, merge multiple datasets, run a difference-in-differences analysis with an event study, and produce publication-quality tables and figures. We also cover instrumental variables and regression discontinuity as standalone analyses.</p>
+<p>This walkthrough takes you through an entire empirical project: loading data, cleaning, merging multiple datasets, running a difference-in-differences analysis with event study, and producing publication-quality tables and figures. We also cover instrumental variables and regression discontinuity as standalone analyses.</p>
 
 <!-- ============================================================ -->
 <!-- PROJECT DIRECTORY SETUP -->
@@ -14,72 +14,75 @@ current_page: project-walkthrough
 <section id="project-setup" class="tutorial-section">
   <h2>Project Setup</h2>
 
-  <p>An empirical project separates <strong>raw data</strong> from <strong>processed data</strong>, and <strong>build code</strong> (data processing) from <strong>analysis code</strong> (regressions, tables, figures). Download a package below and unzip — you're ready to go.</p>
+  <p>An empirical project separates <strong>raw data</strong> from <strong>processed data</strong>, and <strong>build code</strong> (data processing) from <strong>analysis code</strong> (regressions, tables, figures). The download below contains the full project with this structure already in place.</p>
 
-  {% capture callout_content %}<div style="text-align: center;">
-    <p><strong>Starter</strong> — code and raw data with empty output folders. Run <code>master</code> to generate everything.</p>
-    <table style="margin: 0 auto; border-collapse: collapse; width: auto;">
-      <thead>
-        <tr>
-          <th style="padding: 8px 16px; text-align: left;"></th>
-          <th style="padding: 8px 16px; text-align: center;">Stata</th>
-          <th style="padding: 8px 16px; text-align: center;">R</th>
-          <th style="padding: 8px 16px; text-align: center;">Python</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="padding: 8px 16px; font-weight: 500;">Starter</td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-stata.zip" download class="download-btn">Stata</a></td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-r.zip" download class="download-btn">R</a></td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-python.zip" download class="download-btn">Python</a></td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 16px; font-weight: 500;">Complete</td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-stata-complete.zip" download class="download-btn" style="background: #2c3e50;">Stata</a></td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-r-complete.zip" download class="download-btn" style="background: #2c3e50;">R</a></td>
-          <td style="padding: 8px 16px; text-align: center;"><a href="data/pkg-python-complete.zip" download class="download-btn" style="background: #2c3e50;">Python</a></td>
-        </tr>
-      </tbody>
-    </table>
-    <p style="font-size: 0.85em; color: #666; margin-top: 8px;"><strong>Complete</strong> includes all generated output (tables, figures, processed data) so you can check your results.</p>
-    <p style="margin-top: 12px;"><a href="data/project-walkthrough/project_walkthrough_slides.pdf" download class="download-btn" style="background: #2c3e50;">Slides (PDF)</a></p>
-  </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Download the Project", content: callout_content %}
+  <div class="callout-info" style="text-align: center;">
+    <h4>Download the Project</h4>
+    <p>Each ZIP contains all six datasets, the full directory structure shown below, and code in your chosen language. Pick one and unzip — you're ready to go.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="data/pkg-stata.zip" download class="download-btn">Stata</a>
+      <a href="data/pkg-r.zip" download class="download-btn">R</a>
+      <a href="data/pkg-python.zip" download class="download-btn">Python</a>
+    </div>
+  </div>
+
+  <h3>Running Your Scripts</h3>
+
+  <p>Once you've downloaded and unzipped the project, open a terminal in the project folder and run the master file. You can also run individual scripts for development.</p>
+
+  <p><strong>Stata (command line):</strong></p>
+  <ul>
+    <li>Mac: <code>/Applications/Stata/StataMP.app/Contents/MacOS/stata-mp -b do master.do</code></li>
+    <li>Windows: <code>"C:\Program Files\Stata18\StataMP-64.exe" /e do master.do</code></li>
+    <li>Linux: <code>stata-mp -b do master.do</code></li>
+  </ul>
+  <p>The <code>-b</code> (Mac/Linux) or <code>/e</code> (Windows) flag runs Stata in batch mode — output goes to a <code>.log</code> file in the working directory instead of the GUI.</p>
+
+  <p><strong>Stata (VS Code):</strong> Install the <strong>Stata Enhanced</strong> extension for syntax highlighting and the <strong>stataRun</strong> extension to send code to Stata. Press <kbd>Ctrl+Shift+D</kbd> to run the current file or selection.</p>
+
+  <p><strong>R:</strong> Run <code>Rscript master.R</code> from the terminal, or open the project in RStudio and source the master file.</p>
+
+  <p><strong>Python:</strong> Run <code>python master.py</code> from the terminal, or use VS Code with the Python extension to run scripts interactively.</p>
 
   <h3>What's Inside</h3>
 
   <p>Unzipping gives you a single project folder (e.g. <code>pkg-stata/</code>) with this structure:</p>
 
-  {% capture sc %}pkg-stata/
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Directory Structure</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code>pkg-stata/
 ├── master.do                  ← Runs everything in order
 ├── build/
 │   ├── code/
-│   │   ├── 01_collapse_crashes.do
-│   │   ├── 02_collapse_demographics.do
-│   │   └── 03_merge_datasets.do
+│   │   ├── 01_filter_crashes.do
+│   │   ├── 02_collapse_crashes.do
+│   │   ├── 03_reshape_crashes.do
+│   │   ├── 04_append_demographics.do
+│   │   ├── 05_collapse_demographics.do
+│   │   └── 06_merge_datasets.do
 │   ├── input/                 ← Raw data (NEVER modified by code)
 │   │   ├── crash_data.csv
-│   │   ├── demographic_survey/
-│   │   │   ├── demographic_survey_1995.csv
-│   │   │   ├── ...
-│   │   │   └── demographic_survey_2015.csv
-│   │   ├── iv_data.csv
-│   │   ├── rd_data.csv
+│   │   ├── demographic_survey/  ← 21 annual CSVs (1995-2015)
 │   │   ├── policy_adoptions.csv
 │   │   └── state_names.csv
-│   └── output/                ← Empty; created by build scripts
+│   └── output/                ← Processed data (created by build scripts)
 └── analysis/
     ├── code/
     │   ├── 01_descriptive_table.do
     │   ├── 02_dd_regression.do
     │   ├── 03_event_study.do
-    │   ├── 04_iv.do
-    │   └── 05_rd.do
+    │   ├── 04_dd_table.do
+    │   ├── 05_iv.do
+    │   └── 06_rd.do
     └── output/
-        ├── tables/            ← Empty; filled by analysis scripts
-        └── figures/{% endcapture %}
-  {% include "code-block.liquid", stata: sc, stata_label: "Directory Structure" %}
+        ├── tables/
+        └── figures/</code></pre>
+  </div>
 
   <h3>Key Principles</h3>
   <ul>
@@ -92,7 +95,16 @@ current_page: project-walkthrough
   <h3>The Master File</h3>
   <p>The <code>master.do</code> sets global paths and runs every script in order. Anyone should be able to replicate your results by changing one path and running this file.</p>
 
-  {% capture sc %}* MASTER DO FILE
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* MASTER DO FILE
 clear all
 set more off
 
@@ -104,17 +116,21 @@ global analysis "$root/analysis"
 cd "$root"
 
 * Build stage
-do "$build/code/01_collapse_crashes.do"
-do "$build/code/02_collapse_demographics.do"
-do "$build/code/03_merge_datasets.do"
+do "$build/code/01_filter_crashes.do"
+do "$build/code/02_collapse_crashes.do"
+do "$build/code/03_reshape_crashes.do"
+do "$build/code/04_append_demographics.do"
+do "$build/code/05_collapse_demographics.do"
+do "$build/code/06_merge_datasets.do"
 
 * Analysis stage
 do "$analysis/code/01_descriptive_table.do"
 do "$analysis/code/02_dd_regression.do"
 do "$analysis/code/03_event_study.do"
-do "$analysis/code/04_iv.do"
-do "$analysis/code/05_rd.do"{% endcapture %}
-  {% capture rc %}# master.R
+do "$analysis/code/04_dd_table.do"
+do "$analysis/code/05_iv.do"
+do "$analysis/code/06_rd.do"</code></pre>
+    <pre class="code-content r"><code class="language-r"># master.R
 rm(list = ls())
 
 # Set root directory (CHANGE THIS to your project path)
@@ -123,17 +139,21 @@ build <- file.path(root, "build")
 analysis <- file.path(root, "analysis")
 
 # Build stage
-source(file.path(build, "code", "01_collapse_crashes.R"))
-source(file.path(build, "code", "02_collapse_demographics.R"))
-source(file.path(build, "code", "03_merge_datasets.R"))
+source(file.path(build, "code", "01_filter_crashes.R"))
+source(file.path(build, "code", "02_collapse_crashes.R"))
+source(file.path(build, "code", "03_reshape_crashes.R"))
+source(file.path(build, "code", "04_append_demographics.R"))
+source(file.path(build, "code", "05_collapse_demographics.R"))
+source(file.path(build, "code", "06_merge_datasets.R"))
 
 # Analysis stage
 source(file.path(analysis, "code", "01_descriptive_table.R"))
 source(file.path(analysis, "code", "02_dd_regression.R"))
 source(file.path(analysis, "code", "03_event_study.R"))
-source(file.path(analysis, "code", "04_iv.R"))
-source(file.path(analysis, "code", "05_rd.R")){% endcapture %}
-  {% capture pc %}# master.py
+source(file.path(analysis, "code", "04_dd_table.R"))
+source(file.path(analysis, "code", "05_iv.R"))
+source(file.path(analysis, "code", "06_rd.R"))</code></pre>
+    <pre class="code-content python"><code class="language-python"># master.py
 import subprocess, sys, os
 
 root = "."
@@ -141,98 +161,163 @@ build = os.path.join(root, "build")
 analysis = os.path.join(root, "analysis")
 
 scripts = [
-    f"{build}/code/01_collapse_crashes.py",
-    f"{build}/code/02_collapse_demographics.py",
-    f"{build}/code/03_merge_datasets.py",
+    f"{build}/code/01_filter_crashes.py",
+    f"{build}/code/02_collapse_crashes.py",
+    f"{build}/code/03_reshape_crashes.py",
+    f"{build}/code/04_append_demographics.py",
+    f"{build}/code/05_collapse_demographics.py",
+    f"{build}/code/06_merge_datasets.py",
     f"{analysis}/code/01_descriptive_table.py",
     f"{analysis}/code/02_dd_regression.py",
     f"{analysis}/code/03_event_study.py",
-    f"{analysis}/code/04_iv.py",
-    f"{analysis}/code/05_rd.py",
+    f"{analysis}/code/04_dd_table.py",
+    f"{analysis}/code/05_iv.py",
+    f"{analysis}/code/06_rd.py",
 ]
 
 for script in scripts:
     print(f"Running {script}...")
-    subprocess.run([sys.executable, script], check=True){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+    subprocess.run([sys.executable, script], check=True)</code></pre>
+  </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- PART A: READING DATA -->
+<!-- DATA CLEANING INTRO -->
 <!-- ============================================================ -->
-<section id="reading-data" class="tutorial-section">
-  <h2>Part A: Reading Data</h2>
+<section class="tutorial-section">
+  <p>Every raw dataset is a little different, and you'll need to figure out what steps are required to get each one into the format your analysis needs. Parts A and B walk through two examples — cleaning crash data and cleaning demographic survey data — that illustrate common operations (filtering, collapsing, reshaping, looping, appending, destringing). The specific steps will depend on the raw data you're actually working with.</p>
+</section>
 
-  <p>Our project uses data from multiple sources in different formats. Start by reading each one in.</p>
+<!-- ============================================================ -->
+<!-- PART A: CLEANING THE CRASH DATA -->
+<!-- ============================================================ -->
+<section id="crash-data" class="tutorial-section">
+  <h2>Part A: Cleaning the Crash Data</h2>
 
-  <h3>Reading a CSV File</h3>
-  <p>The crash data has one row per crash. This is the raw, granular data we'll need to aggregate later.</p>
+  <p>The crash data has one row per crash, but our analysis is at the <strong>state-year</strong> level. Scripts 01–03 read the raw data, filter it, collapse it to counts, and reshape it so each severity type gets its own column.</p>
 
-  {% capture sc %}* Read crash-level data (CSV)
+  <h3>Step 1: Read and Filter Crashes</h3>
+  <p>Start by reading the crash-level CSV. This is granular data we'll need to aggregate.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Read crash-level data (CSV)
 import delimited "$build/input/crash_data.csv", clear
 describe
 summarize
-tab severity{% endcapture %}
-  {% capture rc %}pacman::p_load(data.table)
+tab severity</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table)
 
 # Read crash-level data (CSV)
 crashes <- fread("build/input/crash_data.csv")
 str(crashes)
 summary(crashes)
-table(crashes$severity){% endcapture %}
-  {% capture pc %}import pandas as pd
+table(crashes$severity)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
 
 # Read crash-level data (CSV)
 crashes = pd.read_csv("build/input/crash_data.csv")
 print(crashes.info())
 print(crashes.describe())
-print(crashes['severity'].value_counts()){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+print(crashes['severity'].value_counts())</code></pre>
+  </div>
 
-  <h3>Reading a Single Demographic Survey File</h3>
-  <p>The demographics data arrives as <strong>per-year CSV files</strong> at the individual level — one file for each year (1995–2015). This is common with survey data. We'll need to loop and <strong>append</strong> them together later, but for now let's just read a single year to inspect the data.</p>
+  <p>Script <code>01_filter_crashes</code> also drops observations we don't need before any aggregation.</p>
 
-  {% capture sc %}* Read one year of demographic survey data
-import delimited "$build/input/demographic_survey/demographic_survey_2005.csv", clear
-describe
-summarize{% endcapture %}
-  {% capture rc %}pacman::p_load(data.table)
-
-# Read one year of demographic survey data
-survey_2005 <- fread("build/input/demographic_survey/demographic_survey_2005.csv")
-str(survey_2005)
-summary(survey_2005){% endcapture %}
-  {% capture pc %}import pandas as pd
-
-# Read one year of demographic survey data
-survey_2005 = pd.read_csv(
-    "build/input/demographic_survey/demographic_survey_2005.csv"
-)
-print(survey_2005.info())
-print(survey_2005.describe()){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
-
-  {% capture callout_content %}<p>Notice: <code>income</code> is a string like <code>"$35,120"</code> (dollar sign and commas) — we'll clean it in the build step with <code>destring</code>. Each row is a survey respondent with a <code>weight</code> column for computing population-weighted statistics. Also note that <code>state_fips</code> includes 51 (DC) — we'll drop that during filtering.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", heading: "Dirty Data Alert", content: callout_content %}
-</section>
-
-<!-- ============================================================ -->
-<!-- PART B: COLLAPSING DATA -->
-<!-- ============================================================ -->
-<section id="collapsing" class="tutorial-section">
-  <h2>Part B: Filtering, Collapsing, Reshaping, and Saving Intermediate Files</h2>
-
-  <p>The crash data has one row per crash, but our analysis is at the <strong>state-year</strong> level. We need to: (1) <strong>filter</strong> the data to keep only the crashes we care about, (2) <strong>collapse</strong> to count crashes by state, year, and severity, (3) <strong>reshape</strong> from long to wide so each severity type becomes its own column, and (4) <strong>save</strong> the intermediate file.</p>
-
-  {% capture sc %}* Load crash data
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Load crash data
 import delimited "$build/input/crash_data.csv", clear
 
 * --- FILTER: Keep only fatal and serious crashes ---
 drop if severity == "minor"
 
+save "$build/output/crashes_filtered.dta", replace</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table)
+
+# Load crash data
+crashes <- fread("build/input/crash_data.csv")
+
+# Filter: keep only fatal and serious crashes
+crashes <- crashes[severity != "minor"]
+
+fwrite(crashes, "build/output/crashes_filtered.csv")</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+
+# Load crash data
+crashes = pd.read_csv("build/input/crash_data.csv")
+
+# Filter: keep only fatal and serious crashes
+crashes = crashes[crashes['severity'] != 'minor']
+
+crashes.to_csv("build/output/crashes_filtered.csv", index=False)</code></pre>
+  </div>
+
+  <h3>Step 2: Collapse to State-Year-Severity</h3>
+  <p>Script <code>02_collapse_crashes</code> counts crashes by state, year, and severity type.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/crashes_filtered.dta", clear
+
 * --- COLLAPSE: Count crashes by state-year-severity (long format) ---
 gen one = 1
 collapse (sum) n_crashes = one, by(state_fips year severity)
+
+save "$build/output/crashes_long.dta", replace</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table)
+
+crashes <- fread("build/output/crashes_filtered.csv")
+
+# Collapse to state-year-severity level (long format)
+crashes_long <- crashes[, .(n_crashes = .N), by = .(state_fips, year, severity)]
+
+fwrite(crashes_long, "build/output/crashes_long.csv")</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+
+crashes = pd.read_csv("build/output/crashes_filtered.csv")
+
+# Collapse to state-year-severity level (long format)
+crashes_long = (crashes.groupby(['state_fips', 'year', 'severity'])
+                .size().reset_index(name='n_crashes'))
+
+crashes_long.to_csv("build/output/crashes_long.csv", index=False)</code></pre>
+  </div>
+
+  <h3>Step 3: Reshape and Save</h3>
+  <p>Script <code>03_reshape_crashes</code> pivots the long data wide, renames columns, computes derived variables, and saves the final crash dataset.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/crashes_long.dta", clear
 
 * --- RESHAPE: Wide so each severity type becomes its own column ---
 reshape wide n_crashes, i(state_fips year) j(severity) string
@@ -247,17 +332,10 @@ gen fatal_share = fatal_crashes / total_crashes
 
 * Save intermediate file
 save "$build/output/crashes_state_year.dta", replace
-describe{% endcapture %}
-  {% capture rc %}pacman::p_load(data.table)
+describe</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table)
 
-# Load crash data
-crashes <- fread("build/input/crash_data.csv")
-
-# Filter: keep only fatal and serious crashes
-crashes <- crashes[severity != "minor"]
-
-# Collapse to state-year-severity level (long format)
-crashes_long <- crashes[, .(n_crashes = .N), by = .(state_fips, year, severity)]
+crashes_long <- fread("build/output/crashes_long.csv")
 
 # Reshape from long to wide: one column per severity type
 crashes_sy <- dcast(crashes_long, state_fips + year ~ severity,
@@ -270,18 +348,10 @@ crashes_sy[, fatal_share := fatal_crashes / total_crashes]
 
 # Save intermediate file
 fwrite(crashes_sy, "build/output/crashes_state_year.csv")
-str(crashes_sy){% endcapture %}
-  {% capture pc %}import pandas as pd
+str(crashes_sy)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
 
-# Load crash data
-crashes = pd.read_csv("build/input/crash_data.csv")
-
-# Filter: keep only fatal and serious crashes
-crashes = crashes[crashes['severity'] != 'minor']
-
-# Collapse to state-year-severity level (long format)
-crashes_long = (crashes.groupby(['state_fips', 'year', 'severity'])
-                .size().reset_index(name='n_crashes'))
+crashes_long = pd.read_csv("build/output/crashes_long.csv")
 
 # Reshape (pivot) from long to wide: one column per severity type
 crashes_sy = crashes_long.pivot_table(
@@ -298,170 +368,171 @@ crashes_sy['fatal_share'] = crashes_sy['fatal_crashes'] / crashes_sy['total_cras
 
 # Save intermediate file
 crashes_sy.to_csv("build/output/crashes_state_year.csv", index=False)
-print(crashes_sy.info()){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+print(crashes_sy.info())</code></pre>
+  </div>
 
-  {% capture callout_content %}<p>Separating your build code (data processing) from analysis code is a key principle of project organization. Save collapsed data so you can modify your analysis without re-running expensive data processing steps every time.</p>{% endcapture %}
-  {% include "callout.liquid", type: "success", heading: "Why Save Intermediate Files?", content: callout_content %}
-
-  <h3>Collapsing Survey Data: Appending, Cleaning, and Weighted Aggregation</h3>
-
-  <p>The demographics data arrives as <strong>separate CSV files for each year</strong> — a common format for survey data. We need to: (1) <strong>loop and append</strong> the per-year files into one dataset, (2) <strong>filter</strong> out DC and pre-2000 years, (3) <strong>clean</strong> string variables with <code>destring</code>, and (4) <strong>collapse</strong> individuals to state-year using survey weights.</p>
-
-  <p>This is a different kind of collapse than the crash data. With crashes, we <em>counted events</em>. With demographics, we're <em>aggregating characteristics</em> — population is the sum of survey weights, but income and urbanization need to be <strong>weighted averages</strong> (a respondent with a higher weight represents more people in the population).</p>
-
-  {% capture sc %}clear all
-
-* --- Start a log file to record all output ---
-log using "$build/output/02_collapse_demographics.log", replace
-
-* --- Step 1: Convert each CSV to .dta ---
-forvalues y = 1995/2015 {
-    import delimited ///
-        "$build/input/demographic_survey/demographic_survey_`y'.csv", clear
-    gen year = `y'
-    save "$build/output/survey_`y'.dta", replace
-}
-
-* --- Step 2: Append all years ---
-clear
-forvalues y = 1995/2015 {
-    append using "$build/output/survey_`y'.dta"
-}
-
-* --- Step 2: Inspect ---
-tab year
-tab state_fips if state_fips == 51
-
-* --- Step 3: Filter ---
-drop if state_fips == 51
-drop if year < 2000
-
-* --- Step 4: Clean ---
-destring income, replace ignore("$,")
-
-* --- Step 5: Sanity check ---
-preserve
-    summarize income weight urban
-restore
-
-* --- Step 6: Collapse to state-year ---
-collapse (rawsum) population = weight ///
-    (mean) median_income = income ///
-    (mean) pct_urban = urban ///
-    [aweight=weight], by(state_fips year)
-
-* --- Step 7: Verify ---
-assert _N == 800
-
-save "$build/output/demographics_state_year.dta", replace
-
-log close{% endcapture %}
-  {% capture rc %}cat("Running 02_collapse_demographics.R...\n")
-
-pacman::p_load(data.table)
-
-# --- Step 1: Loop over years and append ---
-years <- 1995:2015
-frames <- list()
-for (y in years) {
-  fp <- file.path(root, "build/input/demographic_survey",
-                  paste0("demographic_survey_", y, ".csv"))
-  dt <- fread(fp)
-  dt[, year := y]
-  frames[[as.character(y)]] <- dt
-}
-county <- rbindlist(frames)
-
-# --- Step 2: Filter ---
-county <- county[state_fips != 51]
-county <- county[year >= 2000]
-
-# --- Step 3: Clean ---
-county[, income := as.numeric(gsub("[$,]", "", income))]
-
-# --- Step 4: Collapse to state-year (weighted) ---
-demographics <- county[, .(
-  population = sum(weight),
-  median_income = weighted.mean(income, w = weight),
-  pct_urban = weighted.mean(urban, w = weight)
-), by = .(state_fips, year)]
-
-stopifnot(nrow(demographics) == 800)
-
-fwrite(demographics, file.path(root, "build/output/demographics_state_year.csv"))
-cat("  Saved demographics_state_year.csv:", nrow(demographics), "rows\n"){% endcapture %}
-  {% capture pc %}import pandas as pd
-import numpy as np
-from pathlib import Path
-
-ROOT = Path(__file__).parent.parent.parent
-
-input_dir = ROOT / "build/input/demographic_survey"
-output_file = ROOT / "build/output/demographics_state_year.csv"
-
-# --- Step 1: Loop over years and append ---
-frames = []
-for year in range(1995, 2016):
-    fp = input_dir / f"demographic_survey_{year}.csv"
-    df_year = pd.read_csv(fp)
-    df_year["year"] = year
-    frames.append(df_year)
-survey = pd.concat(frames, ignore_index=True)
-
-# --- Step 2: Filter ---
-survey = survey[survey["state_fips"] != 51]
-survey = survey[survey["year"] >= 2000]
-
-# --- Step 3: Clean ---
-survey["income"] = (
-    survey["income"]
-    .str.replace("$", "", regex=False)
-    .str.replace(",", "", regex=False)
-    .astype(float)
-)
-
-# --- Step 4: Collapse to state-year (weighted) ---
-demographics = survey.groupby(["state_fips", "year"]).apply(
-    lambda g: pd.Series({
-        "population": g["weight"].sum(),
-        "median_income": np.average(g["income"], weights=g["weight"]),
-        "pct_urban": np.average(g["urban"], weights=g["weight"]),
-    }),
-    include_groups=False,
-).reset_index()
-
-assert len(demographics) == 800, f"Expected 800 rows, got {len(demographics)}"
-
-output_file.parent.mkdir(parents=True, exist_ok=True)
-demographics.to_csv(output_file, index=False)
-print(f"Saved demographics_state_year.csv: {len(demographics)} rows"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
-
-  {% capture callout_content %}<p>This code block introduces several new concepts:</p>
-    <ul>
-      <li><strong><code>log using</code> / <code>log close</code></strong> saves all Stata output to a text file — essential for debugging and reproducibility.</li>
-      <li><strong><code>append</code></strong> stacks datasets vertically (same variables, more rows). The loop reads each year's file and appends it to the growing dataset.</li>
-      <li><strong><code>destring</code></strong> converts string variables to numeric, stripping unwanted characters like <code>$</code> and <code>,</code>.</li>
-      <li><strong><code>tab</code></strong> tabulates frequencies — here it reveals that <code>state_fips == 51</code> (DC) is in the data and must be dropped.</li>
-      <li><strong><code>preserve</code> / <code>restore</code></strong> lets you temporarily modify the data (e.g., run a quick summary) without losing your work in progress.</li>
-      <li><strong><code>assert</code></strong> verifies that a condition holds. If <code>_N != 800</code>, Stata stops with an error — catching data issues early.</li>
-      <li><strong>Weighted collapse</strong>: the <code>[aweight=weight]</code> option computes weighted means using survey weights, so respondents representing more people count more.</li>
-    </ul>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "New Commands in This Section", content: callout_content %}
+  <div class="callout-success">
+    <h4>Why Save Intermediate Files?</h4>
+    <p>Separating your build code (data processing) from analysis code is a key principle of project organization. Save collapsed data so you can modify your analysis without re-running expensive data processing steps every time.</p>
+  </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- PART C: MERGING 3+ DATASETS -->
+<!-- PART B: CLEANING THE DEMOGRAPHICS DATA -->
+<!-- ============================================================ -->
+<section id="demographics" class="tutorial-section">
+  <h2>Part B: Cleaning the Demographics Data</h2>
+
+  <p>The demographic survey data arrives as 21 separate annual CSV files (one per year, 1995–2015). Scripts 04 and 05 stack them into a single dataset, clean the data, and collapse to the state-year level.</p>
+
+  <div class="callout-info">
+    <h4>Why Loop and Append?</h4>
+    <p>A lot of public-use data is released as separate annual files. You'll need to loop over the files and append them together before you can do anything else. Writing a loop is far better than manually importing 21 files — it's shorter, less error-prone, and generalizes if files are added later.</p>
+  </div>
+
+  <h3>Step 4: Loop and Append Demographics</h3>
+  <p>Script <code>04_append_demographics</code> reads each annual CSV, tags it with the year, and appends all 21 files into one dataset.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Loop through yearly survey CSV files and append
+clear
+forvalues y = 1995/2015 {
+    preserve
+    import delimited "$build/input/demographic_survey/demographic_survey_`y'.csv", clear
+    gen year = `y'
+    tempfile temp`y'
+    save `temp`y''
+    restore
+    append using `temp`y''
+}
+save "$build/output/demographics_combined.dta", replace</code></pre>
+    <pre class="code-content r"><code class="language-r"># Loop through yearly survey CSVs and stack them
+files <- list.files("build/input/demographic_survey",
+                    pattern = "^demographic_survey_\\d{4}\\.csv$",
+                    full.names = TRUE)
+demo_list <- lapply(files, function(f) {
+  dt <- fread(f)
+  dt[, year := as.integer(gsub(".*_(\\d{4})\\.csv$", "\\1", f))]
+  dt
+})
+demo_all <- rbindlist(demo_list)
+fwrite(demo_all, "build/output/demographics_combined.csv")</code></pre>
+    <pre class="code-content python"><code class="language-python">import glob
+import pandas as pd
+
+# Read and stack all yearly survey CSVs
+files = sorted(glob.glob("build/input/demographic_survey/demographic_survey_*.csv"))
+frames = []
+for f in files:
+    df = pd.read_csv(f)
+    year = int(f.split("_")[-1].replace(".csv", ""))
+    df["year"] = year
+    frames.append(df)
+demo_all = pd.concat(frames, ignore_index=True)
+demo_all.to_csv("build/output/demographics_combined.csv", index=False)</code></pre>
+  </div>
+
+  <h3>Step 5: Clean and Collapse Demographics</h3>
+  <p>Script <code>05_collapse_demographics</code> drops DC and pre-2000 years, cleans the income variable (stored as a string with dollar signs and commas), and collapses to the state-year level using survey weights.</p>
+
+  <div class="callout-info">
+    <h4>Why Destring Income?</h4>
+    <p>Survey data frequently stores numeric values as strings — "$45,000" instead of 45000. You must strip the formatting characters and convert to numeric before doing any math. This is one of the most common data-cleaning tasks in applied work.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/demographics_combined.dta", clear
+
+* Drop DC and pre-2000 years
+drop if state_fips == 51
+drop if year < 2000
+
+* Clean income: remove $ and commas, convert to numeric
+destring income, replace ignore("$,")
+
+* Collapse to state-year level using survey weights
+collapse (rawsum) population = weight ///
+    (mean) median_income = income pct_urban = urban ///
+    [aweight = weight], by(state_fips year)
+
+save "$build/output/demographics_state_year.dta", replace</code></pre>
+    <pre class="code-content r"><code class="language-r">demo_all <- fread("build/output/demographics_combined.csv")
+
+# Drop DC and pre-2000
+demo_all <- demo_all[state_fips != 51 & year >= 2000]
+
+# Clean income: remove $ and commas
+demo_all[, income_num := as.numeric(gsub("[\\$,]", "", income))]
+
+# Weighted collapse to state-year level
+demographics <- demo_all[, .(
+  population    = sum(weight),
+  median_income = weighted.mean(income_num, weight),
+  pct_urban     = weighted.mean(urban, weight)
+), by = .(state_fips, year)]
+
+fwrite(demographics, "build/output/demographics_state_year.csv")</code></pre>
+    <pre class="code-content python"><code class="language-python">demo_all = pd.read_csv("build/output/demographics_combined.csv")
+
+# Drop DC and pre-2000
+demo_all = demo_all[(demo_all["state_fips"] != 51) & (demo_all["year"] >= 2000)]
+
+# Clean income: remove $ and commas
+demo_all["income_num"] = (demo_all["income"]
+    .str.replace("$", "", regex=False)
+    .str.replace(",", "")
+    .astype(float))
+
+# Weighted collapse
+def weighted_mean(group, col, wt):
+    return (group[col] * group[wt]).sum() / group[wt].sum()
+
+demographics = (demo_all.groupby(["state_fips", "year"])
+    .apply(lambda g: pd.Series({
+        "population": g["weight"].sum(),
+        "median_income": weighted_mean(g, "income_num", "weight"),
+        "pct_urban": weighted_mean(g, "urban", "weight"),
+    }))
+    .reset_index())
+
+demographics.to_csv("build/output/demographics_state_year.csv", index=False)</code></pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART C: MERGING -->
 <!-- ============================================================ -->
 <section id="merging" class="tutorial-section">
   <h2>Part C: Merging Multiple Datasets</h2>
 
-  <p>Now we merge four datasets together: (1) aggregated crashes, (2) state demographics, (3) policy adoption dates, and (4) state names. Each merge uses <code>state_fips</code> as the key, with some using <code>year</code> as well.</p>
+  <p>Now we merge four datasets together: (1) aggregated crashes, (2) state demographics (from Part C), (3) policy adoption dates, and (4) state names. Each merge uses <code>state_fips</code> as the key, with some using <code>year</code> as well.</p>
 
-  {% capture sc %}clear all
-
-* Convert CSVs to .dta for merging
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Convert CSVs to .dta for merging
 import delimited "$build/input/policy_adoptions.csv", clear
 save "$build/output/policy_adoptions.dta", replace
 
@@ -471,7 +542,7 @@ save "$build/output/state_names.dta", replace
 * Load the main dataset and merge everything sequentially
 use "$build/output/crashes_state_year.dta", clear
 
-* Merge 1: Demographics (collapsed from survey data) — keep only matched rows
+* Merge 1: Demographics — keep only matched rows
 merge 1:1 state_fips year using "$build/output/demographics_state_year.dta", ///
     keep(match) nogen
 
@@ -483,24 +554,23 @@ merge m:1 state_fips using "$build/output/policy_adoptions.dta", ///
 merge m:1 state_fips using "$build/output/state_names.dta", ///
     keep(match) nogen
 
-* Create treatment indicators
-gen ever_treated = !missing(adoption_year)
-gen post_treated = (year >= adoption_year & ever_treated)
+* Create treatment indicator
+gen post_treated = (year >= adoption_year & !missing(adoption_year))
 gen log_pop = ln(population)
 
-save "$build/output/analysis_panel.dta", replace{% endcapture %}
-  {% capture rc %}cat("Running 03_merge_datasets.R...\n")
-
-pacman::p_load(data.table)
+* Save final analysis dataset
+save "$build/output/analysis_panel.dta", replace
+describe</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table)
 
 # Load all datasets
-crashes <- fread(file.path(root, "build/output/crashes_state_year.csv"))
-demographics <- fread(file.path(root, "build/output/demographics_state_year.csv"))
-policies <- fread(file.path(root, "build/input/policy_adoptions.csv"))
-state_names <- fread(file.path(root, "build/input/state_names.csv"))
+crashes_sy <- fread("build/output/crashes_state_year.csv")
+demographics <- fread("build/output/demographics_state_year.csv")
+policies <- fread("build/input/policy_adoptions.csv")
+state_names <- fread("build/input/state_names.csv")
 
 # Merge 1: Crashes + Demographics (on state_fips + year)
-panel <- merge(crashes, demographics, by = c("state_fips", "year"), all = FALSE)
+panel <- merge(crashes_sy, demographics, by = c("state_fips", "year"), all = FALSE)
 cat("After merge 1:", nrow(panel), "rows\n")
 
 # Merge 2: + Policy adoptions (on state_fips only — many:1)
@@ -511,35 +581,26 @@ cat("After merge 2:", nrow(panel), "rows\n")
 panel <- merge(panel, state_names, by = "state_fips", all.x = TRUE)
 cat("After merge 3:", nrow(panel), "rows\n")
 
-# Create treatment indicators
-panel[, ever_treated := fifelse(!is.na(adoption_year), 1L, 0L)]
+# Create treatment indicator
 panel[, post_treated := fifelse(
-  ever_treated == 1L & year >= adoption_year, 1L, 0L
+  !is.na(adoption_year) & year >= adoption_year, 1L, 0L
 )]
 panel[, log_pop := log(population)]
 
-fwrite(panel, file.path(root, "build/output/analysis_panel.csv"))
-cat("  Saved analysis_panel.csv:", nrow(panel), "rows\n"){% endcapture %}
-  {% capture pc %}import pandas as pd
+# Save final analysis dataset
+fwrite(panel, "build/output/analysis_panel.csv")
+str(panel)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
 import numpy as np
-from pathlib import Path
-
-ROOT = Path(__file__).parent.parent.parent
-
-crashes_file = ROOT / "build/output/crashes_state_year.csv"
-demographics_file = ROOT / "build/output/demographics_state_year.csv"
-policy_file = ROOT / "build/input/policy_adoptions.csv"
-names_file = ROOT / "build/input/state_names.csv"
-output_file = ROOT / "build/output/analysis_panel.csv"
 
 # Load all datasets
-crashes = pd.read_csv(crashes_file)
-demographics = pd.read_csv(demographics_file)
-policies = pd.read_csv(policy_file)
-state_names = pd.read_csv(names_file)
+crashes_sy = pd.read_csv("build/output/crashes_state_year.csv")
+demographics = pd.read_csv("build/output/demographics_state_year.csv")
+policies = pd.read_csv("build/input/policy_adoptions.csv")
+state_names = pd.read_csv("build/input/state_names.csv")
 
 # Merge 1: Crashes + Demographics (on state_fips + year)
-panel = crashes.merge(demographics, on=['state_fips', 'year'], how='inner')
+panel = crashes_sy.merge(demographics, on=['state_fips', 'year'], how='inner')
 print(f"After merge 1: {len(panel)} rows")
 
 # Merge 2: + Policy adoptions (on state_fips only — many:1)
@@ -550,21 +611,22 @@ print(f"After merge 2: {len(panel)} rows")
 panel = panel.merge(state_names, on='state_fips', how='left')
 print(f"After merge 3: {len(panel)} rows")
 
-# Create treatment indicators
-panel['ever_treated'] = panel['adoption_year'].notna().astype(int)
+# Create treatment indicator
 panel['post_treated'] = (
     (panel['year'] >= panel['adoption_year']) &
     panel['adoption_year'].notna()
 ).astype(int)
 panel['log_pop'] = np.log(panel['population'])
 
-output_file.parent.mkdir(parents=True, exist_ok=True)
-panel.to_csv(output_file, index=False)
-print(f"Saved analysis_panel.csv: {len(panel)} rows"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+# Save final analysis dataset
+panel.to_csv("build/output/analysis_panel.csv", index=False)
+print(panel.info())</code></pre>
+  </div>
 
-  {% capture callout_content %}<p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>keep()</code> option controls which observations to retain: <code>keep(match)</code> keeps only matched rows, <code>keep(master match)</code> keeps all master rows even if unmatched (like a left join). The <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Always Check Your Merges", content: callout_content %}
+  <div class="callout-info">
+    <h4>Always Check Your Merges</h4>
+    <p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>keep()</code> option controls which observations to retain: <code>keep(match)</code> keeps only matched rows, <code>keep(master match)</code> keeps all master rows even if unmatched (like a left join). The <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>
+  </div>
 </section>
 
 <!-- ============================================================ -->
@@ -575,7 +637,16 @@ print(f"Saved analysis_panel.csv: {len(panel)} rows"){% endcapture %}
 
   <p>Before running regressions, present a descriptive statistics table. A standard format in DD papers has four columns: (1) all observations, (2) treated states in the post-treatment period, (3) treated states before treatment, and (4) never-treated states. This shows how the groups compare and whether there are large pre-treatment differences.</p>
 
-  {% capture sc %}use "$build/output/analysis_panel.dta", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/analysis_panel.dta", clear
 
 * Create group indicator
 gen group = 3 if missing(adoption_year)
@@ -622,8 +693,8 @@ filefilter "$analysis/output/tables/descriptive_table_s1.tex" ///
     from("\BScentering") to("") replace
 filefilter "$analysis/output/tables/descriptive_table_s2.tex" ///
     "$analysis/output/tables/descriptive_table.tex", ///
-    from("\BSend{table}") to("") replace{% endcapture %}
-  {% capture rc %}pacman::p_load(data.table, modelsummary)
+    from("\BSend{table}") to("") replace</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(data.table, modelsummary)
 
 panel <- fread("build/output/analysis_panel.csv")
 
@@ -646,8 +717,8 @@ datasummary(
   data = panel,
   fmt = 2,
   output = "analysis/output/tables/descriptive_table.tex"
-){% endcapture %}
-  {% capture pc %}import pandas as pd
+)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
 
 panel = pd.read_csv("build/output/analysis_panel.csv")
 
@@ -670,35 +741,46 @@ stats = (panel.groupby('group')[vars]
 # Export to LaTeX
 stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
                  caption="Descriptive Statistics",
-                 label="tab:desc"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+                 label="tab:desc")</code></pre>
+  </div>
 
   <p>Here's what the exported table looks like when compiled to PDF:</p>
   <figure class="output-figure">
     <img src="data/project-walkthrough/figures/descriptive_table.png" alt="Descriptive statistics table">
   </figure>
 
-  {% capture callout_content %}<ul>
+  <div class="callout-info">
+    <h4>What to Look For</h4>
+    <ul>
       <li><strong>Pre-treatment balance:</strong> Treated Before vs. Untreated should look similar. Big differences suggest selection into treatment.</li>
       <li><strong>Post-treatment changes:</strong> Compare Treated After vs. Treated Before. This is the raw before/after for treated units.</li>
       <li><strong>Sample composition:</strong> Report observation counts for each group at the bottom of the table.</li>
-    </ul>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "What to Look For", content: callout_content %}
+    </ul>
+  </div>
 
   <h3>From Code Output to Publication-Ready Table</h3>
 
   <p>The code above produces a <code>.tex</code> file containing the table body. To get a publication-ready PDF, wrap it in a standalone LaTeX document and compile:</p>
 
-  {% capture sc %}\documentclass[border=10pt]{standalone}
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">LaTeX wrapper</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">\documentclass[border=10pt]{standalone}
 \usepackage{booktabs}
 \begin{document}
 \input{descriptive_table.tex}
-\end{document}{% endcapture %}
-  {% include "code-block.liquid", stata: sc, stata_label: "LaTeX wrapper" %}
+\end{document}</code></pre>
+  </div>
 
   <p>Compile with <code>pdflatex standalone_table.tex</code>. See the <a href="auxiliary-latex.html">LaTeX module</a> for installation details.</p>
 
-  {% capture callout_content %}<ul>
+  <div class="callout-warning">
+    <h4>Table Formatting Checklist</h4>
+    <ul>
       <li><strong>Use booktabs rules</strong> (<code>\toprule</code>, <code>\midrule</code>, <code>\bottomrule</code>) — never vertical lines or heavy grids</li>
       <li><strong>Standard errors in parentheses</strong> directly below coefficients</li>
       <li><strong>Stars for significance</strong> with a clear legend at the bottom</li>
@@ -706,11 +788,13 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
       <li><strong>Label variables clearly:</strong> "Log(Population)" not "log_pop"</li>
       <li><strong>Fixed effects indicators:</strong> "Yes" or blank (not "No")</li>
       <li><strong>Sample size</strong> and <strong>R-squared</strong> at the bottom of every regression table</li>
-    </ul>{% endcapture %}
-  {% include "callout.liquid", type: "warning", heading: "Table Formatting Checklist", content: callout_content %}
+    </ul>
+  </div>
 
-  {% capture callout_content %}<p>Formatting tables and figures is an excellent use case for AI tools like ChatGPT or Claude. These tasks leave little room for hallucination—the AI just needs to adjust spacing, labels, and LaTeX formatting. Describe what you want and iterate.</p>{% endcapture %}
-  {% include "callout.liquid", type: "success", heading: "AI Tools Are Great for Table Formatting", content: callout_content %}
+  <div class="callout-success">
+    <h4>AI Tools Are Great for Table Formatting</h4>
+    <p>Formatting tables and figures is an excellent use case for AI tools like ChatGPT or Claude. These tasks leave little room for hallucination—the AI just needs to adjust spacing, labels, and LaTeX formatting. Describe what you want and iterate.</p>
+  </div>
 </section>
 
 <!-- ============================================================ -->
@@ -722,42 +806,66 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
   <h3>The TWFE Regression</h3>
   <p>With our merged panel, we estimate the effect of the policy on fatal crashes using two-way fixed effects (state + year FE).</p>
 
-  {% capture sc %}use "$build/output/analysis_panel.dta", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/analysis_panel.dta", clear
+
+* Create log outcome
+gen log_fatal = log(fatal_crashes + 1)
 
 * Label variables for table output
-label variable post_treated "Treat $\times$ Post"
+label variable post_treated "Post × Treated"
 label variable log_pop "Log Population"
 label variable median_income "Median Income"
 
-* Main DD regression: effect of policy on fatal crashes
-reghdfe fatal_crashes post_treated, absorb(state_fips year) vce(cluster state_fips){% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, data.table)
+* Main DD regression: effect of policy on log fatal crashes
+reghdfe log_fatal post_treated, absorb(state_fips year) vce(cluster state_fips)</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, data.table)
 
 panel <- fread("build/output/analysis_panel.csv")
+panel[, log_fatal := log(fatal_crashes + 1)]
 
 # Main DD regression
 main <- feols(
-  fatal_crashes ~ post_treated | state_fips + year,
+  log_fatal ~ post_treated | state_fips + year,
   data = panel, vcov = ~state_fips
 )
-summary(main){% endcapture %}
-  {% capture pc %}import pyfixest as pf
+summary(main)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pyfixest as pf
 import pandas as pd
+import numpy as np
 
 panel = pd.read_csv("build/output/analysis_panel.csv")
+panel['log_fatal'] = np.log(panel['fatal_crashes'] + 1)
 
 # Main DD regression
 main = pf.feols(
-    "fatal_crashes ~ post_treated | state_fips + year",
+    "log_fatal ~ post_treated | state_fips + year",
     vcov={"CRV1": "state_fips"}, data=panel
 )
-print(main.summary()){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+main.summary()</code></pre>
+  </div>
 
   <h3>Event Study</h3>
   <p>The event study shows dynamic treatment effects and lets us check the parallel trends assumption.</p>
 
-  {% capture sc %}use "$build/output/analysis_panel.dta", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/analysis_panel.dta", clear
 
 * Create time-to-treatment (never-treated get a far-away value)
 gen time_to_treat = year - adoption_year
@@ -778,8 +886,11 @@ forvalues t = -5/5 {
 replace rel_m5 = (time_to_treat <= -5) & !missing(adoption_year)
 replace rel_5  = (time_to_treat >= 5)  & !missing(adoption_year)
 
+* Create log outcome
+gen log_fatal = log(fatal_crashes + 1)
+
 * Regression (omit t=-1)
-reghdfe fatal_crashes rel_m5 rel_m4 rel_m3 rel_m2 ///
+reghdfe log_fatal rel_m5 rel_m4 rel_m3 rel_m2 ///
     rel_0 rel_1 rel_2 rel_3 rel_4 rel_5 log_pop, ///
     absorb(state_fips year) vce(cluster state_fips)
 
@@ -826,17 +937,18 @@ twoway (rarea ub lb t, color("44 95 138%20") lwidth(none)) ///
     ytitle("") ///
     ylabel(, labsize(large) labcolor(gs5) grid glcolor(gs14) glwidth(vthin)) ///
     xlabel(-5(1)5, labsize(large) labcolor(gs5)) ///
-    title("Effect on Fatal Crashes", ///
+    title("Effect on Log Fatal Crashes", ///
           position(11) size(large) color(gs5)) ///
     legend(off) ///
     graphregion(color(white) margin(medium)) ///
     plotregion(color(white) margin(small))
 
 graph export "$analysis/output/figures/event_study.png", replace width(2400) height(1800)
-restore{% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, ggfixest, data.table)
+restore</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, ggfixest, data.table)
 
 panel <- fread("build/output/analysis_panel.csv")
+panel[, log_fatal := log(fatal_crashes + 1)]
 
 # Create time-to-treatment
 # Never-treated: set to -1000
@@ -854,7 +966,7 @@ panel[, time_to_treat := fifelse(
 
 # Event study regression
 es <- feols(
-  fatal_crashes ~ i(time_to_treat, ever_treated,
+  log_fatal ~ i(time_to_treat, ever_treated,
                      ref = c(-1, -1000)) + log_pop
     | state_fips + year,
   data = panel, vcov = ~state_fips
@@ -864,15 +976,16 @@ summary(es)
 # Plot
 ggiplot(es) +
   labs(x = "Years Relative to Policy Adoption",
-       y = "Effect on Fatal Crashes") +
+       y = "Effect on Log Fatal Crashes") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   theme_minimal()
-ggsave("analysis/output/figures/event_study.png", width = 8, height = 5, dpi = 300){% endcapture %}
-  {% capture pc %}import pyfixest as pf
+ggsave("analysis/output/figures/event_study.png", width = 8, height = 5, dpi = 300)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pyfixest as pf
 import pandas as pd
 import numpy as np
 
 panel = pd.read_csv("build/output/analysis_panel.csv")
+panel['log_fatal'] = np.log(panel['fatal_crashes'] + 1)
 
 # Create time-to-treatment
 panel['time_to_treat'] = panel['year'] - panel['adoption_year']
@@ -887,15 +1000,15 @@ panel['time_to_treat'] = np.where(
 
 # Event study regression
 es = pf.feols(
-    "fatal_crashes ~ i(time_to_treat, ever_treated, ref=c(-1, -1000))"
+    "log_fatal ~ i(time_to_treat, ever_treated, ref=c(-1, -1000))"
     " + log_pop | state_fips + year",
     vcov={"CRV1": "state_fips"}, data=panel
 )
-print(es.summary())
+es.summary()
 
 # Plot
-es.iplot(){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+es.iplot()</code></pre>
+  </div>
 
   <p>Here's the event study plot produced by the Stata code above:</p>
   <figure class="output-figure narrow">
@@ -932,7 +1045,9 @@ es.iplot(){% endcapture %}
     <li><strong>Export at high resolution.</strong> Use <code>graph export "file.png", width(2400)</code> or export as PDF for vector graphics.</li>
   </ol>
 
-  {% capture callout_content %}<ul>
+  <div class="callout-info">
+    <h4>Figure Checklist</h4>
+    <ul>
       <li>Can you read all text when the figure is printed at its final size?</li>
       <li>Are axis labels descriptive? (not variable names)</li>
       <li>Is the aspect ratio wider than tall? (roughly 4:3 or 16:10)</li>
@@ -940,22 +1055,31 @@ es.iplot(){% endcapture %}
       <li>Did you export as PDF (vector) or high-res PNG?</li>
       <li>Is the background white? (no gray default)</li>
       <li>Are confidence intervals shown as shaded bands (not error bars) where appropriate?</li>
-    </ul>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Figure Checklist", content: callout_content %}
+    </ul>
+  </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- PART E: PROFESSIONAL DD TABLE WITH SUBGROUPS -->
+<!-- PART F: PROFESSIONAL DD TABLE WITH SUBGROUPS -->
 <!-- ============================================================ -->
 <section id="dd-table" class="tutorial-section">
   <h2>Part F: Professional DD Table with Subgroups</h2>
 
   <p>A strong empirical paper doesn't just report the main result. It shows robustness across specifications and explores heterogeneity. Here we create a single table with: (1) the main result, (2) results by region subgroup, and (3) a specification with additional controls.</p>
 
-  {% capture sc %}use "$build/output/analysis_panel.dta", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">use "$build/output/analysis_panel.dta", clear
 
 * Label variables for table output
-label variable post_treated "Treat $\times$ Post"
+label variable post_treated "Post × Treated"
 label variable log_pop "Log Population"
 label variable median_income "Median Income"
 
@@ -1019,8 +1143,8 @@ esttab m1 m2 m3 m4 m5 ///
     postfoot("\midrule \midrule" ///
              "\multicolumn{6}{l}{\emph{Clustered (state) standard-errors in parentheses}}\\" ///
              "\multicolumn{6}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\" ///
-             "\end{tabular}"){% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, data.table)
+             "\end{tabular}")</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, data.table)
 
 panel <- fread("build/output/analysis_panel.csv")
 
@@ -1048,7 +1172,7 @@ m5 <- feols(serious_crashes ~ post_treated + log_pop | state_fips + year,
 # Export professional table
 etable(
   m1, m2, m3, m4, m5,
-  tex = TRUE, file = "analysis/output/tables/dd_results.tex", replace = TRUE,
+  tex = TRUE, file = "analysis/output/tables/dd_table.tex", replace = TRUE,
   headers = list(
     ":_sym:" = c("(1)", "(2)", "(3)", "(4)", "(5)")
   ),
@@ -1062,13 +1186,13 @@ etable(
   dict = c(
     fatal_crashes = "Fatal Crashes",
     serious_crashes = "Serious Crashes",
-    post_treated = "Treat x Post",
+    post_treated = "Post × Treated",
     log_pop = "Log(Population)",
     median_income = "Median Income"
   ),
   se.below = TRUE, depvar = TRUE
-){% endcapture %}
-  {% capture pc %}import pyfixest as pf
+)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pyfixest as pf
 import pandas as pd
 
 panel = pd.read_csv("build/output/analysis_panel.csv")
@@ -1100,16 +1224,16 @@ m5 = pf.feols("serious_crashes ~ post_treated + log_pop | state_fips + year",
 pf.etable(
     [m1, m2, m3, m4, m5],
     type="tex",
-    file_name="analysis/output/tables/dd_results.tex",
+    file="analysis/output/tables/dd_table.tex",
     labels={
         "fatal_crashes": "Fatal Crashes",
         "serious_crashes": "Serious Crashes",
-        "post_treated": "Treat x Post",
+        "post_treated": "Post × Treated",
         "log_pop": "Log(Population)",
         "median_income": "Median Income",
     },
-){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+)</code></pre>
+  </div>
 
   <p>Here's the DD regression table produced by <code>esttab</code>:</p>
   <figure class="output-figure">
@@ -1118,12 +1242,12 @@ pf.etable(
 </section>
 
 <!-- ============================================================ -->
-<!-- PART F: INSTRUMENTAL VARIABLES -->
+<!-- PART G: INSTRUMENTAL VARIABLES -->
 <!-- ============================================================ -->
 <section id="iv-analysis" class="tutorial-section">
   <h2>Part G: Instrumental Variables</h2>
 
-  <p>The question: <strong>does class size affect student test scores?</strong> Simply comparing small and large classes won't work — schools with smaller classes may differ in ways that also affect scores (e.g., funding, parental involvement). We need exogenous variation in class size. This section uses a dataset inspired by Angrist &amp; Lavy (1999), who exploit a Maimonides rule: Israeli schools must split a class once enrollment exceeds 40, creating sharp jumps in class size that are driven by enrollment rather than school quality.</p>
+  <p>This section uses a separate, pre-built dataset (<code>iv_data.csv</code>) inspired by Angrist &amp; Lavy (1999). We estimate the effect of class size on test scores, using a Maimonides-rule instrument (enrollment determines class size via a maximum-of-40 rule).</p>
 
   <h3>The Setup</h3>
   <ul>
@@ -1135,7 +1259,16 @@ pf.etable(
   <h3>First Stage</h3>
   <p>Does the instrument predict the endogenous variable? Check the <strong>F-statistic</strong> — it should be well above 10.</p>
 
-  {% capture sc %}import delimited "$analysis/code/iv_data.csv", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">import delimited "$analysis/code/iv_data.csv", clear
 
 * Label variables
 label variable class_size "Class Size"
@@ -1148,8 +1281,8 @@ regress class_size enrollment pct_disadvantaged, vce(robust)
 estimates store first_stage
 
 * Check the F-stat on enrollment — should be >> 10
-test enrollment{% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, data.table)
+test enrollment</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, data.table)
 
 iv_data <- fread("analysis/code/iv_data.csv")
 
@@ -1159,43 +1292,65 @@ first_stage <- feols(class_size ~ enrollment + pct_disadvantaged,
 summary(first_stage)
 
 # F-statistic on excluded instrument
-cat("First-stage F:", fitstat(first_stage, "f")$f$stat, "\n"){% endcapture %}
-  {% capture pc %}import pandas as pd
-import statsmodels.formula.api as smf
+cat("First-stage F:", fitstat(first_stage, "f")$f$stat, "\n")</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+import pyfixest as pf
 
 iv_data = pd.read_csv("analysis/code/iv_data.csv")
 
 # First stage: Does enrollment predict class size?
-first_stage = smf.ols(
-    'class_size ~ enrollment + pct_disadvantaged', data=iv_data
-).fit(cov_type='HC1')
-print(first_stage.summary())
+first_stage = pf.feols(
+    "class_size ~ enrollment + pct_disadvantaged",
+    data=iv_data, vcov="hetero"
+)
+first_stage.summary()
 
 # F-statistic on excluded instrument
-f_test = first_stage.f_test('enrollment = 0')
-print(f"\nFirst-stage F-statistic: {f_test.fvalue[0][0]:.1f}"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+enrollment_coef = first_stage.coef()['enrollment']
+enrollment_se = first_stage.se()['enrollment']
+f_stat = (enrollment_coef / enrollment_se) ** 2
+print(f"\nFirst-stage F-statistic: {f_stat:.1f}")</code></pre>
+  </div>
 
   <h3>Reduced Form</h3>
   <p>The reduced form regresses the outcome directly on the instrument. If the instrument affects the outcome, it's working through the endogenous variable.</p>
 
-  {% capture sc %}* Reduced form: Does enrollment predict test scores?
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Reduced form: Does enrollment predict test scores?
 regress test_score enrollment pct_disadvantaged, vce(robust)
-estimates store reduced_form{% endcapture %}
-  {% capture rc %}# Reduced form: Does enrollment predict test scores?
+estimates store reduced_form</code></pre>
+    <pre class="code-content r"><code class="language-r"># Reduced form: Does enrollment predict test scores?
 reduced_form <- feols(test_score ~ enrollment + pct_disadvantaged,
                       data = iv_data)
-summary(reduced_form){% endcapture %}
-  {% capture pc %}# Reduced form: Does enrollment predict test scores?
-reduced_form = smf.ols(
-    'test_score ~ enrollment + pct_disadvantaged', data=iv_data
-).fit(cov_type='HC1')
-print(reduced_form.summary()){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+summary(reduced_form)</code></pre>
+    <pre class="code-content python"><code class="language-python"># Reduced form: Does enrollment predict test scores?
+reduced_form = pf.feols(
+    "test_score ~ enrollment + pct_disadvantaged",
+    data=iv_data, vcov="hetero"
+)
+reduced_form.summary()</code></pre>
+  </div>
 
   <h3>2SLS Estimation</h3>
 
-  {% capture sc %}* OLS (biased estimate)
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* OLS (biased estimate)
 regress test_score class_size pct_disadvantaged, vce(robust)
 estimates store ols
 
@@ -1229,8 +1384,8 @@ esttab first_stage reduced_form iv_2sls ols ///
              "\multicolumn{5}{l}{\emph{Heteroskedasticity-robust standard-errors in parentheses}}\\" ///
              "\multicolumn{5}{l}{\emph{Instrument: School enrollment}}\\" ///
              "\multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\" ///
-             "\end{tabular}"){% endcapture %}
-  {% capture rc %}# 2SLS: Instrument class_size with enrollment
+             "\end{tabular}")</code></pre>
+    <pre class="code-content r"><code class="language-r"># 2SLS: Instrument class_size with enrollment
 # fixest syntax: outcome ~ controls | FE | endogenous ~ instrument
 iv_model <- feols(
   test_score ~ pct_disadvantaged | 0 | class_size ~ enrollment,
@@ -1246,46 +1401,45 @@ ols_model <- feols(test_score ~ class_size + pct_disadvantaged,
                    data = iv_data)
 etable(ols_model, iv_model,
        dict = c(class_size = "Class Size",
-                fit_class_size = "Class Size (IV)")){% endcapture %}
-  {% capture pc %}from linearmodels.iv import IV2SLS
+                fit_class_size = "Class Size (IV)"))</code></pre>
+    <pre class="code-content python"><code class="language-python">import pyfixest as pf
 
 # 2SLS: Instrument class_size with enrollment
-iv_model = IV2SLS.from_formula(
-    'test_score ~ 1 + pct_disadvantaged + [class_size ~ enrollment]',
-    data=iv_data
-).fit(cov_type='robust')
-print(iv_model.summary)
-
-# First-stage F
-print(f"\nFirst-stage F: "
-      f"{iv_model.first_stage.diagnostics['f.stat'].stat:.1f}")
+iv_model = pf.feols(
+    "test_score ~ pct_disadvantaged | 0 | class_size ~ enrollment",
+    data=iv_data, vcov="hetero"
+)
+iv_model.summary()
 
 # Compare: OLS
-ols = smf.ols(
-    'test_score ~ class_size + pct_disadvantaged', data=iv_data
-).fit(cov_type='HC1')
-print("\n--- OLS ---")
-print(f"Class size coef: {ols.params['class_size']:.3f}")
-print("\n--- IV ---")
-print(f"Class size coef: {iv_model.params['class_size']:.3f}"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+ols_model = pf.feols(
+    "test_score ~ class_size + pct_disadvantaged",
+    data=iv_data, vcov="hetero"
+)
+
+# Compare coefficients
+print(f"\nOLS class_size coef: {ols_model.coef()['class_size']:.3f}")
+print(f"IV  class_size coef: {iv_model.coef()['class_size']:.3f}")</code></pre>
+  </div>
 
   <p>Here's the IV results table comparing OLS, first stage, reduced form, and 2SLS:</p>
   <figure class="output-figure">
     <img src="data/project-walkthrough/figures/iv_results.png" alt="IV regression table">
   </figure>
 
-  {% capture callout_content %}<p>OLS is biased because class size is correlated with school quality (omitted variable bias). The IV estimate isolates the causal effect by using only variation in class size driven by enrollment thresholds. The IV estimate should typically be larger in magnitude if OLS is biased toward zero (attenuation bias from measurement error) or could go either way depending on the source of endogeneity.</p>{% endcapture %}
-  {% include "callout.liquid", type: "warning", heading: "OLS vs. IV: What to Expect", content: callout_content %}
+  <div class="callout-warning">
+    <h4>OLS vs. IV: What to Expect</h4>
+    <p>OLS is biased because class size is correlated with school quality (omitted variable bias). The IV estimate isolates the causal effect by using only variation in class size driven by enrollment thresholds. The IV estimate should typically be larger in magnitude if OLS is biased toward zero (attenuation bias from measurement error) or could go either way depending on the source of endogeneity.</p>
+  </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- PART G: REGRESSION DISCONTINUITY -->
+<!-- PART H: REGRESSION DISCONTINUITY -->
 <!-- ============================================================ -->
 <section id="rd-analysis" class="tutorial-section">
   <h2>Part H: Regression Discontinuity</h2>
 
-  <p>The question: <strong>does legal access to alcohol increase mortality?</strong> We can't just compare people who drink to people who don't — drinkers differ from non-drinkers in many ways. But on your 21st birthday, you go from no legal access to full legal access overnight, while nothing else changes discontinuously. This section uses a dataset inspired by Carpenter &amp; Dobkin (2009), who compare mortality rates just below and just above age 21 to isolate the effect of legal drinking access.</p>
+  <p>This section uses a pre-built dataset (<code>rd_data.csv</code>) inspired by Carpenter &amp; Dobkin (2009). We estimate the effect of legal drinking access (turning 21) on mortality using a sharp RD design.</p>
 
   <h3>The Setup</h3>
   <ul>
@@ -1298,7 +1452,16 @@ print(f"Class size coef: {iv_model.params['class_size']:.3f}"){% endcapture %}
   <h3>Linear Specification</h3>
   <p>The simplest RD: a linear function of the running variable on each side of the cutoff, within a bandwidth.</p>
 
-  {% capture sc %}import delimited "$analysis/code/rd_data.csv", clear
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">import delimited "$analysis/code/rd_data.csv", clear
 
 * Label variables
 label variable mortality_rate "Mortality Rate"
@@ -1313,8 +1476,8 @@ regress mortality_rate over_21 days_from_21 days_x_over21 ///
     if abs(days_from_21) <= 365, vce(robust)
 estimates store rd_linear
 
-* The coefficient on over_21 is the RD estimate (jump at cutoff){% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, data.table)
+* The coefficient on over_21 is the RD estimate (jump at cutoff)</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, data.table)
 
 rd_data <- fread("analysis/code/rd_data.csv")
 
@@ -1330,36 +1493,44 @@ rd_narrow <- feols(
   mortality_rate ~ over_21 + days_from_21 + over_21:days_from_21,
   data = rd_data[abs(days_from_21) <= 180]
 )
-summary(rd_narrow){% endcapture %}
-  {% capture pc %}import pandas as pd
-import statsmodels.formula.api as smf
+summary(rd_narrow)</code></pre>
+    <pre class="code-content python"><code class="language-python">import pandas as pd
+import pyfixest as pf
 
 rd_data = pd.read_csv("analysis/code/rd_data.csv")
 
 # Linear RD within bandwidth of 365 days
-subset = rd_data[rd_data['days_from_21'].abs() <= 365]
-rd_linear = smf.ols(
+subset = rd_data[rd_data['days_from_21'].abs() <= 365].copy()
+rd_linear = pf.feols(
     'mortality_rate ~ over_21 + days_from_21 + over_21:days_from_21',
-    data=subset
-).fit(cov_type='HC1')
+    data=subset, vcov="hetero"
+)
 print("=== Linear RD (bw=365) ===")
-print(rd_linear.summary())
+rd_linear.summary()
 
 # Narrower bandwidth (180 days)
-subset_narrow = rd_data[rd_data['days_from_21'].abs() <= 180]
-rd_narrow = smf.ols(
+subset_narrow = rd_data[rd_data['days_from_21'].abs() <= 180].copy()
+rd_narrow = pf.feols(
     'mortality_rate ~ over_21 + days_from_21 + over_21:days_from_21',
-    data=subset_narrow
-).fit(cov_type='HC1')
+    data=subset_narrow, vcov="hetero"
+)
 print("\n=== Linear RD (bw=180) ===")
-print(f"RD estimate: {rd_narrow.params['over_21']:.3f} "
-      f"(SE: {rd_narrow.bse['over_21']:.3f})"){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+rd_narrow.summary()</code></pre>
+  </div>
 
   <h3>Polynomial Specification</h3>
   <p>A polynomial specification allows for curvature in the relationship between the running variable and the outcome. This can be more flexible but risks overfitting.</p>
 
-  {% capture sc %}* Create polynomial terms
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* Create polynomial terms
 gen days_sq = days_from_21^2
 gen days_cu = days_from_21^3
 gen days_sq_x_over21 = days_sq * over_21
@@ -1400,8 +1571,8 @@ esttab rd_linear rd_quadratic rd_cubic ///
     postfoot("\midrule \midrule" ///
              "\multicolumn{4}{l}{\emph{Robust standard-errors in parentheses}}\\" ///
              "\multicolumn{4}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\" ///
-             "\end{tabular}"){% endcapture %}
-  {% capture rc %}pacman::p_load(fixest, rdrobust, data.table)
+             "\end{tabular}")</code></pre>
+    <pre class="code-content r"><code class="language-r">pacman::p_load(fixest, rdrobust, data.table)
 
 rd_data <- fread("analysis/code/rd_data.csv")
 
@@ -1430,24 +1601,24 @@ rdplot(
   title = "RD Plot: Mortality at Age 21",
   x.label = "Days from 21st Birthday",
   y.label = "Mortality Rate"
-){% endcapture %}
-  {% capture pc %}import numpy as np
+)</code></pre>
+    <pre class="code-content python"><code class="language-python">import numpy as np
 import matplotlib.pyplot as plt
-import statsmodels.formula.api as smf
+import pandas as pd
+import pyfixest as pf
 
 rd_data = pd.read_csv("analysis/code/rd_data.csv")
 
 # Quadratic RD
 rd_data['days2'] = rd_data['days_from_21'] ** 2
-subset = rd_data[rd_data['days_from_21'].abs() <= 365]
-rd_quad = smf.ols(
+subset = rd_data[rd_data['days_from_21'].abs() <= 365].copy()
+rd_quad = pf.feols(
     'mortality_rate ~ over_21 + days_from_21 + days2'
     ' + over_21:days_from_21 + over_21:days2',
-    data=subset
-).fit(cov_type='HC1')
+    data=subset, vcov="hetero"
+)
 print("=== Quadratic RD ===")
-print(f"RD estimate: {rd_quad.params['over_21']:.3f} "
-      f"(SE: {rd_quad.bse['over_21']:.3f})")
+rd_quad.summary()
 
 # RD Plot
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -1466,8 +1637,8 @@ ax.set_title('RD Plot: Mortality at Age 21')
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 fig.tight_layout()
-fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
-  {% include "code-block.liquid", stata: sc, r: rc, python: pc %}
+fig.savefig('analysis/output/figures/rd_plot.png', dpi=300)</code></pre>
+  </div>
 
   <p>Here's the RD plot and regression table:</p>
   <figure class="output-figure narrow">
@@ -1482,33 +1653,8 @@ fig.savefig('analysis/output/figures/rd_plot.png', dpi=300){% endcapture %}
     <img src="data/project-walkthrough/figures/rd_results.png" alt="RD regression table">
   </figure>
 
-  {% capture callout_content %}<p>Start with <strong>linear</strong> — it's simpler and less prone to overfitting. Use polynomial specifications as robustness checks. If the linear and polynomial estimates are very different, it suggests the result may be sensitive to functional form assumptions. The <code>rdrobust</code> package provides data-driven bandwidth selection and bias-corrected inference, and is the current best practice.</p>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Linear vs. Polynomial: Which to Use?", content: callout_content %}
-</section>
-
-<!-- ============================================================ -->
-<!-- EXERCISES -->
-<!-- ============================================================ -->
-<section id="exercises" class="tutorial-section">
-  <h2>Exercises</h2>
-
-  <p>Practice the techniques from this walkthrough. Each ZIP contains the exercise PDF, a codebook, and all necessary datasets.</p>
-
-  {% capture ex1_content %}<div style="text-align: center;">
-    <p>Data cleaning, merging, descriptive statistics, and difference-in-differences.</p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="data/exercises/exercise1.zip" download class="download-btn">Download</a>
-      <!-- <a href="data/exercises/exercise1-solutions.zip" download class="download-btn">Solutions</a> -->
-    </div>
-  </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Exercise 1 (Basic)", content: ex1_content %}
-
-  {% capture ex2_content %}<div style="text-align: center;">
-    <p>Merging, two-way fixed effects, event studies, and instrumental variables.</p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="data/exercises/exercise2.zip" download class="download-btn">Download</a>
-      <!-- <a href="data/exercises/exercise2-solutions.zip" download class="download-btn">Solutions</a> -->
-    </div>
-  </div>{% endcapture %}
-  {% include "callout.liquid", type: "info", heading: "Exercise 2 (Advanced)", content: ex2_content %}
+  <div class="callout-info">
+    <h4>Linear vs. Polynomial: Which to Use?</h4>
+    <p>Start with <strong>linear</strong> — it's simpler and less prone to overfitting. Use polynomial specifications as robustness checks. If the linear and polynomial estimates are very different, it suggests the result may be sensitive to functional form assumptions. The <code>rdrobust</code> package provides data-driven bandwidth selection and bias-corrected inference, and is the current best practice.</p>
+  </div>
 </section>

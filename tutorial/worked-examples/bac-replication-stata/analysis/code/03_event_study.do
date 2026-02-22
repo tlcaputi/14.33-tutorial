@@ -11,21 +11,19 @@ replace event_time_binned = 10 if event_time > 10
 * Shift to positive values for factor variable (add 6 so -5 becomes 1)
 gen et_shifted = event_time_binned + 6
 
-* Check if control variables are available
+* Check if unemployment is available
 capture confirm variable unemployment
 local has_unemp = (_rc == 0)
-capture confirm variable income
-local has_income = (_rc == 0)
-
-* Policy controls are always present (created in build script)
-local controls "alr zero_tolerance primary_seatbelt secondary_seatbelt mlda21 gdl speed_70 aggravated_dui"
-if `has_unemp' local controls "`controls' unemployment"
-if `has_income' local controls "`controls' income"
 
 * Event study regression for hit-run
 * Reference category is t=-1, which is et_shifted=5
 di "  Running event study: ln_hr ~ event_time_dummies + FE"
-reghdfe ln_hr ib5.et_shifted `controls', absorb(state_id year) cluster(state_id)
+if `has_unemp' {
+    reghdfe ln_hr ib5.et_shifted unemployment, absorb(state_id year) cluster(state_id)
+}
+else {
+    reghdfe ln_hr ib5.et_shifted, absorb(state_id year) cluster(state_id)
+}
 est store hr_es
 
 * Extract coefficients for hit-run
@@ -84,7 +82,12 @@ forvalues et = -5/10 {
 * Event study regression for non-hit-run
 di ""
 di "  Running event study: ln_nhr ~ event_time_dummies + FE"
-reghdfe ln_nhr ib5.et_shifted `controls', absorb(state_id year) cluster(state_id)
+if `has_unemp' {
+    reghdfe ln_nhr ib5.et_shifted unemployment, absorb(state_id year) cluster(state_id)
+}
+else {
+    reghdfe ln_nhr ib5.et_shifted, absorb(state_id year) cluster(state_id)
+}
 est store nhr_es
 
 * Extract coefficients for non-hit-run
@@ -121,23 +124,3 @@ export delimited "$analysis/output/tables/es_coefficients_nhr.csv", replace
 restore
 
 di "  Saved event study coefficients"
-
-* =============================================================================
-* Alternative: Using xtevent for canonical event study
-* =============================================================================
-* xtevent simplifies event study estimation.
-* Install: ssc install xtevent
-
-* xtevent ln_hr `controls', ///
-*     policyvar(treated) ///
-*     panelvar(state_id) timevar(year) ///
-*     window(5 10) ///
-*     cluster(state_id)
-* xteventplot, title("Event Study: Hit-Run (xtevent)")
-
-* xtevent ln_nhr `controls', ///
-*     policyvar(treated) ///
-*     panelvar(state_id) timevar(year) ///
-*     window(5 10) ///
-*     cluster(state_id)
-* xteventplot, title("Event Study: Non-Hit-Run (xtevent)")

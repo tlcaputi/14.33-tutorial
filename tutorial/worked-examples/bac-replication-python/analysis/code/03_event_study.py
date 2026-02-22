@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-from linearmodels.panel import PanelOLS
+import pyfixest as pf
 
 # Load analysis data
 analysis_data = pd.read_parquet(BUILD / "output" / "analysis_data.parquet")
@@ -21,9 +21,6 @@ for et in event_times:
     safe_name = f'et_m{abs(int(et))}' if et < 0 else f'et_p{int(et)}'
     analysis_data[safe_name] = (analysis_data['event_time_binned'] == et).astype(int)
 
-# Set up panel structure
-panel_data = analysis_data.set_index(['state_fips', 'year'])
-
 # Build formula
 et_cols = [f'et_m{abs(int(et))}' if et < 0 else f'et_p{int(et)}' for et in event_times]
 # Policy controls are always present (created in build script)
@@ -34,27 +31,25 @@ if 'unemployment' in analysis_data.columns:
 if 'income' in analysis_data.columns:
     controls.append('income')
 all_vars = et_cols + controls
-formula = f'ln_hr ~ {" + ".join(all_vars)} + EntityEffects + TimeEffects'
+formula_hr = f'ln_hr ~ {" + ".join(all_vars)} | state_fips + year'
 
 print(f"  Running event study: ln_hr ~ event_time_dummies + FE")
 
 # Fit model
-model = PanelOLS.from_formula(formula, data=panel_data, drop_absorbed=True)
-results = model.fit(cov_type='clustered', cluster_entity=True)
+hr_results = pf.feols(formula_hr, data=analysis_data, vcov={'CRV1': 'state_fips'})
 
 # Extract coefficients
 coefs = []
 for et in event_times:
     safe_name = f'et_m{abs(int(et))}' if et < 0 else f'et_p{int(et)}'
-    if safe_name in results.params.index:
-        coefs.append({
-            'event_time': et,
-            'coefficient': results.params[safe_name],
-            'std_error': results.std_errors[safe_name],
-            'pvalue': results.pvalues[safe_name],
-            'ci_lower': results.params[safe_name] - 1.96 * results.std_errors[safe_name],
-            'ci_upper': results.params[safe_name] + 1.96 * results.std_errors[safe_name]
-        })
+    coefs.append({
+        'event_time': et,
+        'coefficient': hr_results.coef()[safe_name],
+        'std_error': hr_results.se()[safe_name],
+        'pvalue': hr_results.pvalue()[safe_name],
+        'ci_lower': hr_results.coef()[safe_name] - 1.96 * hr_results.se()[safe_name],
+        'ci_upper': hr_results.coef()[safe_name] + 1.96 * hr_results.se()[safe_name]
+    })
 
 # Add reference period
 coefs.append({
@@ -75,22 +70,20 @@ for _, row in coef_df_hr.iterrows():
     print(f"    t={int(row['event_time']):+3d}: {row['coefficient']:7.4f} ({row['std_error']:.4f}){sig}")
 
 # Also run for non-hit-run
-formula_nhr = f'ln_nhr ~ {" + ".join(all_vars)} + EntityEffects + TimeEffects'
-model_nhr = PanelOLS.from_formula(formula_nhr, data=panel_data, drop_absorbed=True)
-results_nhr = model_nhr.fit(cov_type='clustered', cluster_entity=True)
+formula_nhr = f'ln_nhr ~ {" + ".join(all_vars)} | state_fips + year'
+nhr_results = pf.feols(formula_nhr, data=analysis_data, vcov={'CRV1': 'state_fips'})
 
 coefs_nhr = []
 for et in event_times:
     safe_name = f'et_m{abs(int(et))}' if et < 0 else f'et_p{int(et)}'
-    if safe_name in results_nhr.params.index:
-        coefs_nhr.append({
-            'event_time': et,
-            'coefficient': results_nhr.params[safe_name],
-            'std_error': results_nhr.std_errors[safe_name],
-            'pvalue': results_nhr.pvalues[safe_name],
-            'ci_lower': results_nhr.params[safe_name] - 1.96 * results_nhr.std_errors[safe_name],
-            'ci_upper': results_nhr.params[safe_name] + 1.96 * results_nhr.std_errors[safe_name]
-        })
+    coefs_nhr.append({
+        'event_time': et,
+        'coefficient': nhr_results.coef()[safe_name],
+        'std_error': nhr_results.se()[safe_name],
+        'pvalue': nhr_results.pvalue()[safe_name],
+        'ci_lower': nhr_results.coef()[safe_name] - 1.96 * nhr_results.se()[safe_name],
+        'ci_upper': nhr_results.coef()[safe_name] + 1.96 * nhr_results.se()[safe_name]
+    })
 
 coefs_nhr.append({
     'event_time': -1,
