@@ -4,11 +4,8 @@
 * ===========================================================================
 *
 * Usage:
-*   1. Open Stata and set the working directory to this folder (pkg-stata/).
+*   1. Set the `root` path below to the location of this folder (pkg-stata/).
 *   2. Run: do master.do
-*
-* All paths are defined relative to the project root so that the project
-* is portable across machines. Never hard-code absolute paths in scripts.
 *
 * Pipeline:
 *   Build
@@ -38,7 +35,9 @@ set varabbrev off
 * All scripts reference $build and $analysis so that paths never need to
 * be edited in individual scripts when the project is moved.
 
-global root     "."
+* >>> CHANGE THIS PATH to wherever you unzipped the project <<<
+global root "/path/to/pkg-stata"
+
 global build    "$root/build"
 global analysis "$root/analysis"
 

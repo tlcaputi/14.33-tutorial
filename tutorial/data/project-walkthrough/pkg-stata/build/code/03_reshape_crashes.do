@@ -12,14 +12,15 @@
 * counts. This script also computes total crashes and the fatal share.
 * ===========================================================================
 
-* Setup — master.do sets these; uncomment below if running standalone
-* cd "/path/to/pkg-stata"
+* Setup — master.do sets these globals. To run this script standalone,
+* set `root` to the full path of the project folder (pkg-stata/).
 if `"${root}"' == "" {
     clear all
     set more off
-    global root "."
+    global root "/path/to/pkg-stata"
     global build "$root/build"
     global analysis "$root/analysis"
+    cd "$root"
 }
 
 * ---------------------------------------------------------------------------
