@@ -882,7 +882,11 @@ stats.T.to_latex("analysis/output/tables/descriptive_table.tex",
   <h2>Part E: Difference-in-Differences and Event Study</h2>
 
   <h3>The TWFE Regression</h3>
-  <p>With our merged panel, we estimate the effect of the policy on fatal crashes using two-way fixed effects (state + year FE).</p>
+  <p>With our merged panel, we estimate the effect of the policy on fatal crashes using two-way fixed effects (state + year FE):</p>
+
+  $$ Y_{st} = \gamma_s + \delta_t + \beta \cdot (\text{Treat} \times \text{Post})_{st} + \varepsilon_{st} $$
+
+  <p>where \(\gamma_s\) are state fixed effects, \(\delta_t\) are year fixed effects, and \(\beta\) is the treatment effect.</p>
 
   <div class="code-block">
     <div class="code-header">
@@ -1334,6 +1338,12 @@ pf.etable(
     <li><strong>Outcome:</strong> test_score</li>
   </ul>
 
+  <p>The three IV equations:</p>
+  <p><strong>First stage:</strong> \( D_i = \alpha_0 + \alpha_1 Z_i + \alpha_2 X_i + \nu_i \)</p>
+  <p><strong>Reduced form:</strong> \( Y_i = \pi_0 + \pi_1 Z_i + \pi_2 X_i + \eta_i \)</p>
+  <p><strong>2SLS (structural):</strong> \( Y_i = \beta_0 + \beta_1 D_i + \beta_2 X_i + \varepsilon_i \)</p>
+  <p>where \(Y_i\) is test score, \(D_i\) is class size (endogenous), \(Z_i\) is enrollment (instrument), and \(X_i\) are controls. The IV estimate is \(\hat{\beta}_1 = \hat{\pi}_1 / \hat{\alpha}_1\).</p>
+
   <h3>First Stage</h3>
   <p>Does the instrument predict the endogenous variable? Check the <strong>F-statistic</strong> — it should be well above 10.</p>
 
@@ -1526,6 +1536,12 @@ print(f"IV  class_size coef: {iv_model.coef()['class_size']:.3f}")</code></pre>
     <li><strong>Treatment:</strong> over_21 (legal access to alcohol)</li>
     <li><strong>Outcome:</strong> mortality_rate</li>
   </ul>
+
+  <p>The RD estimating equation (linear specification):</p>
+
+  $$ Y_i = \alpha + \tau \cdot \mathbf{1}[X_i \geq c] + \beta_1 (X_i - c) + \beta_2 (X_i - c) \cdot \mathbf{1}[X_i \geq c] + \varepsilon_i $$
+
+  <p>where \(X_i\) is the running variable (days from 21), \(c = 0\) is the cutoff, and \(\tau\) is the treatment effect — the jump in mortality at age 21.</p>
 
   <h3>Linear Specification</h3>
   <p>The simplest RD: a linear function of the running variable on each side of the cutoff, within a bandwidth.</p>

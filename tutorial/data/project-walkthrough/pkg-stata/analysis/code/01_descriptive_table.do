@@ -67,11 +67,12 @@ label variable pct_urban       "Pct. Urban"
 *   sample(...)    — add a sample size row; place() controls where it appears
 ********************************************************************************
 
-dtable fatal_crashes serious_crashes total_crashes ///
-    fatal_share population median_income pct_urban, ///
+dtable fatal_crashes serious_crashes ///
+    population median_income pct_urban ///
+    i.census_region, ///
     by(group) ///
     nformat(%14.2fc mean sd) ///
-    sample(, statistics(freq) place(seplabels))
+    sample(, statistics(freq) place(items))
 
 * Rename the automatically-generated "Total" column to "All"
 collect label levels group .m "All", modify
