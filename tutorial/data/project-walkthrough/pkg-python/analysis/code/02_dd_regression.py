@@ -16,6 +16,7 @@ post-adoption years, 0 otherwise).  The outcome is log(fatal_crashes + 1)
 to handle zeros while preserving a percentage-change interpretation.
 
 Output: analysis/output/tables/dd_results.txt
+        analysis/output/tables/dd_results.tex
 """
 
 import io
@@ -36,6 +37,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 # ─── Paths ────────────────────────────────────────────────────────────────────
 input_file  = ROOT / "build/output/analysis_panel.csv"
 output_file = ROOT / "analysis/output/tables/dd_results.txt"
+output_tex  = ROOT / "analysis/output/tables/dd_results.tex"
 
 print("=" * 60)
 print("SCRIPT 02: DIFFERENCE-IN-DIFFERENCES REGRESSION")
@@ -127,7 +129,19 @@ with open(output_file, "w") as f:
     f.write("-" * 80 + "\n")
     f.write(capture(lambda: pf.etable([m1, m2])) + "\n")
 
+# ─── Save LaTeX output ──────────────────────────────────────────────────────
+tex = pf.etable([m1, m2], type="tex", labels={
+    "post_treated": r"Treatment $\times$ Post",
+    "log_pop": "log(Population)",
+    "median_income": "Median Income",
+    "pct_urban": "Pct.\\ Urban",
+    "log_fatal": "log(Fatal Crashes + 1)",
+})
+with open(output_tex, "w") as f:
+    f.write(tex + "\n")
+
 print(f"\nSaved: {output_file.relative_to(ROOT)}")
+print(f"Saved: {output_tex.relative_to(ROOT)}")
 print("  Models estimated: 2 (no controls, with controls)")
 print("  SE type: cluster-robust (CRV1) by state_fips")
 print("  Outcome: log(fatal_crashes + 1)")

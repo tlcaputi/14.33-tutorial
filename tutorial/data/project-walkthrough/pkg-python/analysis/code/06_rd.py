@@ -24,6 +24,7 @@ Data: analysis/code/rd_data.csv
 Outputs:
   - analysis/output/figures/rd_plot.png
   - analysis/output/tables/rd_results.txt
+  - analysis/output/tables/rd_results.tex
 """
 
 import io
@@ -46,6 +47,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 input_file   = ROOT / "analysis/code/rd_data.csv"
 output_plot  = ROOT / "analysis/output/figures/rd_plot.png"
 output_file  = ROOT / "analysis/output/tables/rd_results.txt"
+output_tex   = ROOT / "analysis/output/tables/rd_results.tex"
 
 print("=" * 60)
 print("SCRIPT 06: REGRESSION DISCONTINUITY DESIGN")
@@ -241,7 +243,22 @@ with open(output_file, "w") as f:
     f.write(f"p-value:                 {rd_pval_q:.4f}\n")
     f.write(f"95% CI:                  [{rd_ci_lo_q:.4f}, {rd_ci_hi_q:.4f}]\n")
 
+# ─── Save LaTeX output ──────────────────────────────────────────────────────
+tex = pf.etable([linear_rd, quad_rd], type="tex", labels={
+    "over_21": "Over 21",
+    "days_from_21": "Days from 21",
+    "days_x_over21": r"Days $\times$ Over 21",
+    "days_sq": "Days$^2$",
+    "days_sq_x_over21": r"Days$^2$ $\times$ Over 21",
+    "male": "Male",
+    "income": "Income",
+    "mortality_rate": "Mortality Rate",
+})
+with open(output_tex, "w") as f:
+    f.write(tex + "\n")
+
 print(f"\nSaved: {output_file.relative_to(ROOT)}")
+print(f"Saved: {output_tex.relative_to(ROOT)}")
 print(f"  Linear RD estimate:    {rd_est:.4f}  (SE {rd_se:.4f}, p={rd_pval:.4f})")
 print(f"  Quadratic RD estimate: {rd_est_q:.4f}  (SE {rd_se_q:.4f}, p={rd_pval_q:.4f})")
 print(f"  Bandwidth: +/- {bandwidth} days")

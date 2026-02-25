@@ -36,7 +36,7 @@ if `"${root}"' == "" {
 * ---------------------------------------------------------------------------
 * policy_adoptions.csv: one row per state with the year it adopted the policy
 *   (or missing if it never adopted).
-* state_names.csv: maps state_fips to state abbreviation and full name.
+* state_names.csv: maps state_fips to state name and region.
 
 import delimited "$build/input/policy_adoptions.csv", clear varnames(1)
 save "$build/output/policy_adoptions.dta", replace
@@ -122,7 +122,6 @@ gen log_pop = ln(population)
 
 label variable state_fips      "State FIPS code"
 label variable year            "Year"
-label variable state_abbrev    "State abbreviation"
 label variable state_name      "State name"
 label variable fatal_crashes   "Number of fatal crashes"
 label variable serious_crashes "Number of serious crashes"
@@ -141,7 +140,7 @@ label variable log_pop         "Log population"
 * 9. Order variables and save
 * ---------------------------------------------------------------------------
 
-order state_fips state_abbrev state_name year ///
+order state_fips state_name year ///
     ever_treated adoption_year post_treated   ///
     fatal_crashes serious_crashes total_crashes fatal_share ///
     population log_pop median_income pct_urban

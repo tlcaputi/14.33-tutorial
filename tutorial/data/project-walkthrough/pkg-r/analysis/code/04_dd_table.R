@@ -34,7 +34,9 @@ pacman::p_load(data.table, fixest)
 dt <- fread(file.path(root, "build/output/analysis_panel.csv"))
 
 # ---- Create variables ------------------------------------------------
-dt[, post_treated := treated]
+if (!"post_treated" %in% names(dt)) {
+  dt[, post_treated := fifelse(!is.na(adoption_year) & year >= adoption_year, 1L, 0L)]
+}
 
 # South indicator: the Census Bureau defines the South as the 16 states
 # (plus DC) in the "South" region. The analysis_panel uses that labeling.

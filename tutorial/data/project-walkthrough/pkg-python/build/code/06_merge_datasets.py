@@ -14,8 +14,8 @@ import pandas as pd
 
 crashes     = pd.read_csv(ROOT / "build" / "output" / "crashes_state_year.csv")
 demo        = pd.read_csv(ROOT / "build" / "output" / "demographics_state_year.csv")
-policy      = pd.read_csv(ROOT / "data" / "policy_adoptions.csv")
-state_names = pd.read_csv(ROOT / "data" / "state_names.csv")
+policy      = pd.read_csv(ROOT / "build" / "input" / "policy_adoptions.csv")
+state_names = pd.read_csv(ROOT / "build" / "input" / "state_names.csv")
 
 # Merge sequentially
 panel = crashes.merge(demo,        on=["state_fips", "year"], how="inner")

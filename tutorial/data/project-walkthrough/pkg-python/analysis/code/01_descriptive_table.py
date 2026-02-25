@@ -6,6 +6,7 @@ sample groups: Untreated states, Treated states before policy adoption,
 and Treated states after policy adoption.
 
 Output: analysis/output/tables/descriptive_table.csv
+        analysis/output/tables/descriptive_table.tex
 """
 
 import os
@@ -18,6 +19,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 # ─── Paths ────────────────────────────────────────────────────────────────────
 input_file  = ROOT / "build/output/analysis_panel.csv"
 output_file = ROOT / "analysis/output/tables/descriptive_table.csv"
+output_tex  = ROOT / "analysis/output/tables/descriptive_table.tex"
 
 print("=" * 60)
 print("SCRIPT 01: DESCRIPTIVE STATISTICS TABLE")
@@ -104,9 +106,66 @@ for g in group_order:
 print(n_line)
 print(divider)
 
-# ─── Save output ──────────────────────────────────────────────────────────────
+# ─── Save CSV output ─────────────────────────────────────────────────────────
 output_file.parent.mkdir(parents=True, exist_ok=True)
 table.to_csv(output_file, index=False)
+
+# ─── Save LaTeX output ──────────────────────────────────────────────────────
+pretty_names = {
+    "fatal_crashes": "Fatal Crashes",
+    "serious_crashes": "Serious Crashes",
+    "total_crashes": "Total Crashes",
+    "fatal_share": "Fatal Share",
+    "population": "Population",
+    "median_income": "Median Income",
+    "pct_urban": "Pct.\\ Urban",
+}
+
+lines = []
+lines.append(r"\begin{tabular}{l" + "cc" * len(group_order) + "}")
+lines.append(r"\toprule")
+# Group headers
+hdr = " "
+for g in group_order:
+    hdr += rf" & \multicolumn{{2}}{{c}}{{{g}}}"
+hdr += r" \\"
+lines.append(hdr)
+for i, g in enumerate(group_order):
+    col_start = 2 + i * 2
+    col_end = col_start + 1
+    lines.append(rf"\cmidrule(lr){{{col_start}-{col_end}}}")
+# Sub-header
+sub = " "
+for _ in group_order:
+    sub += r" & Mean & SD"
+sub += r" \\"
+lines.append(sub)
+lines.append(r"\midrule")
+# Data rows
+for _, row in table.iterrows():
+    label = pretty_names.get(row["Variable"], row["Variable"])
+    line = label
+    for g in group_order:
+        m = row[f"{g}_mean"]
+        s = row[f"{g}_sd"]
+        line += f" & {m:,.2f} & {s:,.2f}"
+    line += r" \\"
+    lines.append(line)
+lines.append(r"\midrule")
+# Observation counts
+obs_line = "Observations"
+for g in group_order:
+    n = int((df["_group"] == g).sum())
+    obs_line += f" & \\multicolumn{{2}}{{c}}{{{n:,}}}"
+obs_line += r" \\"
+lines.append(obs_line)
+lines.append(r"\bottomrule")
+lines.append(r"\end{tabular}")
+
+with open(output_tex, "w") as f:
+    f.write("\n".join(lines) + "\n")
+
 print(f"\nSaved: {output_file.relative_to(ROOT)}")
+print(f"Saved: {output_tex.relative_to(ROOT)}")
 print(f"  Variables: {len(variables)}")
 print(f"  Groups: {group_order}")

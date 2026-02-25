@@ -13,7 +13,7 @@ import pandas as pd
 
 frames = []
 for year in range(1995, 2016):
-    path = ROOT / "data" / f"demographic_survey_{year}.csv"
+    path = ROOT / "build" / "input" / "demographic_survey" / f"demographic_survey_{year}.csv"
     df = pd.read_csv(path)
     df["year"] = year
     frames.append(df)

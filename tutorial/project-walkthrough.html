@@ -18,12 +18,32 @@ current_page: project-walkthrough
 
   <div class="callout-info" style="text-align: center;">
     <h4>Download the Project</h4>
-    <p>Each ZIP contains all six datasets, the full directory structure shown below, and code in your chosen language. Pick one and unzip — you're ready to go.</p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="data/pkg-stata.zip" download class="download-btn">Stata</a>
-      <a href="data/pkg-r.zip" download class="download-btn">R</a>
-      <a href="data/pkg-python.zip" download class="download-btn">Python</a>
-    </div>
+    <p><strong>Starter</strong> packages contain data and empty code files for you to fill in as you follow along. <strong>Complete</strong> packages include finished code that runs end-to-end.</p>
+    <table style="margin: 16px auto; border-collapse: collapse; text-align: center;">
+      <thead>
+        <tr>
+          <th style="padding: 6px 16px;"></th>
+          <th style="padding: 6px 16px;">Stata</th>
+          <th style="padding: 6px 16px;">R</th>
+          <th style="padding: 6px 16px;">Python</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 6px 16px; font-weight: 600;">Starter</td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-stata.zip" download class="download-btn">Download</a></td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-r.zip" download class="download-btn">Download</a></td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-python.zip" download class="download-btn">Download</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 16px; font-weight: 600;">Complete</td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-stata-complete.zip" download class="download-btn">Download</a></td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-r-complete.zip" download class="download-btn">Download</a></td>
+          <td style="padding: 6px 16px;"><a href="data/pkg-python-complete.zip" download class="download-btn">Download</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 12px;"><a href="data/project-walkthrough/project_walkthrough_slides.pdf" download class="download-btn">Tutorial Slides (PDF)</a></p>
   </div>
 
   <h3>Running Your Scripts</h3>
@@ -623,9 +643,67 @@ panel.to_csv("build/output/analysis_panel.csv", index=False)
 print(panel.info())</code></pre>
   </div>
 
+  <h3>Understanding Merge Types</h3>
+
+  <p>Merges can be deceptively complicated. There are three types:</p>
+
+  <ul>
+    <li><strong>1:1</strong> — Each row in one dataset matches exactly one row in the other. This is the most common merge. Example: merging two state-year datasets on <code>state_fips</code> and <code>year</code>.</li>
+    <li><strong>m:1</strong> (many-to-one) — Multiple rows in the master dataset match one row in the using dataset. Example: merging individual-level data with state-level variables. Many individuals share the same state, so each state-level row gets matched to multiple individual rows.</li>
+    <li><strong>1:m</strong> (one-to-many) — The reverse: one row in the master matches many rows in the using dataset.</li>
+  </ul>
+
+  <p>In the code above, Merge 1 is a <strong>1:1</strong> merge (one row per state-year in both datasets). Merges 2 and 3 are <strong>m:1</strong> — the panel has many state-year rows per state, but the policy and state-name files have one row per state.</p>
+
+  <h3>The <code>keep()</code> Option in Stata</h3>
+
+  <p>In Stata, your original dataset is called "master" and the dataset you're merging in is called "using." After a merge, each observation is one of three types:</p>
+  <ul>
+    <li><strong>master</strong> — rows from the master that didn't match anything in the using data</li>
+    <li><strong>match</strong> — rows that matched between master and using</li>
+    <li><strong>using</strong> — rows from the using data that didn't match anything in the master</li>
+  </ul>
+  <p>You choose which to keep with the <code>keep()</code> option. Be careful — the wrong choice silently drops observations.</p>
+
+  <p><strong>Example:</strong> Suppose you have a balanced state-year panel and want to merge in earthquake counts. You collapse the earthquake data to state-year totals, but states with <em>no earthquakes</em> don't appear in that dataset at all.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="stata">Stata</button>
+        <button class="code-tab" data-lang="r">R</button>
+        <button class="code-tab" data-lang="python">Python</button>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre class="code-content stata active"><code class="language-stata">* BAD: keep(match) drops states with zero earthquakes!
+merge 1:1 state year using "earthquakes.dta", keep(match)
+
+* GOOD: keep(master match) preserves all original observations
+merge 1:1 state year using "earthquakes.dta", keep(master match) nogen
+replace num_earthquakes = 0 if missing(num_earthquakes)</code></pre>
+    <pre class="code-content r"><code class="language-r"># BAD: inner join drops states with zero earthquakes
+panel <- merge(panel, earthquakes, by = c("state", "year"))
+
+# GOOD: left join preserves all original observations
+panel <- merge(panel, earthquakes, by = c("state", "year"), all.x = TRUE)
+panel[is.na(num_earthquakes), num_earthquakes := 0]</code></pre>
+    <pre class="code-content python"><code class="language-python"># BAD: inner join drops states with zero earthquakes
+panel = panel.merge(earthquakes, on=['state', 'year'])
+
+# GOOD: left join preserves all original observations
+panel = panel.merge(earthquakes, on=['state', 'year'], how='left')
+panel['num_earthquakes'] = panel['num_earthquakes'].fillna(0)</code></pre>
+  </div>
+
+  <div class="callout-warning">
+    <h4>The Rule of Thumb</h4>
+    <p>Start with a dataset that contains all the observations you want. Use <code>keep(master match)</code> in Stata (or <code>how='left'</code> in R/Python) almost always. Then replace missing values with the appropriate value (often 0, meaning "no events") for any variable you merged in. This ensures your panel stays balanced and you never silently drop observations.</p>
+  </div>
+
   <div class="callout-info">
     <h4>Always Check Your Merges</h4>
-    <p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>keep()</code> option controls which observations to retain: <code>keep(match)</code> keeps only matched rows, <code>keep(master match)</code> keeps all master rows even if unmatched (like a left join). The <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>
+    <p>After every merge, verify: (1) the number of rows is what you expect, (2) there are no unexpected missing values, and (3) the merge type (1:1, m:1, 1:m) matches your data structure. In Stata, the <code>nogen</code> option suppresses the <code>_merge</code> variable. In R/Python, compare row counts before and after.</p>
   </div>
 </section>
 

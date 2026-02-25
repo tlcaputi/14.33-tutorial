@@ -11,7 +11,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 
 import pandas as pd
 
-crashes = pd.read_csv(ROOT / "data" / "crash_data.csv")
+crashes = pd.read_csv(ROOT / "build" / "input" / "crash_data.csv")
 
 crashes = crashes[crashes["severity"].isin(["fatal", "serious"])]
 

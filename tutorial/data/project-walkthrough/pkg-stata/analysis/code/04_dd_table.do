@@ -46,6 +46,9 @@ label variable post_treated   "Post \$\times\$ Treated"
 label variable log_pop        "Log Population"
 label variable median_income  "Median Income"
 
+* Create numeric south indicator (reghdfe cannot filter on string variables)
+gen south = (region == "South")
+
 ********************************************************************************
 * MODEL 1: FATAL CRASHES — NO CONTROLS
 * The parsimonious specification absorbs all time-invariant state differences
@@ -81,9 +84,9 @@ estimates store m2
 * rates and may have different baseline driving behavior.
 ********************************************************************************
 
-reghdfe fatal_crashes post_treated log_pop, ///
-    absorb(state_fips year) vce(cluster state_fips) ///
-    if region == "South"
+reghdfe fatal_crashes post_treated log_pop ///
+    if south == 1, ///
+    absorb(state_fips year) vce(cluster state_fips)
 
 estadd local state_fe "Yes"
 estadd local year_fe  "Yes"
@@ -95,9 +98,9 @@ estimates store m3
 * or is broadly consistent across regions.
 ********************************************************************************
 
-reghdfe fatal_crashes post_treated log_pop, ///
-    absorb(state_fips year) vce(cluster state_fips) ///
-    if region != "South"
+reghdfe fatal_crashes post_treated log_pop ///
+    if south == 0, ///
+    absorb(state_fips year) vce(cluster state_fips)
 
 estadd local state_fe "Yes"
 estadd local year_fe  "Yes"

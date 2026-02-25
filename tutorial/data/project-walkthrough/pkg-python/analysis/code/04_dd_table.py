@@ -17,6 +17,7 @@ All models use state and year fixed effects.  Models m1-m4 cluster SEs
 by state; m5 also clusters by state.
 
 Output: analysis/output/tables/dd_table.txt
+        analysis/output/tables/dd_table.tex
 """
 
 import io
@@ -37,6 +38,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 # ─── Paths ────────────────────────────────────────────────────────────────────
 input_file  = ROOT / "build/output/analysis_panel.csv"
 output_file = ROOT / "analysis/output/tables/dd_table.txt"
+output_tex  = ROOT / "analysis/output/tables/dd_table.tex"
 
 print("=" * 60)
 print("SCRIPT 04: MULTI-COLUMN DD TABLE")
@@ -175,6 +177,18 @@ with open(output_file, "w") as f:
     f.write("-" * 80 + "\n")
     f.write(capture(lambda: pf.etable([m1, m2, m3, m4, m5])) + "\n")
 
+# ─── Save LaTeX output ──────────────────────────────────────────────────────
+tex = pf.etable([m1, m2, m3, m4, m5], type="tex", labels={
+    "post_treated": r"Treatment $\times$ Post",
+    "log_pop": "log(Population)",
+    "median_income": "Median Income",
+    "fatal_crashes": "Fatal Crashes",
+    "serious_crashes": "Serious Crashes",
+})
+with open(output_tex, "w") as f:
+    f.write(tex + "\n")
+
 print(f"\nSaved: {output_file.relative_to(ROOT)}")
+print(f"Saved: {output_tex.relative_to(ROOT)}")
 print("  Models: 5 (baseline, controls, South, Non-South, serious crashes)")
 print("  SE type: cluster-robust (CRV1) by state_fips")

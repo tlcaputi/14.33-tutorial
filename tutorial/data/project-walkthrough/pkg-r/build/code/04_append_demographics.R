@@ -10,7 +10,7 @@ if (!exists("root")) {
 # Loop over years, read each annual demographic survey file and add year column
 years <- 1995:2015
 demo_list <- lapply(years, function(yr) {
-  dt <- fread(file.path(build, "input", paste0("demographic_survey_", yr, ".csv")))
+  dt <- fread(file.path(build, "input", "demographic_survey", paste0("demographic_survey_", yr, ".csv")))
   dt[, year := yr]
   dt
 })

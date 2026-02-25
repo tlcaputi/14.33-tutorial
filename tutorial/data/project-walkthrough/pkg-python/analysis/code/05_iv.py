@@ -23,6 +23,7 @@ Data: analysis/code/iv_data.csv
   - school_id, enrollment, class_size, test_score, pct_disadvantaged
 
 Output: analysis/output/tables/iv_results.txt
+        analysis/output/tables/iv_results.tex
 """
 
 import io
@@ -42,6 +43,7 @@ ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent))
 # ─── Paths ────────────────────────────────────────────────────────────────────
 input_file  = ROOT / "analysis/code/iv_data.csv"
 output_file = ROOT / "analysis/output/tables/iv_results.txt"
+output_tex  = ROOT / "analysis/output/tables/iv_results.tex"
 
 print("=" * 60)
 print("SCRIPT 05: INSTRUMENTAL VARIABLES REGRESSION")
@@ -200,7 +202,18 @@ with open(output_file, "w") as f:
     f.write(f"  Difference (IV - OLS): {iv_coef - ols_coef:.4f}\n")
     f.write(f"  First-stage F-statistic: {f_stat:.2f}\n")
 
+# ─── Save LaTeX output ──────────────────────────────────────────────────────
+tex = pf.etable([first_stage, reduced_form, ols_model, iv_model], type="tex", labels={
+    "enrollment": "Enrollment",
+    "pct_disadvantaged": "Pct.\\ Disadvantaged",
+    "class_size": "Class Size",
+    "test_score": "Test Score",
+})
+with open(output_tex, "w") as f:
+    f.write(tex + "\n")
+
 print(f"\nSaved: {output_file.relative_to(ROOT)}")
+print(f"Saved: {output_tex.relative_to(ROOT)}")
 print(f"  First-stage F-stat: {f_stat:.2f}")
 print(f"  OLS estimate:  {ols_coef:.4f}  (SE {ols_se:.4f})")
 print(f"  IV estimate:   {iv_coef:.4f}  (SE {iv_se:.4f})")

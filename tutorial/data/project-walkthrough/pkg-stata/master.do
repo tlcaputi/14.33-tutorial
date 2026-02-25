@@ -5,7 +5,11 @@
 *
 * Usage:
 *   1. Set the `root` path below to the location of this folder (pkg-stata/).
-*   2. Run: do master.do
+*   2. Run from the command line:
+*        Mac:     /Applications/Stata/StataMP.app/Contents/MacOS/stata-mp -b do master.do
+*        Windows: "C:\Program Files\Stata18\StataMP-64.exe" /e do master.do
+*        Linux:   stata-mp -b do master.do
+*      Or open master.do in the Stata GUI and click "Do".
 *
 * Pipeline:
 *   Build
@@ -42,6 +46,12 @@ global build    "$root/build"
 global analysis "$root/analysis"
 
 cd "$root"
+
+* Create output directories (zip may strip empty folders)
+capture mkdir "$build/output"
+capture mkdir "$analysis/output"
+capture mkdir "$analysis/output/tables"
+capture mkdir "$analysis/output/figures"
 
 
 * ===========================================================================
@@ -88,6 +98,47 @@ do "$analysis/code/05_iv.do"
 
 * Step 6: Regression discontinuity
 do "$analysis/code/06_rd.do"
+
+* ===========================================================================
+* COMPILE LATEX TABLES TO PDF
+* ===========================================================================
+* For each .tex file in the tables folder, wrap it in a standalone LaTeX
+* document and compile to PDF with pdflatex.
+
+local tables_dir "$analysis/output/tables"
+local texfiles : dir "`tables_dir'" files "*.tex"
+
+foreach f of local texfiles {
+    local base = subinstr("`f'", ".tex", "", 1)
+    local wrapper "`tables_dir'/`base'_compile.tex"
+    local pdfout  "`tables_dir'/`base'_compile.pdf"
+    local target  "`tables_dir'/`base'.pdf"
+
+    * Write standalone wrapper
+    file open fh using "`wrapper'", write replace text
+    file write fh `"\documentclass[border=10pt]{standalone}"' _n
+    file write fh `"\usepackage{booktabs,amsmath,threeparttable,makecell}"' _n
+    file write fh `"\begin{document}"' _n
+    file write fh `"\input{`f'}"' _n
+    file write fh `"\end{document}"' _n
+    file close fh
+
+    * Compile (suppress output)
+    ! cd "`tables_dir'" && pdflatex -interaction=nonstopmode "`base'_compile.tex" > /dev/null 2>&1
+
+    * Rename output and clean up
+    capture confirm file "`pdfout'"
+    if _rc == 0 {
+        ! mv "`pdfout'" "`target'"
+        di "  Compiled: `base'.pdf"
+    }
+    else {
+        di "  WARNING: Failed to compile `f'"
+    }
+    capture erase "`wrapper'"
+    capture erase "`tables_dir'/`base'_compile.aux"
+    capture erase "`tables_dir'/`base'_compile.log"
+}
 
 di ""
 di "============================================="

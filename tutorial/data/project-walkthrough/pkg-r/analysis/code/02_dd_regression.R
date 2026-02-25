@@ -36,9 +36,11 @@ dt <- fread(file.path(root, "build/output/analysis_panel.csv"))
 # the percent change in fatal crashes.
 dt[, log_fatal := log(fatal_crashes + 1)]
 
-# ---- Create post_treated ---------------------------------------------
+# ---- Create post_treated (if not already present) --------------------
 # post_treated = 1 in treated states on or after their adoption year.
-dt[, post_treated := treated]
+if (!"post_treated" %in% names(dt)) {
+  dt[, post_treated := fifelse(!is.na(adoption_year) & year >= adoption_year, 1L, 0L)]
+}
 
 cat("\nSample:", nrow(dt), "state-year observations\n")
 cat("States:", dt[, uniqueN(state_fips)], "\n")
