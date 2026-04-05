@@ -1,0 +1,52 @@
+---
+layout: layouts/tutorial.html
+title: Q&A | Intro to Data Analysis for Economics
+current_page: qa
+---
+<h1>Q&amp;A</h1>
+<p class="subtitle">Common questions and coding issues from the class</p>
+
+<p>This page collects real questions from students in the course (anonymized) along with explanations and fixes. If you're running into a problem, chances are someone else has hit the same thing.</p>
+
+<section id="foreach-negative" class="tutorial-section">
+  <h2>Negative Numbers in <code>foreach</code> Variable Names</h2>
+
+  <div class="qa-item">
+    <div class="qa-question">
+      <div class="qa-label">Question</div>
+      <p>I'm trying to create event-study dummies using a <code>foreach</code> loop, but I keep getting syntax errors no matter what I try. Here's my code:</p>
+      {% capture sc_q %}* Event dummies (k = -1 omitted as baseline)
+foreach kk in -5 -4 -3 -2 0 1 2 3 4 5 {
+    gen ev_`kk' = (D == 1 & kb == `kk')
+}{% endcapture %}
+      {% include "code-block.liquid", stata: sc_q %}
+      <p>I've tried putting everything on one line and splitting it across multiple lines, but I get <code>invalid syntax r(198)</code> either way. What am I doing wrong?</p>
+    </div>
+
+    <div class="qa-answer">
+      <div class="qa-label qa-label-answer">Answer</div>
+      <p>The issue isn't with the loop structure or the braces&mdash;it's with the <strong>negative numbers in the variable names</strong>.</p>
+
+      <p>When the loop reaches <code>kk = -5</code>, Stata substitutes the value into the variable name, so <code>gen ev_`kk'</code> becomes:</p>
+
+      {% capture sc_bad %}gen ev_-5 = (D == 1 & kb == -5){% endcapture %}
+      {% include "code-block.liquid", stata: sc_bad %}
+
+      <p>But <code>ev_-5</code> is not a valid Stata variable name&mdash;variable names can only contain letters, digits, and underscores. Stata reads <code>ev_-5</code> as "<code>ev_</code> minus <code>5</code>" and throws a syntax error.</p>
+
+      <p>The fix is to replace the minus sign with something else (like <code>m</code>) in the variable name, while keeping the actual negative value for the condition:</p>
+
+      {% capture sc_fix %}* Event dummies (k = -1 omitted as baseline)
+foreach kk in -5 -4 -3 -2 0 1 2 3 4 5 {
+    local vname = subinstr("`kk'", "-", "m", .)
+    gen ev_`vname' = (D == 1 & kb == `kk')
+}{% endcapture %}
+      {% include "code-block.liquid", stata: sc_fix %}
+
+      <p>This creates variables named <code>ev_m5</code>, <code>ev_m4</code>, ..., <code>ev_0</code>, <code>ev_1</code>, ..., <code>ev_5</code>. When you use these dummies later (e.g., in a regression), remember that <code>ev_m5</code> means <em>k</em>&nbsp;=&nbsp;&minus;5.</p>
+
+      {% capture kp_content %}<p>Stata variable names can only contain <strong>letters</strong>, <strong>digits</strong>, and <strong>underscores</strong>. Any time your loop values might produce characters outside this set (hyphens, spaces, periods), you need to transform the value before using it in a variable name.</p>{% endcapture %}
+      {% include "key-principle.liquid", heading: "Variable Naming Rule", content: kp_content %}
+    </div>
+  </div>
+</section>
